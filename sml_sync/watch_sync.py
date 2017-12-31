@@ -188,8 +188,8 @@ class HeldFilesMonitor(object):
             if difference[0] in {'RIGHT_ONLY', 'TYPE_DIFFERENT'}:
                 yield difference[1].path
             elif difference[0] == 'ATTRS_DIFFERENT':
-                local_mtime, _ = difference[1].attrs
-                remote_mtime, _ = difference[2].attrs
+                local_mtime = difference[1].attrs.last_modified
+                remote_mtime = difference[2].attrs.last_modified
                 if remote_mtime > local_mtime:
                     # Hold only if remote file was modified after current
                     yield difference[1].path
