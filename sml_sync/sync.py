@@ -49,7 +49,6 @@ class Synchronizer(object):
         self._sftp.remove(os.path.join(self.remote_dir, path))
 
     def rmdir_remote(self, path):
-        print('removing remote dir {}'.format(path))
         self._sftp.rmdir(os.path.join(self.remote_dir, path))
 
     def mvfile_remote(self, src_path, dest_path):

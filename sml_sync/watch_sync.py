@@ -134,17 +134,24 @@ class Uploader(object):
         self._thread.start()
 
     def _handle_sync(self, fs_event):
+        self._exchange.publish(
+            Messages.STARTING_HANDLING_FS_EVENT,
+            fs_event
+        )
         if fs_event.is_directory:
             # TODO implement directory handling
             if fs_event.event_type in \
                {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
                 self._synchronizer.up(fs_event.path)
+            elif fs_event.event_type == ChangeEventType.DELETED:
+                self._synchronizer.rmdir_remote(fs_event.path)
+            elif fs_event.event_type == ChangeEventType.MOVED:
+                self._synchronizer.mvfile_remote(
+                    fs_event.path,
+                    fs_event.extra_args['dest_path']
+                )
         else:
             path = fs_event.path
-            self._exchange.publish(
-                Messages.STARTING_HANDLING_FS_EVENT,
-                fs_event
-            )
             if fs_event.event_type in \
                {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
                 self._synchronizer.up(path)
@@ -152,11 +159,13 @@ class Uploader(object):
                 self._synchronizer.rmfile_remote(path)
             elif fs_event.event_type == ChangeEventType.MOVED:
                 self._synchronizer.mvfile_remote(
-                    path, fs_event.extra_args['dest_path'])
-            self._exchange.publish(
-                Messages.FINISHED_HANDLING_FS_EVENT,
-                fs_event
-            )
+                    path,
+                    fs_event.extra_args['dest_path']
+                )
+        self._exchange.publish(
+            Messages.FINISHED_HANDLING_FS_EVENT,
+            fs_event
+        )
 
     def join(self):
         if self._thread is not None:
