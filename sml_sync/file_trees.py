@@ -3,11 +3,15 @@ import os
 import stat
 from datetime import datetime
 
-from .models import FsObject, FsObjectType
+from .models import FsObject, FsObjectType, FileAttrs, DirectoryAttrs
 
 
 def get_remote_mtime(path, sftp):
-    return datetime.fromtimestamp(int(sftp.stat(path).st_mtime))
+    return _get_mtime(path, sftp)
+
+
+def _get_mtime(path, oslike):
+    return datetime.fromtimestamp(int(oslike.stat(path).st_mtime))
 
 
 def walk_local_file_tree(base):
@@ -48,10 +52,11 @@ def _walk_file_tree_helper(base, oslike):
         path = os.path.join(base, obj_name)
         is_directory = stat.S_ISDIR(oslike.stat(path).st_mode)
         if is_directory:
-            yield FsObject(path, FsObjectType.DIRECTORY, None)
+            mtime = _get_mtime(path, oslike)
+            yield FsObject(path, FsObjectType.DIRECTORY, DirectoryAttrs(mtime))
             for fs_object in _walk_file_tree_helper(path, oslike):
                 yield fs_object
         else:
             size = oslike.stat(path).st_size
-            mtime = datetime.fromtimestamp(int(oslike.stat(path).st_mtime))
-            yield FsObject(path, FsObjectType.FILE, (mtime, size))
+            mtime = _get_mtime(path, oslike)
+            yield FsObject(path, FsObjectType.FILE, FileAttrs(mtime, size))
