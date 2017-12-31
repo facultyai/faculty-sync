@@ -1,6 +1,7 @@
 
 import time
 import threading
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from .cli import parse_command_line
@@ -74,7 +75,7 @@ class Controller(object):
         try:
             future.result()
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
     def _sync_sherlockml_to_local(self):
         self._clear_current_subscriptions()
