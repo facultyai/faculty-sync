@@ -11,7 +11,7 @@ from .file_trees import (
     walk_local_file_tree, walk_remote_file_tree, get_remote_mtime,
     compare_file_trees
 )
-from .models import FsObjectType, ChangeEventType, FsChangeEvent
+from .models import ChangeEventType, FsChangeEvent
 from .pubsub import Messages
 
 
