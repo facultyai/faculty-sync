@@ -49,9 +49,8 @@ class TimestampDatabase(object):
     def from_fs_objects(cls, fs_objects, path_prefix):
         _data = {}
         for fs_object in fs_objects:
-            if fs_object.obj_type == FsObjectType.FILE:
-                last_modified, _ = fs_object.attrs
-                _data[fs_object.path] = last_modified
+            last_modified = fs_object.attrs.last_modified
+            _data[fs_object.path] = last_modified
         return cls(_data)
 
 
@@ -137,7 +136,9 @@ class Uploader(object):
     def _handle_sync(self, fs_event):
         if fs_event.is_directory:
             # TODO implement directory handling
-            pass
+            if fs_event.event_type in \
+               {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
+                self._synchronizer.up(fs_event.path)
         else:
             path = fs_event.path
             self._exchange.publish(
