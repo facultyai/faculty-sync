@@ -40,5 +40,5 @@ class ChangeEventType(Enum):
 
 FsChangeEvent = collections.namedtuple(
     'FsChangeEvent',
-    ['event_type', 'is_directory', 'path']
+    ['event_type', 'is_directory', 'path', 'extra_args']
 )

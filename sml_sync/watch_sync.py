@@ -74,14 +74,36 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         self.queue = queue
         self.local_dir = local_dir
 
-    def on_any_event(self, event):
-        event_type = self.watchdog_event_lookup[event.event_type]
-        is_directory = event.is_directory
-        path = os.path.relpath(
-            event.src_path,
-            start=self.local_dir
-        )
-        self.queue.put(FsChangeEvent(event_type, is_directory, path))
+    def on_any_event(self, watchdog_event):
+        event_type = self.watchdog_event_lookup[watchdog_event.event_type]
+        is_directory = watchdog_event.is_directory
+        path = self._relpath(watchdog_event.src_path)
+        if event_type == ChangeEventType.MOVED:
+            dest_path = watchdog_event.dest_path
+            abs_local_dir = os.path.abspath(self.local_dir)
+            if os.path.abspath(dest_path).startswith(abs_local_dir):
+                event = FsChangeEvent(
+                    event_type,
+                    is_directory,
+                    path,
+                    extra_args={'dest_path': self._relpath(dest_path)}
+                )
+            else:
+                # File was moved outside of the area we're watching:
+                # treat as deletion
+                event = FsChangeEvent(
+                    ChangeEventType.DELETED,
+                    is_directory,
+                    path,
+                    extra_args=None
+                )
+        else:
+            event = FsChangeEvent(
+                event_type, is_directory, path, extra_args=None)
+        self.queue.put(event)
+
+    def _relpath(self, path):
+        return os.path.relpath(path, start=self.local_dir)
 
 
 class Uploader(object):
@@ -127,6 +149,9 @@ class Uploader(object):
                 self._synchronizer.up(path)
             elif fs_event.event_type == ChangeEventType.DELETED:
                 self._synchronizer.rmfile_remote(path)
+            elif fs_event.event_type == ChangeEventType.MOVED:
+                self._synchronizer.mvfile_remote(
+                    path, fs_event.extra_args['dest_path'])
             self._exchange.publish(
                 Messages.FINISHED_HANDLING_FS_EVENT,
                 fs_event
@@ -173,26 +198,53 @@ class HeldFilesMonitor(object):
         if path in self._held_paths:
             return False
         else:
-            last_known_timestamp = self._remote_timestamps.get(path)
-            try:
-                current_timestamp = get_remote_mtime(
-                    os.path.join(self._remote_dir, path), self._sftp)
-                has_changed = last_known_timestamp != current_timestamp
-                if has_changed:
-                    self._held_paths.add(path)
-                    self._exchange.publish(
-                        Messages.HELD_FILES_CHANGED,
-                        frozenset(self._held_paths)
-                    )
+            if fs_event.event_type == ChangeEventType.MOVED:
+                dest_path = fs_event.extra_args['dest_path']
+                if self._has_path_changed(path):
+                    self._add_to_held_paths(path)
+                    src_path_unchanged = False
+                else:
+                    src_path_unchanged = True
+                if self._has_path_changed(dest_path):
+                    self._add_to_held_paths(dest_path)
+                    dest_path_unchanged = False
+                else:
+                    dest_path_unchanged = True
+                return src_path_unchanged and dest_path_unchanged
+            else:
+                if self._has_path_changed(path):
+                    self._add_to_held_paths(path)
                     return False
                 else:
                     return True
-            except FileNotFoundError:
-                return True
+
+    def _has_path_changed(self, path):
+        last_known_timestamp = self._remote_timestamps.get(path)
+        try:
+            current_timestamp = get_remote_mtime(
+                os.path.join(self._remote_dir, path), self._sftp)
+            has_changed = last_known_timestamp != current_timestamp
+            return has_changed
+        except FileNotFoundError:
+            return False
+
+    def _add_to_held_paths(self, path):
+        self._held_paths.add(path)
+        self._exchange.publish(
+            Messages.HELD_FILES_CHANGED,
+            frozenset(self._held_paths)
+        )
 
     def has_synced(self, fs_event):
         if fs_event.event_type == ChangeEventType.DELETED:
             self._remote_timestamps.remove(fs_event.path)
+        elif fs_event.event_type == ChangeEventType.MOVED:
+            self._remote_timestamps.remove(fs_event.path)
+            dest_path = fs_event.extra_args['dest_path']
+            abs_dest_path = os.path.join(self._remote_dir, dest_path)
+            current_timestamp = get_remote_mtime(abs_dest_path, self._sftp)
+            self._remote_timestamps.update_if_newer(
+                dest_path, current_timestamp)
         else:
             path = fs_event.path
             current_timestamp = get_remote_mtime(

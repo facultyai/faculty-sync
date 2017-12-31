@@ -11,6 +11,7 @@ from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 
 from .pubsub import Messages
+from .models import ChangeEventType
 
 
 class View(object):
@@ -280,10 +281,21 @@ class WatchSyncScreen(object):
 
     def _update_recently_synced_items_control(self):
         recent_syncs_text = [
-            '  {} {}'.format('>', fs_event.path)
+            '  {}'.format(self._format_fs_event(fs_event))
             for fs_event in self._recently_synced_items
         ]
         self._recently_synced_items_control.text = '\n'.join(recent_syncs_text)
+
+    def _format_fs_event(self, event):
+        if event.event_type == ChangeEventType.MOVED:
+            src_path = event.path
+            dest_path = event.extra_args['dest_path']
+            event_str = '> {} -> {}'.format(src_path, dest_path)
+        elif event.event_type == ChangeEventType.DELETED:
+            event_str = 'x {}'.format(event.path)
+        else:
+            event_str = '> {}'.format(event.path)
+        return event_str
 
     def _update_queue_status(self):
         if self._current_event is not None:

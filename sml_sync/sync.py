@@ -48,6 +48,12 @@ class Synchronizer(object):
     def rmfile_remote(self, path):
         self._sftp.remove(os.path.join(self.remote_dir, path))
 
+    def mvfile_remote(self, src_path, dest_path):
+        self._sftp.rename(
+            os.path.join(self.remote_dir, src_path),
+            os.path.join(self.remote_dir, dest_path)
+        )
+
     def _rsync(self, path_from, path_to, rsync_opts=None):
         rsync_opts = [] if rsync_opts is None else rsync_opts
         ssh_cmd = 'ssh {} -p {} -i {}'.format(
