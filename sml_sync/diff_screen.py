@@ -193,12 +193,14 @@ class DifferencesScreen(object):
 
         @self.bindings.add('tab')
         @self.bindings.add('down')
+        @self.bindings.add('left')
         def _(event):
             new_focus = self._summary.focus_next()
             self._details.set_focus(new_focus)
 
         @self.bindings.add('s-tab')
         @self.bindings.add('up')
+        @self.bindings.add('right')
         def _(event):
             new_focus = self._summary.focus_previous()
             self._details.set_focus(new_focus)
