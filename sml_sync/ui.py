@@ -4,11 +4,14 @@ import threading
 import traceback
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.key_binding.key_bindings import (KeyBindings,
-                                                     merge_key_bindings)
+from prompt_toolkit.key_binding.key_bindings import (
+    KeyBindings, merge_key_bindings
+)
+from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import HSplit, Layout
 from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout.controls import FormattedTextControl, BufferControl
+from prompt_toolkit.layout.widgets import TextArea, SearchField, MenuContainer, MenuItem
 
 from .pubsub import Messages
 from .models import ChangeEventType
@@ -123,74 +126,6 @@ class WalkingFileTreesScreen(object):
 
     def stop(self):
         self._exchange.unsubscribe(self._subscription_id)
-
-
-class DifferencesScreen(object):
-
-    def __init__(self, differences, exchange):
-        self._exchange = exchange
-        self._bottom_toolbar = Window(FormattedTextControl(
-            '[d] Sync SherlockML files down  '
-            '[u] Sync local files up  '
-            '[r] Refresh  '
-            '[w] Continuous sync from local changes  '
-            '[q] Quit'
-        ), height=1, style='reverse')
-        differences_containers = self.render_differences(differences)
-        self.main_container = HSplit(
-            differences_containers + [self._bottom_toolbar]
-        )
-
-        self.bindings = KeyBindings()
-
-        @self.bindings.add('d')
-        def _(event):
-            self._exchange.publish('SYNC_SHERLOCKML_TO_LOCAL')
-
-        @self.bindings.add('u')
-        def _(event):
-            self._exchange.publish('SYNC_LOCAL_TO_SHERLOCKML')
-
-        @self.bindings.add('r')
-        def _(event):
-            self._exchange.publish('REFRESH_DIFFERENCES')
-
-        @self.bindings.add('w')
-        def _(event):
-            self._exchange.publish('START_WATCH_SYNC')
-
-    def render_differences(self, differences):
-        extra_local_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'LEFT_ONLY'
-        ]
-        extra_local_paths_text = [
-            '{} exists only locally'.format(path)
-            for path in extra_local_paths
-        ]
-        extra_remote_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'RIGHT_ONLY'
-        ]
-        extra_remote_paths_text = [
-            '{} exists only on SherlockML'.format(path)
-            for path in extra_remote_paths
-        ]
-        containers = [
-            Window(
-                FormattedTextControl(
-                    'Differences between local directory and SherlockML'),
-                height=1
-            ),
-            Window(height=1, char='-'),
-            Window(
-                FormattedTextControl('\n'.join(extra_local_paths_text)),
-                dont_extend_height=True
-            ),
-            Window(height=1, char='-'),
-            Window(FormattedTextControl('\n'.join(extra_remote_paths_text)))
-        ]
-        return containers
 
 
 class SynchronizationScreen(object):

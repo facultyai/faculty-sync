@@ -11,9 +11,10 @@ from .cli import parse_command_line
 from .ssh import get_ssh_details, sftp_from_ssh_details
 from .pubsub import PubSubExchange, Messages
 from .ui import (
-    View, WalkingFileTreesScreen, DifferencesScreen, SynchronizationScreen,
+    View, WalkingFileTreesScreen, SynchronizationScreen,
     WatchSyncScreen
 )
+from .diff_screen import DifferencesScreen
 from .file_trees import (
     walk_local_file_tree, walk_remote_file_tree, compare_file_trees)
 from .sync import Synchronizer
