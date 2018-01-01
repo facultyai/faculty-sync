@@ -45,6 +45,9 @@ class Synchronizer(object):
         path_to = local
         self._rsync(path_from, path_to, rsync_opts)
 
+    def mkdir_remote(self, path):
+        self._sftp.mkdir(os.path.join(self.remote_dir, path))
+
     def rmfile_remote(self, path):
         self._sftp.remove(os.path.join(self.remote_dir, path))
 

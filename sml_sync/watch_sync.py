@@ -3,6 +3,7 @@ import threading
 import os
 import queue
 from datetime import datetime
+import logging
 
 import watchdog.observers
 import watchdog.events
@@ -126,8 +127,14 @@ class Uploader(object):
                 except queue.Empty:
                     continue
                 if self._monitor.should_sync(fs_event):
-                    self._handle_sync(fs_event)
-                    self._monitor.has_synced(fs_event)
+                    try:
+                        self._handle_sync(fs_event)
+                        self._monitor.has_synced(fs_event)
+                    except Exception as exc:
+                        logging.exception(exc)
+                        self._exchange.publish(
+                            Messages.ERROR_HANDLING_FS_EVENT
+                        )
                 else:
                     pass
         self._thread = threading.Thread(target=run)
@@ -141,8 +148,8 @@ class Uploader(object):
         if fs_event.is_directory:
             # TODO implement directory handling
             if fs_event.event_type in \
-               {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
-                self._synchronizer.up(fs_event.path)
+             {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
+                self._synchronizer.mkdir_remote(fs_event.path)
             elif fs_event.event_type == ChangeEventType.DELETED:
                 self._synchronizer.rmdir_remote(fs_event.path)
             elif fs_event.event_type == ChangeEventType.MOVED:
@@ -153,7 +160,7 @@ class Uploader(object):
         else:
             path = fs_event.path
             if fs_event.event_type in \
-               {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
+             {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
                 self._synchronizer.up(path)
             elif fs_event.event_type == ChangeEventType.DELETED:
                 self._synchronizer.rmfile_remote(path)

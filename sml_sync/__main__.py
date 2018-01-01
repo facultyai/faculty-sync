@@ -2,11 +2,14 @@
 import time
 import threading
 import traceback
+import logging
 from concurrent.futures import ThreadPoolExecutor
+
+import daiquiri
 
 from .cli import parse_command_line
 from .ssh import get_ssh_details, sftp_from_ssh_details
-from .pubsub import PubSubExchange
+from .pubsub import PubSubExchange, Messages
 from .ui import (
     View, WalkingFileTreesScreen, DifferencesScreen, SynchronizationScreen,
     WatchSyncScreen
@@ -15,6 +18,12 @@ from .file_trees import (
     walk_local_file_tree, walk_remote_file_tree, compare_file_trees)
 from .sync import Synchronizer
 from .watch_sync import WatcherSynchronizer
+
+
+daiquiri.setup(
+    level=logging.INFO,
+    outputs=[daiquiri.output.File('sml-sync.log')]
+)
 
 
 class Controller(object):
@@ -35,6 +44,7 @@ class Controller(object):
             configuration.remote_dir,
             ssh_details
         )
+        self._watcher_synchronizer = None
 
     def start(self):
         self._exchange.subscribe(
@@ -61,6 +71,10 @@ class Controller(object):
         self._exchange.subscribe(
             'START_WATCH_SYNC',
             lambda _: self._submit(self._start_watch_sync)
+        )
+        self._exchange.subscribe(
+            Messages.ERROR_HANDLING_FS_EVENT,
+            lambda _: self._submit(self._restart_watch_sync)
         )
 
         def run():
@@ -128,14 +142,21 @@ class Controller(object):
         self._clear_current_subscriptions()
         self._current_screen = WatchSyncScreen(self._exchange)
         self._view.mount(self._current_screen)
-        watcher_synchronizer = WatcherSynchronizer(
+        self._watcher_synchronizer = WatcherSynchronizer(
             self._configuration.local_dir,
             self._configuration.remote_dir,
             self._sftp,
             self._synchronizer,
             self._exchange
         )
-        watcher_synchronizer.start()
+        self._watcher_synchronizer.start()
+
+    def _restart_watch_sync(self):
+        self._clear_current_subscriptions()
+        if self._watcher_synchronizer is not None:
+            self._watcher_synchronizer.stop()
+        self._synchronizer.up(rsync_opts=['--delete'])
+        self._start_watch_sync()
 
     def join(self):
         self._thread.join()
