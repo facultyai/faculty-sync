@@ -141,6 +141,7 @@ class Uploader(object):
         self._thread.start()
 
     def _handle_sync(self, fs_event):
+        logging.info('Processing file system event {}'.format(fs_event))
         self._exchange.publish(
             Messages.STARTING_HANDLING_FS_EVENT,
             fs_event
