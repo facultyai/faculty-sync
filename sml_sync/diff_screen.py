@@ -2,7 +2,7 @@
 from enum import Enum
 
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
-from prompt_toolkit.layout import HSplit
+from prompt_toolkit.layout import HSplit, VSplit
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.containers import Window
 
@@ -23,6 +23,8 @@ class Summary(object):
         self._current_index = None
         self._menu_containers = []
         self._menu_container_names = []
+        self._margin_control = FormattedTextControl('')
+        self._margin = Window(self._margin_control, width=4)
 
         self._inflect = inflect.engine()
         self._plural = self._inflect.plural
@@ -40,7 +42,7 @@ class Summary(object):
 
     @property
     def containers(self):
-        return self._menu_containers
+        return [VSplit([self._margin, HSplit(self._menu_containers)])]
 
     def focus_next(self):
         if self._has_differences:
@@ -53,11 +55,14 @@ class Summary(object):
     def _set_selection_index(self, new_index):
         # Wrap around when selecting
         self._current_index = new_index % len(self._menu_containers)
-        for icontainer, container in enumerate(self._menu_containers):
-            if icontainer == self._current_index:
-                container.style = 'reverse'
-            else:
-                container.style = ''
+        margin_lines = []
+        for icontainer in range(len(self._menu_containers)):
+            margin_lines.append(
+                '  > ' if icontainer == self._current_index
+                else (' ' * 4)
+            )
+        margin_text = '\n'.join(margin_lines)
+        self._margin_control.text = margin_text
         return self._menu_container_names[self._current_index]
 
     def _render_containers(self, differences):
@@ -81,7 +86,7 @@ class Summary(object):
         else:
             self._has_differences = True
             if extra_local_paths:
-                text = '  There {} {} {} that {} locally but not on SherlockML'.format(
+                text = 'There {} {} {} that {} locally but not on SherlockML'.format(
                     self._plural_verb('is', len(extra_local_paths)),
                     len(extra_local_paths),
                     self._plural('file', len(extra_local_paths)),
@@ -91,7 +96,7 @@ class Summary(object):
                 self._menu_containers.append(container)
                 self._menu_container_names.append(SummaryContainerName.LOCAL)
             if extra_remote_paths:
-                text = '  There {} {} {} that {} only on SherlockML'.format(
+                text = 'There {} {} {} that {} only on SherlockML'.format(
                     self._plural_verb('is', len(extra_remote_paths)),
                     len(extra_remote_paths),
                     self._plural('file', len(extra_remote_paths)),
@@ -101,7 +106,7 @@ class Summary(object):
                 self._menu_containers.append(container)
                 self._menu_container_names.append(SummaryContainerName.REMOTE)
             if other_differences:
-                text = '  There {} {} {} that {} not synchronized'.format(
+                text = 'There {} {} {} that {} not synchronized'.format(
                     self._plural_verb('is', len(other_differences)),
                     len(other_differences),
                     self._plural('file', len(other_differences)),
@@ -151,7 +156,7 @@ class Details(object):
             self._render_paths(paths)
 
     def _render_paths(self, paths):
-        path_texts = ['  {}'.format(path) for path in paths]
+        path_texts = ['    {}'.format(path) for path in paths]
         self._control.text = '\n'.join(path_texts)
 
 
