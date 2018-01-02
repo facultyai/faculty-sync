@@ -7,11 +7,9 @@ from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding.key_bindings import (
     KeyBindings, merge_key_bindings
 )
-from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import HSplit, Layout
 from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl, BufferControl
-from prompt_toolkit.layout.widgets import TextArea, SearchField, MenuContainer, MenuItem
+from prompt_toolkit.layout.controls import FormattedTextControl
 
 from .pubsub import Messages
 from .models import ChangeEventType
@@ -122,7 +120,8 @@ class WalkingFileTreesScreen(object):
         elif status == 'REMOTE_WALK':
             self.status_control.text = 'Walking file tree on SherlockML'
         elif status == 'CALCULATING_DIFFERENCES':
-            self.status_control.text = 'Calculating differences between local and remote file trees'
+            self.status_control.text = (
+                'Calculating differences between local and remote file trees')
 
     def stop(self):
         self._exchange.unsubscribe(self._subscription_id)
