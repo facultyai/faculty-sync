@@ -178,10 +178,7 @@ class WatchSyncScreen(object):
 
         @self.bindings.add('s')
         def _(event):
-            pass
-            # self.stop()
-            # if not future_result.done():
-            #     future_result.set_result('STOP_SYNC')
+            self._exchange.publish(Messages.STOP_WATCH_SYNC)
 
     def _update_main_screen(self):
         self._update_recently_synced_items_control()

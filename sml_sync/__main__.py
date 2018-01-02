@@ -77,6 +77,10 @@ class Controller(object):
             Messages.ERROR_HANDLING_FS_EVENT,
             lambda _: self._submit(self._restart_watch_sync)
         )
+        self._exchange.subscribe(
+            Messages.STOP_WATCH_SYNC,
+            lambda _: self._submit(self._stop_watch_sync)
+        )
 
         def run():
             while not self._stop_event.is_set():
@@ -158,6 +162,12 @@ class Controller(object):
             self._watcher_synchronizer.stop()
         self._synchronizer.up(rsync_opts=['--delete'])
         self._start_watch_sync()
+
+    def _stop_watch_sync(self):
+        logging.info('Stopping watch-synchronization loop.')
+        if self._watcher_synchronizer is not None:
+            self._watcher_synchronizer.stop()
+        self._get_differences()
 
     def join(self):
         self._thread.join()
