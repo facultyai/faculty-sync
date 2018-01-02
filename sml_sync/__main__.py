@@ -10,11 +10,12 @@ import daiquiri
 from .cli import parse_command_line
 from .ssh import get_ssh_details, sftp_from_ssh_details
 from .pubsub import PubSubExchange, Messages
-from .ui import (
-    View, WalkingFileTreesScreen, SynchronizationScreen,
-    WatchSyncScreen
+from .ui import View
+from .screens import (
+    DifferencesScreen, WalkingFileTreesScreen,
+    SynchronizationScreen, WatchSyncScreen,
+    WalkingFileTreesStatus
 )
-from .diff_screen import DifferencesScreen
 from .file_trees import (
     walk_local_file_tree, walk_remote_file_tree, compare_file_trees)
 from .sync import Synchronizer
@@ -127,17 +128,20 @@ class Controller(object):
     def _get_differences(self):
         self._clear_current_subscriptions()
         self._current_screen = WalkingFileTreesScreen(
-            'CONNECTING', self._exchange)
+            WalkingFileTreesStatus.CONNECTING, self._exchange)
         try:
             self._view.mount(self._current_screen)
             self._sftp = sftp_from_ssh_details(self._ssh_details)
-            self._exchange.publish('WALK_STATUS_CHANGE', 'LOCAL_WALK')
+            self._exchange.publish(
+                'WALK_STATUS_CHANGE', WalkingFileTreesStatus.LOCAL_WALK)
             local_files = walk_local_file_tree(self._configuration.local_dir)
-            self._exchange.publish('WALK_STATUS_CHANGE', 'REMOTE_WALK')
+            self._exchange.publish(
+                'WALK_STATUS_CHANGE', WalkingFileTreesStatus.REMOTE_WALK)
             remote_files = walk_remote_file_tree(
                 self._configuration.remote_dir, self._sftp)
             self._exchange.publish(
-                'WALK_STATUS_CHANGE', 'CALCULATING_DIFFERENCES')
+                'WALK_STATUS_CHANGE',
+                WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
             differences = list(compare_file_trees(local_files, remote_files))
             self._exchange.publish('DISPLAY_DIFFERENCES', differences)
         finally:
