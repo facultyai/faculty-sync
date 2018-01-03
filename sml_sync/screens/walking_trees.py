@@ -76,7 +76,6 @@ class WalkingFileTreesScreen(object):
                 '  {} Calculating differences between '
                 'local and remote file trees'.format(loading_character))
 
-
     def stop(self):
         self._stop_event.set()
         self._exchange.unsubscribe(self._subscription_id)
