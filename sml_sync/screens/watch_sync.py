@@ -1,13 +1,52 @@
 
 import collections
+import threading
+import time
 
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout import HSplit
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.application.current import get_app
 
 from ..pubsub import Messages
 from ..models import ChangeEventType
+
+from .loading import LoadingIndicator
+
+
+class Loading(object):
+
+    def __init__(self):
+        self._loading_indicator = LoadingIndicator()
+        self._control = FormattedTextControl('')
+        self.container = HSplit([
+            Window(height=1),
+            Window(self._control, height=1),
+            Window()
+        ])
+        self._thread = None
+        self._stop_event = threading.Event()
+        self._start_updating_loading_indicator()
+
+    def _render(self):
+        self._control.text = \
+            '  {} Loading directory structure on SherlockML'.format(
+                self._loading_indicator.current())
+
+    def _start_updating_loading_indicator(self):
+        def run():
+            app = get_app()
+            while not self._stop_event.is_set():
+                self._loading_indicator.next()
+                self._render()
+                time.sleep(0.5)
+                app.invalidate()
+        self._thread = threading.Thread(target=run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._stop_event.set()
 
 
 class WatchSyncScreen(object):
@@ -19,7 +58,7 @@ class WatchSyncScreen(object):
         self._recently_synced_items = collections.deque(maxlen=10)
         self._current_event = None
 
-        self._loading_status_control = FormattedTextControl('Loading...')
+        self._loading_component = Loading()
         self._queue_status_control = FormattedTextControl('')
         self._recently_synced_items_control = FormattedTextControl('')
         self._held_files_control = FormattedTextControl('')
@@ -30,7 +69,7 @@ class WatchSyncScreen(object):
             ), height=1, style='reverse')
 
         self.main_container = HSplit([
-            Window(self._loading_status_control),
+            self._loading_component.container,
             self.menu_bar
         ])
         self._exchange.subscribe(
@@ -56,7 +95,13 @@ class WatchSyncScreen(object):
         def _(event):
             self._exchange.publish(Messages.STOP_WATCH_SYNC)
 
+    def _stop_loading_component(self):
+        if self._loading_component is not None:
+            self._loading_component.stop()
+            self._loading_component = None
+
     def _update_main_screen(self):
+        self._stop_loading_component()
         self._update_recently_synced_items_control()
         self._update_held_files_control()
         self.main_container.children = [
