@@ -93,7 +93,6 @@ class WatchSyncScreen(object):
 
         self._held_files = []
         self._recently_synced_items = collections.deque(maxlen=10)
-        self._current_event = None
 
         self._loading_component = Loading()
         self._currently_syncing_component = None
@@ -166,13 +165,10 @@ class WatchSyncScreen(object):
         self._update_held_files_control()
 
     def _on_start_handling_fs_event(self, fs_event):
-        self._current_event = fs_event
         if self._currently_syncing_component:
             self._currently_syncing_component.set_current_event(fs_event)
-        # self._update_queue_status()
 
     def _on_finish_handling_fs_event(self, fs_event):
-        self._current_event = None
         self._recently_synced_items.appendleft(fs_event)
         self._update_recently_synced_items_control()
         if self._currently_syncing_component:
