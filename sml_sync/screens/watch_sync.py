@@ -49,6 +49,43 @@ class Loading(object):
         self._stop_event.set()
 
 
+class CurrentlySyncing(object):
+
+    def __init__(self):
+        self._current_event = None
+        self._loading_indicator = LoadingIndicator()
+        self._control = FormattedTextControl('')
+        self.container = Window(self._control, height=1)
+        self._stop_event = threading.Event()
+        self._thread = None
+        self._start_updating_loading_indicator()
+
+    def set_current_event(self, fs_event):
+        self._current_event = fs_event
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _render(self):
+        if self._current_event is None:
+            self._control.text = ''
+        else:
+            path = self._current_event.path
+            self._control.text = '  {} {}'.format(
+                self._loading_indicator.current(), path)
+
+    def _start_updating_loading_indicator(self):
+        def run():
+            app = get_app()
+            while not self._stop_event.is_set():
+                self._loading_indicator.next()
+                self._render()
+                time.sleep(0.5)
+                app.invalidate()
+        self._thread = threading.Thread(target=run, daemon=True)
+        self._thread.start()
+
+
 class WatchSyncScreen(object):
 
     def __init__(self, exchange):
@@ -59,7 +96,7 @@ class WatchSyncScreen(object):
         self._current_event = None
 
         self._loading_component = Loading()
-        self._queue_status_control = FormattedTextControl('')
+        self._currently_syncing_component = None
         self._recently_synced_items_control = FormattedTextControl('')
         self._held_files_control = FormattedTextControl('')
 
@@ -74,7 +111,7 @@ class WatchSyncScreen(object):
         ])
         self._exchange.subscribe(
             'START_WATCH_SYNC_MAIN_LOOP',
-            lambda _: self._update_main_screen()
+            lambda _: self._start_main_screen()
         )
         self._exchange.subscribe(
             Messages.HELD_FILES_CHANGED,
@@ -100,12 +137,19 @@ class WatchSyncScreen(object):
             self._loading_component.stop()
             self._loading_component = None
 
-    def _update_main_screen(self):
+    def _stop_main_components(self):
+        if self._currently_syncing_component is not None:
+            self._currently_syncing_component.stop()
+            self._currently_syncing_component = None
+
+    def _start_main_screen(self):
         self._stop_loading_component()
+        self._currently_syncing_component = CurrentlySyncing()
         self._update_recently_synced_items_control()
         self._update_held_files_control()
         self.main_container.children = [
-            Window(self._queue_status_control, height=1),
+            Window(height=1),
+            self._currently_syncing_component.container,
             Window(self._recently_synced_items_control, height=10),
             Window(char='-', height=1),
             Window(FormattedTextControl(
@@ -123,13 +167,16 @@ class WatchSyncScreen(object):
 
     def _on_start_handling_fs_event(self, fs_event):
         self._current_event = fs_event
-        self._update_queue_status()
+        if self._currently_syncing_component:
+            self._currently_syncing_component.set_current_event(fs_event)
+        # self._update_queue_status()
 
     def _on_finish_handling_fs_event(self, fs_event):
         self._current_event = None
         self._recently_synced_items.appendleft(fs_event)
-        self._update_queue_status()
         self._update_recently_synced_items_control()
+        if self._currently_syncing_component:
+            self._currently_syncing_component.set_current_event(None)
 
     def _update_recently_synced_items_control(self):
         recent_syncs_text = [
@@ -148,13 +195,6 @@ class WatchSyncScreen(object):
         else:
             event_str = '> {}'.format(event.path)
         return event_str
-
-    def _update_queue_status(self):
-        if self._current_event is not None:
-            path = self._current_event.path
-            self._queue_status_control.text = '>>> {}'.format(path)
-        else:
-            self._queue_status_control.text = ''
 
     def _update_held_files_control(self):
         held_files_text = [
