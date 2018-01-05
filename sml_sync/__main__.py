@@ -58,7 +58,7 @@ class Controller(object):
             lambda _: self._submit(self._get_differences)
         )
         self._exchange.subscribe(
-            'DISPLAY_DIFFERENCES',
+            Messages.DISPLAY_DIFFERENCES,
             lambda differences: self._submit(
                 self._display_differences, differences)
         )
@@ -133,17 +133,17 @@ class Controller(object):
             self._view.mount(self._current_screen)
             self._sftp = sftp_from_ssh_details(self._ssh_details)
             self._exchange.publish(
-                'WALK_STATUS_CHANGE', WalkingFileTreesStatus.LOCAL_WALK)
+                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
             local_files = walk_local_file_tree(self._configuration.local_dir)
             self._exchange.publish(
-                'WALK_STATUS_CHANGE', WalkingFileTreesStatus.REMOTE_WALK)
+                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.REMOTE_WALK)
             remote_files = walk_remote_file_tree(
                 self._configuration.remote_dir, self._sftp)
             self._exchange.publish(
-                'WALK_STATUS_CHANGE',
+                Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
             differences = list(compare_file_trees(local_files, remote_files))
-            self._exchange.publish('DISPLAY_DIFFERENCES', differences)
+            self._exchange.publish(Messages.DISPLAY_DIFFERENCES, differences)
         finally:
             self._current_screen.stop()
 

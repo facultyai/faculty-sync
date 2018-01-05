@@ -36,7 +36,7 @@ class WalkingFileTreesScreen(object):
         ])
         self._exchange = exchange
         self._subscription_id = exchange.subscribe(
-            'WALK_STATUS_CHANGE',
+            Messages.WALK_STATUS_CHANGE,
             lambda new_status: self.set_status(new_status)
         )
         self._stop_event = threading.Event()
