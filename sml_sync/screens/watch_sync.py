@@ -2,9 +2,11 @@
 import collections
 import threading
 import time
+from datetime import datetime
+import logging
 
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout import HSplit
+from prompt_toolkit.layout import HSplit, VSplit
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.application.current import get_app
@@ -13,6 +15,7 @@ from ..pubsub import Messages
 from ..models import ChangeEventType
 
 from .loading import LoadingIndicator
+from . import humanize
 
 
 class Loading(object):
@@ -86,6 +89,71 @@ class CurrentlySyncing(object):
         self._thread.start()
 
 
+class RecentlySyncedItems(object):
+
+    def __init__(self):
+        self._items = collections.deque(maxlen=10)
+        self.container = VSplit([Window()], height=10)
+        self._thread = None
+        self._stop_event = threading.Event()
+        self._start_updating()
+
+    def add_item(self, fs_event):
+        self._items.appendleft((datetime.now(), fs_event))
+        self._render()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _render(self):
+        items = list(self._items)  # Defensive copy to avoid race conditions
+        if items:
+            events = [event for (_, event) in items]
+            times = [sync_time for (sync_time, _) in items]
+            self.container.children = [
+                Window(width=2),
+                self._render_events(events),
+                Window(width=2),
+                self._render_times(times)
+            ]
+        else:
+            self.container.children = [Window()]
+
+    def _render_events(self, events):
+        event_texts = [self._format_event(event) for event in events]
+        event_max_width = max(len(event_text) for event_text in event_texts)
+        return Window(
+            FormattedTextControl('\n'.join(event_texts)),
+            width=min(event_max_width, 50)
+        )
+
+    def _format_event(self, event):
+        if event.event_type == ChangeEventType.MOVED:
+            src_path = event.path
+            dest_path = event.extra_args['dest_path']
+            event_str = '> {} -> {}'.format(src_path, dest_path)
+        elif event.event_type == ChangeEventType.DELETED:
+            event_str = 'x {}'.format(event.path)
+        else:
+            event_str = '> {}'.format(event.path)
+        return event_str
+
+    def _render_times(self, times):
+        logging.info('rendering {}'.format(times))
+        times_text = [humanize.naturaltime(t) for t in times]
+        return Window(FormattedTextControl('\n'.join(times_text)))
+
+    def _start_updating(self):
+        def run():
+            app = get_app()
+            while not self._stop_event.is_set():
+                self._render()
+                time.sleep(5)
+                app.invalidate()
+        self._thread = threading.Thread(target=run, daemon=True)
+        self._thread.start()
+
+
 class WatchSyncScreen(object):
 
     def __init__(self, exchange):
@@ -96,7 +164,7 @@ class WatchSyncScreen(object):
 
         self._loading_component = Loading()
         self._currently_syncing_component = None
-        self._recently_synced_items_control = FormattedTextControl('')
+        self._recently_synced_component = None
         self._held_files_control = FormattedTextControl('')
 
         self.menu_bar = Window(FormattedTextControl(
@@ -140,17 +208,22 @@ class WatchSyncScreen(object):
         if self._currently_syncing_component is not None:
             self._currently_syncing_component.stop()
             self._currently_syncing_component = None
+        if self._recently_synced_component is not None:
+            self._recently_synced_component.stop()
+            self._recently_synced_component = None
 
     def _start_main_screen(self):
         self._stop_loading_component()
         self._currently_syncing_component = CurrentlySyncing()
-        self._update_recently_synced_items_control()
+        self._recently_synced_component = RecentlySyncedItems()
         self._update_held_files_control()
         self.main_container.children = [
             Window(height=1),
             self._currently_syncing_component.container,
-            Window(self._recently_synced_items_control, height=10),
+            self._recently_synced_component.container,
+            Window(height=1),
             Window(char='-', height=1),
+            Window(height=1),
             Window(FormattedTextControl(
                 'The following files will not be synced '
                 'to avoid accidentally overwriting changes on SherlockML:'),
@@ -169,28 +242,10 @@ class WatchSyncScreen(object):
             self._currently_syncing_component.set_current_event(fs_event)
 
     def _on_finish_handling_fs_event(self, fs_event):
-        self._recently_synced_items.appendleft(fs_event)
-        self._update_recently_synced_items_control()
+        if self._recently_synced_component:
+            self._recently_synced_component.add_item(fs_event)
         if self._currently_syncing_component:
             self._currently_syncing_component.set_current_event(None)
-
-    def _update_recently_synced_items_control(self):
-        recent_syncs_text = [
-            '  {}'.format(self._format_fs_event(fs_event))
-            for fs_event in self._recently_synced_items
-        ]
-        self._recently_synced_items_control.text = '\n'.join(recent_syncs_text)
-
-    def _format_fs_event(self, event):
-        if event.event_type == ChangeEventType.MOVED:
-            src_path = event.path
-            dest_path = event.extra_args['dest_path']
-            event_str = '> {} -> {}'.format(src_path, dest_path)
-        elif event.event_type == ChangeEventType.DELETED:
-            event_str = 'x {}'.format(event.path)
-        else:
-            event_str = '> {}'.format(event.path)
-        return event_str
 
     def _update_held_files_control(self):
         held_files_text = [
