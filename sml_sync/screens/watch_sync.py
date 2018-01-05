@@ -139,7 +139,6 @@ class RecentlySyncedItems(object):
         return event_str
 
     def _render_times(self, times):
-        logging.info('rendering {}'.format(times))
         times_text = [humanize.naturaltime(t) for t in times]
         return Window(FormattedTextControl('\n'.join(times_text)))
 
