@@ -116,7 +116,7 @@ class RecentlySyncedItems(object):
             events = [event for (_, event) in items]
             times = [sync_time for (sync_time, _) in items]
             self.container.children = [
-                Window(width=2, height=len(items)),
+                Window(width=4, height=len(items)),
                 self._render_events(events),
                 Window(width=2, height=len(items)),
                 self._render_times(times)
@@ -162,17 +162,49 @@ class RecentlySyncedItems(object):
         self._thread.start()
 
 
+class HeldFiles(object):
+
+    def __init__(self):
+        self._held_paths = list()
+        self.container = HSplit([Window()])
+
+    def set_paths(self, paths):
+        # Truncate to avoid huge list lengths
+        self._held_paths = list(paths)[:100]
+        self._render()
+
+    def _render(self):
+        if self._held_paths:
+            self.container.children = [
+                Window(height=1),
+                Window(char='-', height=1),
+                Window(height=1),
+                Window(FormattedTextControl(
+                    '  The following files will not be synced to '
+                    'avoid accidentally overwriting changes on SherlockML:'),
+                       dont_extend_height=True
+                ),
+                Window(height=1),
+                self._format_held_paths(self._held_paths)
+            ]
+        else:
+            self.container.children = Window(dont_extend_height=True)
+
+    def _format_held_paths(self, paths):
+        paths_text = '\n'.join(['    {}'.format(path) for path in paths])
+        control = FormattedTextControl(paths_text)
+        return Window(control)
+
+
 class WatchSyncScreen(object):
 
     def __init__(self, exchange):
         self._exchange = exchange
 
-        self._held_files = []
-
         self._loading_component = Loading()
         self._currently_syncing_component = None
         self._recently_synced_component = None
-        self._held_files_control = FormattedTextControl('')
+        self._held_files_component = None
 
         self.menu_bar = Window(FormattedTextControl(
                 '[s] Stop  '
@@ -223,26 +255,18 @@ class WatchSyncScreen(object):
         self._stop_loading_component()
         self._currently_syncing_component = CurrentlySyncing()
         self._recently_synced_component = RecentlySyncedItems()
-        self._update_held_files_control()
+        self._held_files_component = HeldFiles()
         self.main_container.children = [
             Window(height=1),
             self._currently_syncing_component.container,
             self._recently_synced_component.container,
-            Window(height=1),
-            Window(char='-', height=1),
-            Window(height=1),
-            Window(FormattedTextControl(
-                '  The following files will not be synced '
-                'to avoid accidentally overwriting changes on SherlockML:'),
-                dont_extend_height=True
-            ),
-            Window(self._held_files_control),
+            self._held_files_component.container,
             self.menu_bar
         ]
 
     def _update_held_files(self, held_files):
-        self._held_files = held_files
-        self._update_held_files_control()
+        if self._held_files_component:
+            self._held_files_component.set_paths(held_files)
 
     def _on_start_handling_fs_event(self, fs_event):
         if self._currently_syncing_component:
@@ -254,11 +278,5 @@ class WatchSyncScreen(object):
         if self._currently_syncing_component:
             self._currently_syncing_component.set_current_event(None)
 
-    def _update_held_files_control(self):
-        held_files_text = [
-            '  x {}'.format(held_file) for held_file in self._held_files
-        ]
-        self._held_files_control.text = '\n'.join(held_files_text)
-
     def stop(self):
-        pass
+        self._stop_main_components()
