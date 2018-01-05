@@ -57,6 +57,7 @@ class CurrentlySyncing(object):
     def __init__(self):
         self._current_event = None
         self._loading_indicator = LoadingIndicator()
+        self._has_synced_at_least_once = False
         self._control = FormattedTextControl('')
         self.container = Window(self._control, height=1)
         self._stop_event = threading.Event()
@@ -64,13 +65,16 @@ class CurrentlySyncing(object):
         self._start_updating_loading_indicator()
 
     def set_current_event(self, fs_event):
+        self._has_synced_at_least_once = True
         self._current_event = fs_event
 
     def stop(self):
         self._stop_event.set()
 
     def _render(self):
-        if self._current_event is None:
+        if self._current_event is None and not self._has_synced_at_least_once:
+            self._control.text = '  Ready and waiting for local changes'
+        elif self._current_event is None:
             self._control.text = ''
         else:
             path = self._current_event.path
@@ -93,7 +97,8 @@ class RecentlySyncedItems(object):
 
     def __init__(self):
         self._items = collections.deque(maxlen=10)
-        self.container = VSplit([Window()], height=10)
+        self._empty_window = Window(height=1)
+        self.container = VSplit([self._empty_window])
         self._thread = None
         self._stop_event = threading.Event()
         self._start_updating()
@@ -111,36 +116,40 @@ class RecentlySyncedItems(object):
             events = [event for (_, event) in items]
             times = [sync_time for (sync_time, _) in items]
             self.container.children = [
-                Window(width=2),
+                Window(width=2, height=len(items)),
                 self._render_events(events),
-                Window(width=2),
+                Window(width=2, height=len(items)),
                 self._render_times(times)
             ]
         else:
-            self.container.children = [Window()]
+            self.container.children = [self._empty_window]
 
     def _render_events(self, events):
         event_texts = [self._format_event(event) for event in events]
         event_max_width = max(len(event_text) for event_text in event_texts)
         return Window(
             FormattedTextControl('\n'.join(event_texts)),
-            width=min(event_max_width, 50)
+            width=min(event_max_width, 50),
+            height=len(events)
         )
 
     def _format_event(self, event):
         if event.event_type == ChangeEventType.MOVED:
             src_path = event.path
             dest_path = event.extra_args['dest_path']
-            event_str = '> {} -> {}'.format(src_path, dest_path)
+            event_str = '{} -> {}'.format(src_path, dest_path)
         elif event.event_type == ChangeEventType.DELETED:
-            event_str = 'x {}'.format(event.path)
+            event_str = '{} (x)'.format(event.path)
         else:
-            event_str = '> {}'.format(event.path)
+            event_str = '{}'.format(event.path)
         return event_str
 
     def _render_times(self, times):
         times_text = [humanize.naturaltime(t) for t in times]
-        return Window(FormattedTextControl('\n'.join(times_text)))
+        return Window(
+            FormattedTextControl('\n'.join(times_text)),
+            height=len(times)
+        )
 
     def _start_updating(self):
         def run():
@@ -159,7 +168,6 @@ class WatchSyncScreen(object):
         self._exchange = exchange
 
         self._held_files = []
-        self._recently_synced_items = collections.deque(maxlen=10)
 
         self._loading_component = Loading()
         self._currently_syncing_component = None
@@ -224,7 +232,7 @@ class WatchSyncScreen(object):
             Window(char='-', height=1),
             Window(height=1),
             Window(FormattedTextControl(
-                'The following files will not be synced '
+                '  The following files will not be synced '
                 'to avoid accidentally overwriting changes on SherlockML:'),
                 dont_extend_height=True
             ),
