@@ -26,7 +26,7 @@ DirectoryAttrs = collections.namedtuple('DirectoryAttrs', ['last_modified'])
 
 Configuration = collections.namedtuple(
     'Configuration',
-    ['project_id', 'server_id', 'local_dir', 'remote_dir']
+    ['project', 'server_id', 'local_dir', 'remote_dir']
 )
 
 SshDetails = collections.namedtuple(

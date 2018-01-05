@@ -78,7 +78,7 @@ class View(object):
         top_text = (
             'SherlockML synchronizer '
             '{configuration.local_dir} -> '
-            '{configuration.project_id}:{configuration.remote_dir}'
+            '{configuration.project.id_}:{configuration.remote_dir}'
         ).format(configuration=self.configuration)
         top_toolbar = Window(
             FormattedTextControl(top_text),

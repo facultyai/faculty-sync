@@ -28,7 +28,7 @@ def sftp_from_ssh_details(ssh_details):
 def get_ssh_details(configuration):
     client = sml.galleon.Galleon()
     details = client.ssh_details(
-        configuration.project_id,
+        configuration.project.id_,
         configuration.server_id
     )
     hostname = details['hostname']

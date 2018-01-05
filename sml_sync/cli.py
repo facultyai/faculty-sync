@@ -6,6 +6,7 @@ import sml.auth
 import sml.casebook
 
 from .models import Configuration
+from .projects import Project, Projects
 
 
 class NoValidServer(Exception):
@@ -27,27 +28,29 @@ def parse_command_line(argv=None):
         help='Local directory to sync from'
     )
     arguments = parser.parse_args(argv)
-    project_id = _resolve_project(arguments.project)
-    server_id = _any_server(project_id)
+    project = _resolve_project(arguments.project)
+    server_id = _any_server(project.id_)
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
     remote_dir = remote_dir.rstrip('/') + '/'
     configuration = Configuration(
-        project_id, server_id, local_dir, remote_dir
+        project, server_id, local_dir, remote_dir
     )
     return configuration
 
 
 def _resolve_project(project):
     """Resolve a project name or ID to a project ID."""
+    projects_client = Projects()
     try:
         project_id = uuid.UUID(project)
+        project = projects_client.get_project_by_id(project_id)
     except ValueError:
         user_id = sml.auth.user_id()
-        client = sml.casebook.Casebook()
-        project_id = client.get_project_by_name(user_id, project).id_
-    return project_id
+        project = projects_client.get_project_by_name(
+            user_id, project)
+    return project
 
 
 def _any_server(project_id, status=None):
