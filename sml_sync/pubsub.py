@@ -57,7 +57,7 @@ class PubSubExchange(object):
         def run():
             while not self._stop_event.is_set():
                 try:
-                    message_type, message_data = self.queue.get(timeout=1)
+                    message_type, message_data = self.queue.get(timeout=0.1)
                     try:
                         subscribers = self.subscribers[message_type]
                         for (subscription_id, callback) in subscribers:
