@@ -6,8 +6,7 @@ from datetime import datetime
 
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout import HSplit, VSplit
-from prompt_toolkit.layout.widgets import Frame
-from prompt_toolkit.layout.containers import Window, FloatContainer, Float
+from prompt_toolkit.layout.containers import Window, FloatContainer
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.application.current import get_app
 
@@ -16,6 +15,7 @@ from ..models import ChangeEventType
 
 from .loading import LoadingIndicator
 from . import humanize
+from .help import help_modal
 
 HELP_TITLE = 'Incremental synchronization'
 
@@ -32,7 +32,7 @@ Keys:
 
     [s] Stop incremental synchronization and go back to main screen
     [q] Quit the application
-    [?] Show this message
+    [?] Toggle this message
 """
 
 
@@ -314,18 +314,5 @@ class WatchSyncScreen(object):
         if self.main_container.floats:
             self.main_container.floats = []
         else:
-            help_container = Float(Frame(
-                HSplit([
-                    Window(
-                        FormattedTextControl(HELP_TITLE),
-                        height=1, style='reverse'
-                    ),
-                    Window(height=1),
-                    Window(FormattedTextControl(HELP_TEXT)),
-                    Window(
-                        FormattedTextControl('[?] Close this window'),
-                        height=1, style='reverse'
-                    )
-                ])
-            ))
+            help_container = help_modal(HELP_TITLE, HELP_TEXT)
             self.main_container.floats = [help_container]
