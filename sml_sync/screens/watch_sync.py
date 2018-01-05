@@ -3,11 +3,11 @@ import collections
 import threading
 import time
 from datetime import datetime
-import logging
 
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout import HSplit, VSplit
-from prompt_toolkit.layout.containers import Window
+from prompt_toolkit.layout.widgets import Frame
+from prompt_toolkit.layout.containers import Window, FloatContainer, Float
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.application.current import get_app
 
@@ -16,6 +16,24 @@ from ..models import ChangeEventType
 
 from .loading import LoadingIndicator
 from . import humanize
+
+HELP_TITLE = 'Incremental synchronization'
+
+HELP_TEXT = """\
+A background process is currently watching the local directory. When
+it detects a change, that change is replicated in the directory in
+SherlockML.
+
+To avoid overwriting changes that you may have made on SherlockML
+directly, we avoid pushing changes if the file is modified on
+SherlockML while this process is running.
+
+Keys:
+
+    [s] Stop incremental synchronization and go back to main screen
+    [q] Quit the application
+    [?] Show this message
+"""
 
 
 class Loading(object):
@@ -208,13 +226,20 @@ class WatchSyncScreen(object):
 
         self.menu_bar = Window(FormattedTextControl(
                 '[s] Stop  '
-                '[q] Quit'
+                '[q] Quit  '
+                '[?] Help'
             ), height=1, style='reverse')
 
-        self.main_container = HSplit([
+        self._screen_container = HSplit([
             self._loading_component.container,
             self.menu_bar
         ])
+
+        self.main_container = FloatContainer(
+            self._screen_container,
+            floats=[]
+        )
+
         self._exchange.subscribe(
             'START_WATCH_SYNC_MAIN_LOOP',
             lambda _: self._start_main_screen()
@@ -238,6 +263,10 @@ class WatchSyncScreen(object):
         def _(event):
             self._exchange.publish(Messages.STOP_WATCH_SYNC)
 
+        @self.bindings.add('?')
+        def _(event):
+            self._toggle_help()
+
     def _stop_loading_component(self):
         if self._loading_component is not None:
             self._loading_component.stop()
@@ -256,7 +285,7 @@ class WatchSyncScreen(object):
         self._currently_syncing_component = CurrentlySyncing()
         self._recently_synced_component = RecentlySyncedItems()
         self._held_files_component = HeldFiles()
-        self.main_container.children = [
+        self._screen_container.children = [
             Window(height=1),
             self._currently_syncing_component.container,
             self._recently_synced_component.container,
@@ -280,3 +309,23 @@ class WatchSyncScreen(object):
 
     def stop(self):
         self._stop_main_components()
+
+    def _toggle_help(self):
+        if self.main_container.floats:
+            self.main_container.floats = []
+        else:
+            help_container = Float(Frame(
+                HSplit([
+                    Window(
+                        FormattedTextControl(HELP_TITLE),
+                        height=1, style='reverse'
+                    ),
+                    Window(height=1),
+                    Window(FormattedTextControl(HELP_TEXT)),
+                    Window(
+                        FormattedTextControl('[?] Close this window'),
+                        height=1, style='reverse'
+                    )
+                ])
+            ))
+            self.main_container.floats = [help_container]
