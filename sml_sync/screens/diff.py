@@ -4,9 +4,36 @@ from enum import Enum
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.containers import Window
+from prompt_toolkit.layout.containers import Window, FloatContainer
 
 import inflect
+
+from .help import help_modal
+
+HELP_TITLE = 'Differences between local directory and SherlockML'
+
+HELP_TEXT = """\
+This is a summary of the differences between SherlockML and
+your local directory. It summarizes the files that exist
+only on SherlockML, the files that exist on locally and the
+files that are on both, but with different modification times.
+
+Keys:
+
+    [u] Push all the local changes to SherlockML. This will
+        erase any file that is on SherlockML, but not available
+        locally.
+    [d] Bring all the changes down from SherlockML. This will
+        erase any file that is present locally but not on
+        SherlockML.
+    [r] Refresh differences between the local file system
+        and SherlockML.
+    [w] Enter incremental synchronization mode, where changes
+        to the local file system are automatically replicated
+        on SherlockML.
+    [q] Quit the application.
+    [?] Toggle this message.
+"""
 
 
 class SummaryContainerName(Enum):
@@ -168,9 +195,10 @@ class DifferencesScreen(object):
             '[d] Sync SherlockML files down  '
             '[u] Sync local files up  '
             '[r] Refresh  '
-            '[w] Continuous sync from local changes  '
+            '[w] Incremental sync from local changes\n'
+            '[?] Help  '
             '[q] Quit'
-        ), height=1, style='reverse')
+        ), height=2, style='reverse')
         self._summary = Summary(differences)
         self._details = Details(differences, self._summary.current_focus)
         self.bindings = KeyBindings()
@@ -191,6 +219,10 @@ class DifferencesScreen(object):
         def _(event):
             self._exchange.publish('START_WATCH_SYNC')
 
+        @self.bindings.add('?')
+        def _(event):
+            self._toggle_help()
+
         @self.bindings.add('tab')
         @self.bindings.add('down')
         @self.bindings.add('left')
@@ -205,10 +237,21 @@ class DifferencesScreen(object):
             new_focus = self._summary.focus_previous()
             self._details.set_focus(new_focus)
 
-        self.main_container = HSplit(
+        self._screen_container = HSplit(
             [Window(height=1)] +
             self._summary.containers +
             [Window(height=1), Window(char='-', height=1), Window(height=1)] +
             [self._details.container] +
             [self._bottom_toolbar]
         )
+        self.main_container = FloatContainer(
+            self._screen_container,
+            floats=[]
+        )
+
+    def _toggle_help(self):
+        if self.main_container.floats:
+            self.main_container.floats = []
+        else:
+            help_container = help_modal(HELP_TITLE, HELP_TEXT)
+            self.main_container.floats = [help_container]
