@@ -191,7 +191,7 @@ class DifferencesScreen(object):
 
         @self.bindings.add('w')
         def _(event):
-            self._exchange.publish('START_WATCH_SYNC')
+            self._exchange.publish(Messages.START_WATCH_SYNC)
 
         @self.bindings.add('tab')
         @self.bindings.add('down')

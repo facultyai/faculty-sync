@@ -285,7 +285,7 @@ class WatcherSynchronizer(object):
         self.uploader = Uploader(self.queue, synchronizer, monitor, exchange)
 
     def start(self):
-        self._exchange.publish('START_WATCH_SYNC_MAIN_LOOP')
+        self._exchange.publish(Messages.START_WATCH_SYNC_MAIN_LOOP)
         self.observer.start()
         self.uploader.start()
 

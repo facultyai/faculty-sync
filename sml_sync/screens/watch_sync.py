@@ -241,7 +241,7 @@ class WatchSyncScreen(object):
         )
 
         self._exchange.subscribe(
-            'START_WATCH_SYNC_MAIN_LOOP',
+            Messages.START_WATCH_SYNC_MAIN_LOOP,
             lambda _: self._start_main_screen()
         )
         self._exchange.subscribe(

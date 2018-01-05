@@ -71,7 +71,7 @@ class Controller(object):
             lambda _: self._submit(self._sync_local_to_sherlockml)
         )
         self._exchange.subscribe(
-            'START_WATCH_SYNC',
+            Messages.START_WATCH_SYNC,
             lambda _: self._submit(self._start_watch_sync)
         )
         self._exchange.subscribe(
