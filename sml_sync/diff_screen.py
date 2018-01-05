@@ -8,6 +8,8 @@ from prompt_toolkit.layout.containers import Window
 
 import inflect
 
+from ..pubsub import Messages
+
 
 class SummaryContainerName(Enum):
     LOCAL = 'LOCAL'
@@ -177,15 +179,15 @@ class DifferencesScreen(object):
 
         @self.bindings.add('d')
         def _(event):
-            self._exchange.publish('SYNC_SHERLOCKML_TO_LOCAL')
+            self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
 
         @self.bindings.add('u')
         def _(event):
-            self._exchange.publish('SYNC_LOCAL_TO_SHERLOCKML')
+            self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
 
         @self.bindings.add('r')
         def _(event):
-            self._exchange.publish('REFRESH_DIFFERENCES')
+            self._exchange.publish(Messages.REFRESH_DIFFERENCES)
 
         @self.bindings.add('w')
         def _(event):

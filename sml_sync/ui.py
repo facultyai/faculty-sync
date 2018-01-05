@@ -10,6 +10,8 @@ from prompt_toolkit.key_binding.key_bindings import (
 from prompt_toolkit.layout import HSplit, Layout
 from prompt_toolkit.layout.containers import Window
 
+from .pubsub import Messages
+
 
 class View(object):
 
@@ -91,6 +93,6 @@ class View(object):
         @bindings.add('c-c')
         @bindings.add('q')
         def _(event):
-            self.exchange.publish('STOP_CALLED')
+            self.exchange.publish(Messages.STOP_CALLED)
 
         return bindings

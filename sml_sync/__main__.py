@@ -50,11 +50,11 @@ class Controller(object):
 
     def start(self):
         self._exchange.subscribe(
-            'STOP_CALLED',
+            Messages.STOP_CALLED,
             lambda _: self._stop_event.set()
         )
         self._exchange.subscribe(
-            'START_INITIAL_FILE_TREE_WALK',
+            Messages.START_INITIAL_FILE_TREE_WALK,
             lambda _: self._submit(self._get_differences)
         )
         self._exchange.subscribe(
@@ -63,11 +63,11 @@ class Controller(object):
                 self._display_differences, differences)
         )
         self._exchange.subscribe(
-            'SYNC_SHERLOCKML_TO_LOCAL',
+            Messages.SYNC_SHERLOCKML_TO_LOCAL,
             lambda _: self._submit(self._sync_sherlockml_to_local)
         )
         self._exchange.subscribe(
-            'SYNC_LOCAL_TO_SHERLOCKML',
+            Messages.SYNC_LOCAL_TO_SHERLOCKML,
             lambda _: self._submit(self._sync_local_to_sherlockml)
         )
         self._exchange.subscribe(
@@ -115,7 +115,7 @@ class Controller(object):
         self._clear_current_subscriptions()
         self._current_screen = DifferencesScreen(differences, self._exchange)
         subscription_id = self._exchange.subscribe(
-            'REFRESH_DIFFERENCES',
+            Messages.REFRESH_DIFFERENCES,
             lambda _: self._submit(self._get_differences)
         )
         self._current_screen_subscriptions.append(subscription_id)
@@ -192,7 +192,7 @@ def main():
     with get_ssh_details(configuration) as ssh_details:
         controller = Controller(configuration, ssh_details, view, exchange)
         controller.start()
-        exchange.publish('START_INITIAL_FILE_TREE_WALK')
+        exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
 
         # Run until the controller stops
         controller.join()
