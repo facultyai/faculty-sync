@@ -103,7 +103,6 @@ class Controller(object):
         self._thread = threading.Thread(target=run)
         self._thread.start()
 
-        # self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
         self._exchange.publish(
             Messages.START_RESOLVING_REMOTE_DIRECTORY,
             self._configuration.remote_dir
