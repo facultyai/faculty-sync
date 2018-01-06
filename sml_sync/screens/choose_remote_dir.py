@@ -137,7 +137,7 @@ class RemoteDirectoryPromptScreen(object):
         def _(event):
             current_selection = self._completions_component.current_selection()
             self._exchange.publish(
-                Messages.START_RESOLVING_REMOTE_DIRECTORY,
+                Messages.VERIFY_REMOTE_DIRECTORY,
                 current_selection
             )
 

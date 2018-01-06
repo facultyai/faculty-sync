@@ -58,7 +58,7 @@ class Controller(object):
             lambda _: self._stop_event.set()
         )
         self._exchange.subscribe(
-            Messages.START_RESOLVING_REMOTE_DIRECTORY,
+            Messages.VERIFY_REMOTE_DIRECTORY,
             lambda directory:
                 self._submit(lambda : self._resolve_remote_directory(directory))
         )
@@ -104,7 +104,7 @@ class Controller(object):
         self._thread.start()
 
         self._exchange.publish(
-            Messages.START_RESOLVING_REMOTE_DIRECTORY,
+            Messages.VERIFY_REMOTE_DIRECTORY,
             self._configuration.remote_dir
         )
 
