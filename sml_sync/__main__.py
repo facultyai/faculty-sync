@@ -60,7 +60,8 @@ class Controller(object):
         self._exchange.subscribe(
             Messages.VERIFY_REMOTE_DIRECTORY,
             lambda directory:
-                self._submit(lambda : self._resolve_remote_directory(directory))
+                self._submit(
+                    lambda: self._resolve_remote_directory(directory))
         )
         self._exchange.subscribe(
             Messages.PROMPT_FOR_REMOTE_DIRECTORY,
