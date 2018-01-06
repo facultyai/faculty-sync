@@ -126,8 +126,8 @@ class Controller(object):
     def _prompt_for_remote_directory(self):
         self._clear_current_subscriptions()
         self._current_screen = RemoteDirectoryPromptScreen(
-            get_paths_in_directory=lambda directory: list(get_remote_subdirectories(
-                directory, self._sftp))
+            get_paths_in_directory=lambda directory: list(
+                get_remote_subdirectories(directory, self._sftp))
         )
         self._view.mount(self._current_screen)
 
