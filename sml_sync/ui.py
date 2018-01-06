@@ -16,7 +16,8 @@ from .pubsub import Messages
 class View(object):
 
     def __init__(self, configuration, exchange):
-        self.configuration = configuration
+        self._project_name = configuration.project.name
+        self._local_dir = configuration.local_dir
         self.exchange = exchange
 
         self.main_container = Window(FormattedTextControl(''))
@@ -58,6 +59,9 @@ class View(object):
         except AttributeError:
             # Screen does not define additional keybindings
             self.application.key_bindings = self.bindings
+        try:
+            screen.on_mount(self.application)
+        except AttributeError:
             pass
 
     def start(self):
@@ -77,9 +81,12 @@ class View(object):
     def _render_top_toolbar(self):
         top_text = (
             'SherlockML synchronizer  '
-            '{configuration.local_dir} -> '
-            '{configuration.project.name}:{configuration.remote_dir}'
-        ).format(configuration=self.configuration)
+            '{local_dir} -> '
+            '{project_name}'
+        ).format(
+            local_dir=self._local_dir,
+            project_name=self._project_name
+        )
         top_toolbar = Window(
             FormattedTextControl(top_text),
             height=1,

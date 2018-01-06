@@ -19,7 +19,8 @@ def parse_command_line(argv=None):
     )
     parser.add_argument('project', help='Project name or ID')
     parser.add_argument(
-        'remote',
+        '--remote',
+        default=None,
         help='Remote directory, e.g. /project/src'
     )
     parser.add_argument(

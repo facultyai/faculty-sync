@@ -10,6 +10,23 @@ def get_remote_mtime(path, sftp):
     return _get_mtime(path, sftp)
 
 
+def remote_is_dir(path, sftp):
+    try:
+        path_stat = sftp.stat(path)
+        return stat.S_ISDIR(path_stat).st_mode
+    except FileNotFoundError:
+        return False
+
+
+def get_remote_subdirectories(path, sftp):
+    """ Get directories below path """
+    for obj_name in sftp.listdir(path):
+        full_path = os.path.join(path, obj_name)
+        is_directory = stat.S_ISDIR(sftp.stat(full_path).st_mode)
+        if is_directory:
+            yield full_path
+
+
 def _get_mtime(path, oslike):
     return datetime.fromtimestamp(int(oslike.stat(path).st_mtime))
 

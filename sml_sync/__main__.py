@@ -14,10 +14,13 @@ from .ui import View
 from .screens import (
     DifferencesScreen, WalkingFileTreesScreen,
     SynchronizationScreen, WatchSyncScreen,
-    WalkingFileTreesStatus
+    WalkingFileTreesStatus,
+    RemoteDirectoryPromptScreen
 )
 from .file_trees import (
-    walk_local_file_tree, walk_remote_file_tree, compare_file_trees)
+    walk_local_file_tree, walk_remote_file_tree, compare_file_trees,
+    remote_is_dir, get_remote_subdirectories
+)
 from .sync import Synchronizer
 from .watch_sync import WatcherSynchronizer
 
@@ -33,7 +36,7 @@ class Controller(object):
     def __init__(self, configuration, ssh_details, view, exchange):
         self._configuration = configuration
         self._ssh_details = ssh_details
-        self._sftp = None
+        self._sftp = sftp_from_ssh_details(self._ssh_details)
         self._view = view
         self._exchange = exchange
         self._stop_event = threading.Event()
@@ -41,17 +44,26 @@ class Controller(object):
         self._current_screen_subscriptions = []
         self._thread = None
         self._executor = ThreadPoolExecutor(max_workers=8)
-        self._synchronizer = Synchronizer(
-            configuration.local_dir,
-            configuration.remote_dir,
-            ssh_details
-        )
+        self._synchronizer = None
+        # self._synchronizer = Synchronizer(
+        #     configuration.local_dir,
+        #     configuration.remote_dir,
+        #     ssh_details
+        # )
         self._watcher_synchronizer = None
 
     def start(self):
         self._exchange.subscribe(
             Messages.STOP_CALLED,
             lambda _: self._stop_event.set()
+        )
+        self._exchange.subscribe(
+            Messages.START_RESOLVING_REMOTE_DIRECTORY,
+            lambda _: self._submit(self._resolve_remote_directory)
+        )
+        self._exchange.subscribe(
+            Messages.PROMPT_FOR_REMOTE_DIRECTORY,
+            lambda _: self._submit(self._prompt_for_remote_directory)
         )
         self._exchange.subscribe(
             Messages.START_INITIAL_FILE_TREE_WALK,
@@ -90,7 +102,8 @@ class Controller(object):
         self._thread = threading.Thread(target=run)
         self._thread.start()
 
-        self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
+        # self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
+        self._exchange.publish(Messages.START_RESOLVING_REMOTE_DIRECTORY)
 
     def _submit(self, fn, *args, **kwargs):
         future = self._executor.submit(fn, *args, **kwargs)
@@ -98,6 +111,25 @@ class Controller(object):
             future.result()
         except Exception:
             traceback.print_exc()
+
+    def _resolve_remote_directory(self):
+        config_remote_dir = self._configuration.remote_dir
+        if config_remote_dir is not None:
+            if remote_is_dir(config_remote_dir, self._sftp):
+                self._remote_dir = config_remote_dir
+                self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
+            else:
+                self._exchange.publish(Messages.PROMPT_FOR_REMOTE_DIRECTORY)
+        else:
+            self._exchange.publish(Messages.PROMPT_FOR_REMOTE_DIRECTORY)
+
+    def _prompt_for_remote_directory(self):
+        self._clear_current_subscriptions()
+        self._current_screen = RemoteDirectoryPromptScreen(
+            get_paths_in_directory=lambda directory: list(get_remote_subdirectories(
+                directory, self._sftp))
+        )
+        self._view.mount(self._current_screen)
 
     def _sync_sherlockml_to_local(self):
         self._clear_current_subscriptions()
@@ -133,7 +165,6 @@ class Controller(object):
             WalkingFileTreesStatus.CONNECTING, self._exchange)
         try:
             self._view.mount(self._current_screen)
-            self._sftp = sftp_from_ssh_details(self._ssh_details)
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
             local_files = walk_local_file_tree(self._configuration.local_dir)
@@ -141,7 +172,7 @@ class Controller(object):
                 Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.REMOTE_WALK)
             remote_files = walk_remote_file_tree(
-                self._configuration.remote_dir, self._sftp)
+                self._remote_dir, self._sftp)
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
@@ -156,7 +187,7 @@ class Controller(object):
         self._view.mount(self._current_screen)
         self._watcher_synchronizer = WatcherSynchronizer(
             self._configuration.local_dir,
-            self._configuration.remote_dir,
+            self._remote_dir,
             self._sftp,
             self._synchronizer,
             self._exchange
