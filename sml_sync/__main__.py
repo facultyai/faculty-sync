@@ -90,6 +90,8 @@ class Controller(object):
         self._thread = threading.Thread(target=run)
         self._thread.start()
 
+        self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
+
     def _submit(self, fn, *args, **kwargs):
         future = self._executor.submit(fn, *args, **kwargs)
         try:
@@ -192,7 +194,6 @@ def main():
     with get_ssh_details(configuration) as ssh_details:
         controller = Controller(configuration, ssh_details, view, exchange)
         controller.start()
-        exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
 
         # Run until the controller stops
         controller.join()
