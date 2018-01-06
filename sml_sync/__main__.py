@@ -96,7 +96,7 @@ class Controller(object):
         future = self._executor.submit(fn, *args, **kwargs)
         try:
             future.result()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
     def _sync_sherlockml_to_local(self):
@@ -138,7 +138,8 @@ class Controller(object):
                 Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
             local_files = walk_local_file_tree(self._configuration.local_dir)
             self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.REMOTE_WALK)
+                Messages.WALK_STATUS_CHANGE,
+                WalkingFileTreesStatus.REMOTE_WALK)
             remote_files = walk_remote_file_tree(
                 self._configuration.remote_dir, self._sftp)
             self._exchange.publish(
