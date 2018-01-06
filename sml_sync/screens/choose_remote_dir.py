@@ -141,7 +141,6 @@ class RemoteDirectoryPromptScreen(object):
                 current_selection
             )
 
-
     def on_mount(self, app):
         app.layout.focus(self.main_container)
         self._handle_text_changed()
