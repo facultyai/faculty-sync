@@ -13,7 +13,7 @@ def get_remote_mtime(path, sftp):
 def remote_is_dir(path, sftp):
     try:
         path_stat = sftp.stat(path)
-        return stat.S_ISDIR(path_stat).st_mode
+        return stat.S_ISDIR(path_stat.st_mode)
     except FileNotFoundError:
         return False
 
