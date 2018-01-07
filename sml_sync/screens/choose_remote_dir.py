@@ -219,6 +219,10 @@ class RemoteDirectoryPromptScreen(BaseScreen):
                 current_selection
             )
 
+        @self.bindings.add('c-c')
+        def _(event):
+            self._exchange.publish(Messages.STOP_CALLED)
+
         self._exchange.subscribe(
             Messages.NEW_SUBDIRECTORIES_WALKED,
             lambda _: self._handle_text_changed()
