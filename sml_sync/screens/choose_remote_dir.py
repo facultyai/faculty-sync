@@ -110,8 +110,7 @@ class AsyncCompleterStatus(object):
             self._control.text = ''
         else:
             self._control.text = (
-                '  Fetching subdirectories' +
-                ' of {}'.format(self._current_path)
+                'Fetching subdirectories of {}'.format(self._current_path)
                 if self._current_path is not None else ''
             )
 
@@ -181,7 +180,13 @@ class RemoteDirectoryPromptScreen(BaseScreen):
         self._completions_component = Completions()
         self._completer = AsyncCompleter(exchange, get_paths_in_directory)
         self._completer_status_component = AsyncCompleterStatus()
-        self.main_container = HSplit([
+        self._bottom_toolbar = Window(FormattedTextControl(
+            '[tab] Enter selected directory  '
+            '[return] Choose selected directory  '
+            '[arrows] Navigation  '
+            '[C-c] Quit'
+        ), height=1, style='reverse')
+        self._container = HSplit([
             Window(height=1),
             Window(
                 FormattedTextControl(
@@ -192,7 +197,11 @@ class RemoteDirectoryPromptScreen(BaseScreen):
             self._input,
             Window(height=1),
             self._completions_component.container,
-            self._completer_status_component.container
+            self._completer_status_component.container,
+        ])
+        self.main_container = HSplit([
+            VSplit([Window(width=2), self._container]),
+            self._bottom_toolbar
         ])
         self._buffer.on_text_changed += self._handle_text_changed
 
