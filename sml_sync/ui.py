@@ -18,26 +18,34 @@ class View(object):
     def __init__(self, configuration, exchange):
         self._project_name = configuration.project.name
         self._local_dir = configuration.local_dir
-        self.exchange = exchange
+        self._remote_directory = None
+        self._exchange = exchange
 
-        self.main_container = Window(FormattedTextControl(''))
-        self.top_toolbar = self._render_top_toolbar()
+        self._current_screen = None
+        self.root_container = HSplit([Window()])
+        self.layout = Layout(container=self.root_container)
+        self._render()
+
         self.bindings = self._create_bindings()
-
-        self.root_container = HSplit([
-            self.top_toolbar,
-            self.main_container
-        ])
-
-        self.layout = Layout(
-            container=self.root_container
-        )
 
         self.application = Application(
             layout=self.layout,
             key_bindings=self.bindings,
             full_screen=True
         )
+
+        self._exchange.subscribe(
+            Messages.REMOTE_DIRECTORY_SET,
+            self._set_remote_dir
+        )
+
+    def _render(self):
+        top_toolbar = self._render_top_toolbar()
+        if self._current_screen is not None:
+            main_container = self._current_screen.main_container
+        else:
+            main_container = Window()
+        self.root_container.children = [top_toolbar, main_container]
 
     def mount(self, screen):
         """
@@ -46,11 +54,7 @@ class View(object):
         The screen must have a `main_container` attribute and,
         optionally, a `bindings` attribute.
         """
-        root_container = HSplit([
-            self.top_toolbar,
-            screen.main_container
-        ])
-        self.layout.container = root_container
+        self._current_screen = screen
         if screen.bindings is not None:
             if screen.use_default_bindings:
                 merged_key_bindings = merge_key_bindings([
@@ -62,6 +66,7 @@ class View(object):
         else:
             # Screen does not define additional keybindings
             self.application.key_bindings = self.bindings
+        self._render()
         screen.on_mount(self.application)
 
     def start(self):
@@ -80,12 +85,13 @@ class View(object):
 
     def _render_top_toolbar(self):
         top_text = (
-            'SherlockML synchronizer  '
+            '[SherlockML synchronizer]  '
             '{local_dir} -> '
-            '{project_name}'
+            '{project_name}{remote_directory_text}'
         ).format(
             local_dir=self._local_dir,
-            project_name=self._project_name
+            project_name=self._project_name,
+            remote_directory_text=':{}'.format(self._remote_directory) if self._remote_directory is not None else ''
         )
         top_toolbar = Window(
             FormattedTextControl(top_text),
@@ -100,6 +106,10 @@ class View(object):
         @bindings.add('c-c')
         @bindings.add('q')
         def _(event):
-            self.exchange.publish(Messages.STOP_CALLED)
+            self._exchange.publish(Messages.STOP_CALLED)
 
         return bindings
+
+    def _set_remote_dir(self, directory):
+        self._remote_directory = directory
+        self._render()

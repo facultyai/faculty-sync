@@ -61,7 +61,6 @@ class Summary(object):
         self._plural_verb = self._inflect.plural_verb
 
         self._render_containers(differences)
-        self._set_selection_index(0)
 
     @property
     def current_focus(self):
@@ -83,17 +82,18 @@ class Summary(object):
             return self._set_selection_index(self._current_index - 1)
 
     def _set_selection_index(self, new_index):
-        # Wrap around when selecting
-        self._current_index = new_index % len(self._menu_containers)
-        margin_lines = []
-        for icontainer in range(len(self._menu_containers)):
-            margin_lines.append(
-                '  > ' if icontainer == self._current_index
-                else (' ' * 4)
-            )
-        margin_text = '\n'.join(margin_lines)
-        self._margin_control.text = margin_text
-        return self._menu_container_names[self._current_index]
+        if self._has_differences:
+            # Wrap around when selecting
+            self._current_index = new_index % len(self._menu_containers)
+            margin_lines = []
+            for icontainer in range(len(self._menu_containers)):
+                margin_lines.append(
+                    '  > ' if icontainer == self._current_index
+                    else (' ' * 4)
+                )
+            margin_text = '\n'.join(margin_lines)
+            self._margin_control.text = margin_text
+            return self._menu_container_names[self._current_index]
 
     def _render_containers(self, differences):
         extra_local_paths = [
@@ -111,7 +111,10 @@ class Summary(object):
         if not extra_local_paths and not extra_remote_paths and not other_differences:
             self._has_differences = False
             self._menu_containers = [
-                Window('  Local directory and SherlockML are synchronized.')
+                Window(
+                    FormattedTextControl(
+                        'Local directory and SherlockML are synchronized.'),
+                    height=1)
             ]
         else:
             self._has_differences = True
@@ -145,6 +148,7 @@ class Summary(object):
                 container = Window(FormattedTextControl(text), height=1)
                 self._menu_containers.append(container)
                 self._menu_container_names.append(SummaryContainerName.BOTH)
+            self._set_selection_index(0)
 
 
 class Details(object):
@@ -193,7 +197,7 @@ class Details(object):
 class DifferencesScreen(BaseScreen):
 
     def __init__(self, differences, exchange):
-        super(DifferencesScreen).__init__()
+        super().__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
             '[d] Sync SherlockML files down  '
