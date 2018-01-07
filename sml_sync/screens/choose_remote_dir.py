@@ -74,8 +74,8 @@ class Completions(object):
                 margin_lines = []
                 for icompletion in range(len(self._completions)):
                     margin_lines.append(
-                        '  > ' if icompletion == self._current_index
-                        else (' ' * 4)
+                        '> ' if icompletion == self._current_index
+                        else (' ' * 2)
                     )
                 margin_text = '\n'.join(margin_lines)
                 self._margin_control.text = margin_text
