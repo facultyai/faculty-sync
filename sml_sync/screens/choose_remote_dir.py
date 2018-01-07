@@ -15,6 +15,7 @@ from prompt_toolkit.key_binding.key_bindings import KeyBindings
 
 from ..pubsub import Messages
 from .loading import LoadingIndicator
+from .base import BaseScreen
 
 
 class Completions(object):
@@ -167,9 +168,10 @@ class AsyncCompleter(object):
         self._thread.start()
 
 
-class RemoteDirectoryPromptScreen(object):
+class RemoteDirectoryPromptScreen(BaseScreen):
 
     def __init__(self, exchange, get_paths_in_directory):
+        super().__init__()
         self._exchange = exchange
 
         self._input = TextArea(text='/project/', multiline=False)

@@ -11,6 +11,7 @@ from prompt_toolkit.application.current import get_app
 from ..pubsub import Messages
 
 from .loading import LoadingIndicator
+from .base import BaseScreen
 
 
 class WalkingFileTreesStatus(Enum):
@@ -21,9 +22,10 @@ class WalkingFileTreesStatus(Enum):
     CALCULATING_DIFFERENCES = 'CALCULATING_DIFFERENCES'
 
 
-class WalkingFileTreesScreen(object):
+class WalkingFileTreesScreen(BaseScreen):
 
     def __init__(self, initial_status, exchange):
+        super().__init__()
         self._status_control = FormattedTextControl('')
         self._loading_indicator = LoadingIndicator()
         self._status = None

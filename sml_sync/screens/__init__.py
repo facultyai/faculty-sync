@@ -7,9 +7,12 @@ from .walking_trees import WalkingFileTreesScreen, WalkingFileTreesStatus  # noq
 from .watch_sync import WatchSyncScreen  # noqa
 from .choose_remote_dir import RemoteDirectoryPromptScreen
 
+from .base import BaseScreen
 
-class SynchronizationScreen(object):
+
+class SynchronizationScreen(BaseScreen):
 
     def __init__(self):
+        super().__init__()
         self.main_container = Window(
             FormattedTextControl('Synchronizing'))

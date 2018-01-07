@@ -14,6 +14,7 @@ from ..pubsub import Messages
 from ..models import ChangeEventType
 
 from .loading import LoadingIndicator
+from .base import BaseScreen
 from . import humanize
 from .help import help_modal
 
@@ -214,9 +215,10 @@ class HeldFiles(object):
         return Window(control)
 
 
-class WatchSyncScreen(object):
+class WatchSyncScreen(BaseScreen):
 
     def __init__(self, exchange):
+        super().__init__()
         self._exchange = exchange
 
         self._loading_component = Loading()

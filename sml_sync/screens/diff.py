@@ -11,6 +11,7 @@ import inflect
 from ..pubsub import Messages
 
 from .help import help_modal
+from .base import BaseScreen
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
@@ -189,9 +190,10 @@ class Details(object):
         self._control.text = '\n'.join(path_texts)
 
 
-class DifferencesScreen(object):
+class DifferencesScreen(BaseScreen):
 
     def __init__(self, differences, exchange):
+        super(DifferencesScreen).__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
             '[d] Sync SherlockML files down  '
