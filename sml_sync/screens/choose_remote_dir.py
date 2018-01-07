@@ -172,6 +172,7 @@ class RemoteDirectoryPromptScreen(BaseScreen):
 
     def __init__(self, exchange, get_paths_in_directory):
         super().__init__()
+        self.use_default_bindings = False
         self._exchange = exchange
 
         self._input = TextArea(text='/project/', multiline=False)
