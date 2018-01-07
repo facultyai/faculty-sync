@@ -230,7 +230,6 @@ class RemoteDirectoryPromptScreen(object):
         self._handle_text_changed()
 
     def _handle_text_changed(self, _=None):
-        logging.info('hello handle text changed')
         current_text = self._buffer.text
         directory = os.path.dirname(current_text)
         subdirectories = self._completer.get_subdirectories(directory)
