@@ -30,6 +30,12 @@ def parse_command_line(argv=None):
         default='.',
         help='Local directory to sync from. Defaults to the current directory.'
     )
+    parser.add_argument(
+        '--debug',
+        default=False,
+        action='store_true',
+        help='Run in debug mode (sets the log level to info).'
+    )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
     server_id = _any_server(project.id_)
@@ -39,7 +45,8 @@ def parse_command_line(argv=None):
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
     configuration = Configuration(
-        project, server_id, local_dir, remote_dir
+        project, server_id, local_dir, remote_dir,
+        arguments.debug
     )
     return configuration
 
