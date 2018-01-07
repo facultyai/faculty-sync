@@ -22,27 +22,14 @@ class Completions(object):
 
     def __init__(self):
         self._completions = None
-        self._is_loading = True
         self._control = FormattedTextControl('')
-        self._loading_indicator = LoadingIndicator()
-        self._thread = None
-        self._stop_event = threading.Event()
 
         self._current_index = None
         self._margin_control = FormattedTextControl('')
-        self._margin = Window(self._margin_control, width=4)
-        self.container = VSplit([
-            self._margin,
-            Window(self._control),
-        ])
-
-    def set_loading(self):
-        self._is_loading = True
-        self._start_updating_loading_indicator()
+        self._margin = Window(self._margin_control, width=2)
+        self.container = VSplit([self._margin, Window(self._control)])
 
     def set_completions(self, completions):
-        self._is_loading = False
-        self._stop_updating_loading_indicator()
         self._completions = completions
         self._current_index = 0 if completions else None
         self._render()
@@ -62,38 +49,18 @@ class Completions(object):
             return self._completions[self._current_index]
 
     def _render(self):
-        if self._is_loading:
-            self._control.text = '{} Loading directories'.format(
-                self._loading_indicator.current())
-            self._margin_control.text = ''
+        if self._completions is None:
+            self._control.text = ''
         else:
-            if self._completions is None:
-                self._control.text = ''
-            else:
-                self._control.text = '\n'.join(self._completions)
-                margin_lines = []
-                for icompletion in range(len(self._completions)):
-                    margin_lines.append(
-                        '> ' if icompletion == self._current_index
-                        else (' ' * 2)
-                    )
-                margin_text = '\n'.join(margin_lines)
-                self._margin_control.text = margin_text
-
-    def _start_updating_loading_indicator(self):
-        self._stop_event.clear()
-        def run():
-            app = get_app()
-            while not self._stop_event.is_set():
-                self._loading_indicator.next()
-                self._render()
-                app.invalidate()
-                time.sleep(0.5)
-        self._thread = threading.Thread(target=run, daemon=True)
-        self._thread.start()
-
-    def _stop_updating_loading_indicator(self):
-        self._stop_event.set()
+            self._control.text = '\n'.join(self._completions)
+            margin_lines = []
+            for icompletion in range(len(self._completions)):
+                margin_lines.append(
+                    '> ' if icompletion == self._current_index
+                    else (' ' * 2)
+                )
+            margin_text = '\n'.join(margin_lines)
+            self._margin_control.text = margin_text
 
 
 class AsyncCompleterStatus(object):
