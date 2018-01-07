@@ -6,7 +6,7 @@ import sml.auth
 import sml.casebook
 
 from .models import Configuration
-from .projects import Project, Projects
+from .projects import Projects
 
 
 class NoValidServer(Exception):
