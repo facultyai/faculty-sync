@@ -36,7 +36,8 @@ def parse_command_line(argv=None):
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
-    remote_dir = remote_dir.rstrip('/') + '/'
+    if remote_dir is not None:
+        remote_dir = remote_dir.rstrip('/') + '/'
     configuration = Configuration(
         project, server_id, local_dir, remote_dir
     )
