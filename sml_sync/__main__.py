@@ -45,11 +45,6 @@ class Controller(object):
         self._thread = None
         self._executor = ThreadPoolExecutor(max_workers=8)
         self._synchronizer = None
-        # self._synchronizer = Synchronizer(
-        #     configuration.local_dir,
-        #     configuration.remote_dir,
-        #     ssh_details
-        # )
         self._watcher_synchronizer = None
 
     def start(self):
@@ -122,6 +117,15 @@ class Controller(object):
                 logging.info('Setting {} as remote directory'.format(
                     remote_dir))
                 self._remote_dir = remote_dir
+                self._synchronizer = Synchronizer(
+                    self._configuration.local_dir,
+                    self._remote_dir,
+                    self._ssh_details
+                )
+                self._exchange.publish(
+                    Messages.REMOTE_DIRECTORY_SET,
+                    self._remote_dir
+                )
                 self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
             else:
                 self._exchange.publish(Messages.PROMPT_FOR_REMOTE_DIRECTORY)
