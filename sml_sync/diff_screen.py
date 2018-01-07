@@ -10,6 +10,8 @@ import inflect
 
 from ..pubsub import Messages
 
+from .base import BaseScreen
+
 
 class SummaryContainerName(Enum):
     LOCAL = 'LOCAL'
@@ -162,9 +164,10 @@ class Details(object):
         self._control.text = '\n'.join(path_texts)
 
 
-class DifferencesScreen(object):
+class DifferencesScreen(BaseScreen):
 
     def __init__(self, differences, exchange):
+        super().__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
             '[d] Sync SherlockML files down  '
