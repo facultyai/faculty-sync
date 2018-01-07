@@ -4,6 +4,7 @@ import logging
 import difflib
 import threading
 import time
+from enum import Enum
 from queue import Queue, Empty
 
 from prompt_toolkit.layout.widgets import TextArea
@@ -16,6 +17,14 @@ from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from ..pubsub import Messages
 from .loading import LoadingIndicator
 from .base import BaseScreen
+
+
+class RemoteDirMessages(Enum):
+    """
+    Messages that are only used internally
+    """
+    NEW_SUBDIRECTORIES_WALKED = 'NEW_SUBDIRECTORIES_WALKED'
+    SUBDIRECTORY_WALKER_STATUS_CHANGE = 'SUBDIRECTORY_WALKER_STATUS_CHANGE'
 
 
 class Completions(object):
@@ -137,13 +146,12 @@ class AsyncCompleter(object):
                         logging.info(
                             'Retrieving completions for {}'.format(path))
                         self.current_status = 'BUSY'
-                        self._exchange.publish(
-                            Messages.SUBDIRECTORY_WALKER_STATUS_CHANGE, path)
+                        self._publish_busy(path)
                         try:
                             subdirectories = self._get_paths_in_directory(path)
                             self._completions_cache[path] = subdirectories
                             self._exchange.publish(
-                                Messages.NEW_SUBDIRECTORIES_WALKED)
+                                RemoteDirMessages.NEW_SUBDIRECTORIES_WALKED)
                         except Exception:
                             logging.exception(
                                 'Error fetching subdirectories of {}'.format(
@@ -151,10 +159,18 @@ class AsyncCompleter(object):
                 except Empty:
                     if self.current_status != 'IDLE':
                         self.current_status = 'IDLE'
-                        self._exchange.publish(
-                            Messages.SUBDIRECTORY_WALKER_STATUS_CHANGE)
+                        self._publish_idle()
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
+
+    def _publish_busy(self, path):
+        self._exchange.publish(
+            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE,
+            path)
+
+    def _publish_idle(self):
+        self._exchange.publish(
+            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE)
 
 
 class RemoteDirectoryPromptScreen(BaseScreen):
@@ -226,11 +242,11 @@ class RemoteDirectoryPromptScreen(BaseScreen):
             self._exchange.publish(Messages.STOP_CALLED)
 
         self._exchange.subscribe(
-            Messages.NEW_SUBDIRECTORIES_WALKED,
+            RemoteDirMessages.NEW_SUBDIRECTORIES_WALKED,
             lambda _: self._handle_text_changed()
         )
         self._exchange.subscribe(
-            Messages.SUBDIRECTORY_WALKER_STATUS_CHANGE,
+            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE,
             lambda path: self._handle_walker_status_change(path)
         )
 
