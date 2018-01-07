@@ -21,12 +21,14 @@ def parse_command_line(argv=None):
     parser.add_argument(
         '--remote',
         default=None,
-        help='Remote directory, e.g. /project/src'
+        help=(
+            'Remote directory, e.g. /project/src. If omitted, '
+            'you will be prompted for a directory.')
     )
     parser.add_argument(
         '--local',
         default='.',
-        help='Local directory to sync from'
+        help='Local directory to sync from. Defaults to the current directory.'
     )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
