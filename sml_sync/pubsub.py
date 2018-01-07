@@ -2,6 +2,7 @@
 import threading
 from queue import Queue, Empty
 import uuid
+import logging
 from enum import Enum
 
 
@@ -32,6 +33,9 @@ class Messages(Enum):
     START_INITIAL_FILE_TREE_WALK = 'START_INITIAL_FILE_TREE_WALK'
 
     WALK_STATUS_CHANGE = 'WALK_STATUS_CHANGE'
+
+    NEW_SUBDIRECTORIES_WALKED = 'NEW_SUBDIRECTORIES_WALKED'
+    SUBDIRECTORY_WALKER_STATUS_CHANGE = 'SUBDIRECTORY_WALKER_STATUS_CHANGE'
 
 
 class PubSubExchange(object):
@@ -64,6 +68,11 @@ class PubSubExchange(object):
                     message_type, message_data = self.queue.get(timeout=0.1)
                     try:
                         subscribers = self.subscribers[message_type]
+                        if subscribers:
+                            logging.info(
+                                'Publishing {} to {} subscribers'.format(
+                                    message_type, len(subscribers)
+                                ))
                         for (subscription_id, callback) in subscribers:
                             callback(message_data)
                     except KeyError:
