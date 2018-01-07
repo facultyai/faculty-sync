@@ -66,25 +66,48 @@ class Completions(object):
 class AsyncCompleterStatus(object):
 
     def __init__(self):
+        self._loading_indicator = LoadingIndicator()
         self._status = 'IDLE'
         self._current_path = None
         self._control = FormattedTextControl()
-        self.container = Window(self._control, height=1)
-        self._render()
+        self.container = HSplit([
+            Window(height=1),
+            Window(self._control, height=1)
+        ], height=2)
+        self._thread = None
+        self._stop_event = threading.Event()
+        self._start_updating_loading_indicator()
 
     def _render(self):
         if self._status == 'IDLE':
             self._control.text = ''
         else:
-            self._control.text = (
-                'Fetching subdirectories of {}'.format(self._current_path)
-                if self._current_path is not None else ''
-            )
+            if self._current_path is not None:
+                self._control.text = (
+                    '{} Fetching subdirectories of {}'.format(
+                        self._loading_indicator.current(), self._current_path)
+                    )
+            else:
+                self._control.text = self._loading_indicator.current()
 
     def set_status(self, status, current_path=None):
         self._status = status
         self._current_path = current_path
         self._render()
+
+    def _start_updating_loading_indicator(self):
+        def run():
+            app = get_app()
+            while not self._stop_event.is_set():
+                self._loading_indicator.next()
+                self._render()
+                time.sleep(0.5)
+                app.invalidate()
+        self._thread = threading.Thread(target=run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._stop_event.set()
 
 
 class AsyncCompleter(object):
