@@ -10,8 +10,6 @@ from .ui import View
 from .controller import Controller
 
 
-
-
 def main():
     try:
         configuration = parse_command_line()
