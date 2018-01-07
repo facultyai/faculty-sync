@@ -51,18 +51,18 @@ class View(object):
             screen.main_container
         ])
         self.layout.container = root_container
-        try:
-            merged_key_bindings = merge_key_bindings([
-                self.bindings, screen.bindings
-            ])
-            self.application.key_bindings = merged_key_bindings
-        except AttributeError:
+        if screen.bindings is not None:
+            if screen.use_default_bindings:
+                merged_key_bindings = merge_key_bindings([
+                    self.bindings, screen.bindings
+                ])
+                self.application.key_bindings = merged_key_bindings
+            else:
+                self.application.key_bindings = screen.bindings
+        else:
             # Screen does not define additional keybindings
             self.application.key_bindings = self.bindings
-        try:
-            screen.on_mount(self.application)
-        except AttributeError:
-            pass
+        screen.on_mount(self.application)
 
     def start(self):
         def run():
