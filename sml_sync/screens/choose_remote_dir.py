@@ -176,6 +176,8 @@ class RemoteDirectoryPromptScreen(BaseScreen):
         self._exchange = exchange
 
         self._input = TextArea(text='/project/', multiline=False)
+        self._buffer = self._input.buffer
+        self._buffer.cursor_position = len(self._buffer.text)
         self._completions_component = Completions()
         self._completer = AsyncCompleter(exchange, get_paths_in_directory)
         self._completer_status_component = AsyncCompleterStatus()
@@ -192,7 +194,6 @@ class RemoteDirectoryPromptScreen(BaseScreen):
             self._completions_component.container,
             self._completer_status_component.container
         ])
-        self._buffer = self._input.buffer
         self._buffer.on_text_changed += self._handle_text_changed
 
         self.bindings = KeyBindings()
@@ -209,7 +210,9 @@ class RemoteDirectoryPromptScreen(BaseScreen):
         def _(event):
             current_selection = self._completions_component.current_selection()
             if current_selection is not None:
+                self._buffer.cursor_position = 0
                 self._buffer.text = current_selection + '/'
+                self._buffer.cursor_position = len(self._buffer.text)
 
         @self.bindings.add('enter')
         def _(event):
