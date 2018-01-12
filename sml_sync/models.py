@@ -20,13 +20,13 @@ class FsObject(
         )
 
 
-FileAttrs = collections.namedtuple('FileAttrs', ['last_modified', 'size'])
+FileAttrs = collections.namedtuple('FileAttrs', ['last_modified'])
 DirectoryAttrs = collections.namedtuple('DirectoryAttrs', ['last_modified'])
 
 
 Configuration = collections.namedtuple(
     'Configuration',
-    ['project', 'server_id', 'local_dir', 'remote_dir', 'debug']
+    ['project', 'server_id', 'local_dir', 'remote_dir', 'debug', 'ignore']
 )
 
 SshDetails = collections.namedtuple(

@@ -11,7 +11,7 @@ from .screens import (
     RemoteDirectoryPromptScreen
 )
 from .file_trees import (
-    walk_local_file_tree, walk_remote_file_tree, compare_file_trees,
+    compare_file_trees,
     remote_is_dir, get_remote_subdirectories
 )
 from .ssh import sftp_from_ssh_details
@@ -109,7 +109,8 @@ class Controller(object):
                 self._synchronizer = Synchronizer(
                     self._configuration.local_dir,
                     self._remote_dir,
-                    self._ssh_details
+                    self._ssh_details,
+                    self._configuration.ignore
                 )
                 self._exchange.publish(
                     Messages.REMOTE_DIRECTORY_SET,
@@ -166,12 +167,25 @@ class Controller(object):
             self._view.mount(self._current_screen)
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
-            local_files = walk_local_file_tree(self._configuration.local_dir)
+            local_files = self._synchronizer.list_local()
+            # local_files = walk_local_file_tree(
+            #     self._configuration.local_dir,
+            #     self._configuration.ignore
+            # )
+            logging.info(
+                'Found {} files locally at path {}.'.format(
+                    len(local_files), self._configuration.local_dir)
+            )
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.REMOTE_WALK)
-            remote_files = walk_remote_file_tree(
-                self._remote_dir, self._sftp)
+            # remote_files = walk_remote_file_tree(
+            #     self._remote_dir, self._sftp, self._configuration.ignore)
+            remote_files = self._synchronizer.list_remote()
+            logging.info(
+                'Found {} files on SherlockML at path {}.'.format(
+                    len(remote_files), self._configuration.remote_dir)
+            )
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.CALCULATING_DIFFERENCES)

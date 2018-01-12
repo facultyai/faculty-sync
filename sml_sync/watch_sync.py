@@ -8,10 +8,7 @@ import logging
 import watchdog.observers
 import watchdog.events
 
-from .file_trees import (
-    walk_local_file_tree, walk_remote_file_tree, get_remote_mtime,
-    compare_file_trees
-)
+from .file_trees import get_remote_mtime, compare_file_trees
 from .models import ChangeEventType, FsChangeEvent
 from .pubsub import Messages
 
@@ -187,8 +184,8 @@ class HeldFilesMonitor(object):
         self._remote_dir = remote_dir
         self._sftp = sftp
         self._exchange = exchange
-        _local_tree = walk_local_file_tree(self._local_dir)
-        _remote_tree = walk_remote_file_tree(self._remote_dir, sftp)
+        _local_tree = None # walk_local_file_tree(self._local_dir)
+        _remote_tree = None # walk_remote_file_tree(self._remote_dir, sftp)
         self._local_timestamps = TimestampDatabase.from_fs_objects(
             _local_tree, local_dir)
         self._remote_timestamps = TimestampDatabase.from_fs_objects(

@@ -9,6 +9,8 @@ from .pubsub import PubSubExchange
 from .ui import View
 from .controller import Controller
 
+from .sync import Synchronizer
+
 
 def main():
     try:
@@ -18,9 +20,11 @@ def main():
         exit(1)
 
     daiquiri.setup(
-        level=logging.ERROR if configuration.debug else logging.INFO,
+        level=logging.INFO if configuration.debug else logging.ERROR,
         outputs=[daiquiri.output.File('/tmp/sml-sync.log')]
     )
+
+    logging.info('sml-sync started with configuration {}'.format(configuration))
 
     exchange = PubSubExchange()
     exchange.start()

@@ -2,6 +2,7 @@
 import os
 import stat
 from datetime import datetime
+import logging
 
 from .models import FsObject, FsObjectType, FileAttrs, DirectoryAttrs
 
@@ -31,14 +32,6 @@ def _get_mtime(path, oslike):
     return datetime.fromtimestamp(int(oslike.stat(path).st_mtime))
 
 
-def walk_local_file_tree(base):
-    return list(_walk_file_tree(base, os))
-
-
-def walk_remote_file_tree(base, sftp):
-    return list(_walk_file_tree(base, sftp))
-
-
 def compare_file_trees(left, right):
     left_file_paths = {obj.path: obj for obj in left}
     right_file_paths = {obj.path: obj for obj in right}
@@ -56,24 +49,3 @@ def compare_file_trees(left, right):
                 yield ('TYPE_DIFFERENT', left_obj, right_obj)
             elif left_obj.attrs != right_obj.attrs:
                 yield ('ATTRS_DIFFERENT', left_obj, right_obj)
-
-
-def _walk_file_tree(base, oslike):
-    files_with_absolute_paths = _walk_file_tree_helper(base, oslike)
-    return (f.without_path_prefix(base) for f in files_with_absolute_paths)
-
-
-def _walk_file_tree_helper(base, oslike):
-    """ Call recursively to walk a file tree """
-    for obj_name in oslike.listdir(base):
-        path = os.path.join(base, obj_name)
-        is_directory = stat.S_ISDIR(oslike.stat(path).st_mode)
-        if is_directory:
-            mtime = _get_mtime(path, oslike)
-            yield FsObject(path, FsObjectType.DIRECTORY, DirectoryAttrs(mtime))
-            for fs_object in _walk_file_tree_helper(path, oslike):
-                yield fs_object
-        else:
-            size = oslike.stat(path).st_size
-            mtime = _get_mtime(path, oslike)
-            yield FsObject(path, FsObjectType.FILE, FileAttrs(mtime, size))

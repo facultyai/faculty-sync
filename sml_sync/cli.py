@@ -31,6 +31,11 @@ def parse_command_line(argv=None):
         help='Local directory to sync from. Defaults to the current directory.'
     )
     parser.add_argument(
+        '--ignore',
+        nargs='+',
+        help='Path fragments to ignore (e.g. node_modules, __pycache__).'
+    )
+    parser.add_argument(
         '--debug',
         default=False,
         action='store_true',
@@ -46,7 +51,7 @@ def parse_command_line(argv=None):
         remote_dir = remote_dir.rstrip('/') + '/'
     configuration = Configuration(
         project, server_id, local_dir, remote_dir,
-        arguments.debug
+        arguments.debug, arguments.ignore
     )
     return configuration
 
