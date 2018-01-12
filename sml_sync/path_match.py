@@ -19,6 +19,13 @@ def matches(path, pattern):
             return _floating_match(path, pattern)
 
 
+def matches_any_of(path, patterns):
+    for pattern in patterns:
+        if matches(path, pattern):
+            return True
+    return False
+
+
 def _anchored_match(path, pattern):
     path_components = _get_path_components(path)
     pattern_components = _get_path_components(pattern)
