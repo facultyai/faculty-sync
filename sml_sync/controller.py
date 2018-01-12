@@ -199,8 +199,6 @@ class Controller(object):
         self._current_screen = WatchSyncScreen(self._exchange)
         self._view.mount(self._current_screen)
         self._watcher_synchronizer = WatcherSynchronizer(
-            self._configuration.local_dir,
-            self._remote_dir,
             self._sftp,
             self._synchronizer,
             self._exchange

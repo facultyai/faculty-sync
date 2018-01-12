@@ -11,6 +11,7 @@ import watchdog.events
 from .file_trees import get_remote_mtime, compare_file_trees
 from .models import ChangeEventType, FsChangeEvent
 from .pubsub import Messages
+from . import path_match
 
 
 class TimestampDatabase(object):
@@ -67,37 +68,44 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         watchdog.events.EVENT_TYPE_DELETED: ChangeEventType.DELETED
     }
 
-    def __init__(self, queue, local_dir):
+    def __init__(self, queue, local_dir, excluded_patterns):
         self.queue = queue
         self.local_dir = local_dir
+        self._excluded_patterns = excluded_patterns
 
     def on_any_event(self, watchdog_event):
         event_type = self.watchdog_event_lookup[watchdog_event.event_type]
         is_directory = watchdog_event.is_directory
         path = self._relpath(watchdog_event.src_path)
-        if event_type == ChangeEventType.MOVED:
-            dest_path = watchdog_event.dest_path
-            abs_local_dir = os.path.abspath(self.local_dir)
-            if os.path.abspath(dest_path).startswith(abs_local_dir):
-                event = FsChangeEvent(
-                    event_type,
-                    is_directory,
-                    path,
-                    extra_args={'dest_path': self._relpath(dest_path)}
-                )
-            else:
-                # File was moved outside of the area we're watching:
-                # treat as deletion
-                event = FsChangeEvent(
-                    ChangeEventType.DELETED,
-                    is_directory,
-                    path,
-                    extra_args=None
-                )
+        if path_match.matches_any_of(path, self._excluded_patterns):
+            logging.info(
+                'Ignoring change event {} as it is in list of excluded patterns.'.format(
+                    watchdog_event)
+            )
         else:
-            event = FsChangeEvent(
-                event_type, is_directory, path, extra_args=None)
-        self.queue.put(event)
+            if event_type == ChangeEventType.MOVED:
+                dest_path = watchdog_event.dest_path
+                abs_local_dir = os.path.abspath(self.local_dir)
+                if os.path.abspath(dest_path).startswith(abs_local_dir):
+                    event = FsChangeEvent(
+                        event_type,
+                        is_directory,
+                        path,
+                        extra_args={'dest_path': self._relpath(dest_path)}
+                    )
+                else:
+                    # File was moved outside of the area we're watching:
+                    # treat as deletion
+                    event = FsChangeEvent(
+                        ChangeEventType.DELETED,
+                        is_directory,
+                        path,
+                        extra_args=None
+                    )
+            else:
+                event = FsChangeEvent(
+                    event_type, is_directory, path, extra_args=None)
+            self.queue.put(event)
 
     def _relpath(self, path):
         return os.path.relpath(path, start=self.local_dir)
@@ -132,8 +140,7 @@ class Uploader(object):
                         self._exchange.publish(
                             Messages.ERROR_HANDLING_FS_EVENT
                         )
-                else:
-                    pass
+
         self._thread = threading.Thread(target=run)
         self._thread.start()
 
@@ -270,13 +277,18 @@ class HeldFilesMonitor(object):
 
 class WatcherSynchronizer(object):
 
-    def __init__(self, local_dir, remote_dir, sftp, synchronizer, exchange):
+    def __init__(self, sftp, synchronizer, exchange):
+        local_dir = synchronizer.local_dir
         self.queue = ListableQueue()
         self.observer = watchdog.observers.Observer()
         self._exchange = exchange
         monitor = HeldFilesMonitor(synchronizer, sftp, exchange)
         self.observer.schedule(
-            FileSystemChangeHandler(self.queue, local_dir),
+            FileSystemChangeHandler(
+                self.queue,
+                local_dir,
+                synchronizer.ignore_paths
+            ),
             local_dir,
             recursive=True
         )
