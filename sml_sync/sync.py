@@ -79,9 +79,10 @@ class Synchronizer(object):
     def _rsync(self, path_from, path_to, rsync_opts=None):
         rsync_opts = [] if rsync_opts is None else rsync_opts
         ssh_cmd = self._get_ssh_cmd()
+        exclude_list = self._get_exclude_list()
         rsync_cmd = [
-            'rsync', '-a', '-e', ssh_cmd,
-            *rsync_opts, path_from, path_to
+            'rsync', '-a', '-e', ssh_cmd, *exclude_list, *rsync_opts,
+            path_from, path_to
         ]
 
         process = _run_ssh_cmd(rsync_cmd)
