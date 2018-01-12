@@ -9,6 +9,14 @@ from .models import Configuration
 from .projects import Projects
 
 
+DEFAULT_IGNORE_PATTERNS = [
+    'node_modules',
+    '__pycache__',
+    '*.pyc',
+    '.git'
+]
+
+
 class NoValidServer(Exception):
     pass
 
@@ -49,9 +57,13 @@ def parse_command_line(argv=None):
     local_dir = local_dir.rstrip('/') + '/'
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
+    if arguments.ignore is None:
+        ignore = DEFAULT_IGNORE_PATTERNS
+    else:
+        ignore = arguments.ignore + DEFAULT_IGNORE_PATTERNS
     configuration = Configuration(
         project, server_id, local_dir, remote_dir,
-        arguments.debug, arguments.ignore
+        arguments.debug, ignore
     )
     return configuration
 
