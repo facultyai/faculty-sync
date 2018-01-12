@@ -168,10 +168,6 @@ class Controller(object):
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
             local_files = self._synchronizer.list_local()
-            # local_files = walk_local_file_tree(
-            #     self._configuration.local_dir,
-            #     self._configuration.ignore
-            # )
             logging.info(
                 'Found {} files locally at path {}.'.format(
                     len(local_files), self._configuration.local_dir)
@@ -179,8 +175,6 @@ class Controller(object):
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE,
                 WalkingFileTreesStatus.REMOTE_WALK)
-            # remote_files = walk_remote_file_tree(
-            #     self._remote_dir, self._sftp, self._configuration.ignore)
             remote_files = self._synchronizer.list_remote()
             logging.info(
                 'Found {} files on SherlockML at path {}.'.format(
