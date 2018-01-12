@@ -1,6 +1,8 @@
 import os.path
 import subprocess
 from datetime import datetime
+import logging
+import time
 
 import sml.shell
 
@@ -135,10 +137,14 @@ class Synchronizer(object):
 
 def _run_ssh_cmd(argv):
     """Run a command and print a message when a string is matched."""
+    logging.info('Running command {}'.format(argv))
+    start_time = time.time()
     process = subprocess.run(
         argv,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
+    logging.info('Command took {:.2f} seconds to run'.format(
+        time.time() - start_time))
     process.check_returncode()
     return process
