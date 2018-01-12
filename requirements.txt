@@ -1,1 +1,6 @@
+sml
+daiquiri
+paramiko
+inflect
+watchdog
 git+https://github.com/jonathanslenders/python-prompt-toolkit@2.0
