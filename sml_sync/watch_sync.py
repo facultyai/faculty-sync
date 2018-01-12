@@ -44,7 +44,7 @@ class TimestampDatabase(object):
             self._data[path] = timestamp
 
     @classmethod
-    def from_fs_objects(cls, fs_objects, path_prefix):
+    def from_fs_objects(cls, fs_objects):
         _data = {}
         for fs_object in fs_objects:
             last_modified = fs_object.attrs.last_modified
@@ -179,17 +179,18 @@ class Uploader(object):
 
 class HeldFilesMonitor(object):
 
-    def __init__(self, local_dir, remote_dir, sftp, exchange):
-        self._local_dir = local_dir
-        self._remote_dir = remote_dir
+    def __init__(self, synchronizer, sftp, exchange):
+        self._synchronizer = synchronizer
+        self._local_dir = synchronizer.local_dir
+        self._remote_dir = synchronizer.remote_dir
         self._sftp = sftp
         self._exchange = exchange
-        _local_tree = None # walk_local_file_tree(self._local_dir)
-        _remote_tree = None # walk_remote_file_tree(self._remote_dir, sftp)
+        _local_tree = self._synchronizer.list_local()
+        _remote_tree = self._synchronizer.list_remote()
         self._local_timestamps = TimestampDatabase.from_fs_objects(
-            _local_tree, local_dir)
+            _local_tree)
         self._remote_timestamps = TimestampDatabase.from_fs_objects(
-            _remote_tree, remote_dir)
+            _remote_tree)
         self._held_paths = set(
             self._get_initial_help_paths(_local_tree, _remote_tree))
         self._exchange.publish(
@@ -273,7 +274,7 @@ class WatcherSynchronizer(object):
         self.queue = ListableQueue()
         self.observer = watchdog.observers.Observer()
         self._exchange = exchange
-        monitor = HeldFilesMonitor(local_dir, remote_dir, sftp, exchange)
+        monitor = HeldFilesMonitor(synchronizer, sftp, exchange)
         self.observer.schedule(
             FileSystemChangeHandler(self.queue, local_dir),
             local_dir,
