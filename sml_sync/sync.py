@@ -25,7 +25,7 @@ class Synchronizer(object):
         self.key_file = ssh_details.key_file
         self.local_dir = local_dir
         self.remote_dir = remote_dir
-        self._ignore_paths = ignore_paths if ignore_paths is not None else []
+        self.ignore_paths = ignore_paths
         self._sftp = sftp_from_ssh_details(ssh_details)
 
     def up(self, path='', rsync_opts=None):
@@ -110,7 +110,7 @@ class Synchronizer(object):
 
     def _get_exclude_list(self):
         exclude_list = []
-        for _path in self._ignore_paths:
+        for _path in self.ignore_paths:
             exclude_list.extend(['--exclude', _path])
         return exclude_list
 
