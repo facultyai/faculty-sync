@@ -250,22 +250,24 @@ class WatchSyncScreen(BaseScreen):
             floats=[]
         )
 
-        self._exchange.subscribe(
-            Messages.START_WATCH_SYNC_MAIN_LOOP,
-            lambda _: self._start_main_screen()
-        )
-        self._exchange.subscribe(
-            Messages.HELD_FILES_CHANGED,
-            lambda held_files: self._update_held_files(held_files)
-        )
-        self._exchange.subscribe(
-            Messages.STARTING_HANDLING_FS_EVENT,
-            lambda event: self._on_start_handling_fs_event(event)
-        )
-        self._exchange.subscribe(
-            Messages.FINISHED_HANDLING_FS_EVENT,
-            lambda event: self._on_finish_handling_fs_event(event)
-        )
+        self._subscription_ids = [
+            self._exchange.subscribe(
+                Messages.START_WATCH_SYNC_MAIN_LOOP,
+                lambda _: self._start_main_screen()
+            ),
+            self._exchange.subscribe(
+                Messages.HELD_FILES_CHANGED,
+                lambda held_files: self._update_held_files(held_files)
+            ),
+            self._exchange.subscribe(
+                Messages.STARTING_HANDLING_FS_EVENT,
+                lambda event: self._on_start_handling_fs_event(event)
+            ),
+            self._exchange.subscribe(
+                Messages.FINISHED_HANDLING_FS_EVENT,
+                lambda event: self._on_finish_handling_fs_event(event)
+            )
+        ]
 
         self.bindings = KeyBindings()
 
@@ -319,6 +321,8 @@ class WatchSyncScreen(BaseScreen):
 
     def stop(self):
         self._stop_main_components()
+        for subscription_id in self._subscription_ids:
+            self._exchange.unsubscribe(subscription_id)
 
     def _toggle_help(self):
         if self.main_container.floats:
