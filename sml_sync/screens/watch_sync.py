@@ -153,15 +153,23 @@ class RecentlySyncedItems(object):
         )
 
     def _format_event(self, event):
+        src_path = event.path
+        src_path_text = self._format_path(src_path, event.is_directory)
         if event.event_type == ChangeEventType.MOVED:
-            src_path = event.path
             dest_path = event.extra_args['dest_path']
-            event_str = '{} -> {}'.format(src_path, dest_path)
+            dest_path_text = self._format_path(dest_path, event.is_directory)
+            event_text = '{} -> {}'.format(src_path_text, dest_path_text)
         elif event.event_type == ChangeEventType.DELETED:
-            event_str = '{} (x)'.format(event.path)
+            event_text = '{} (x)'.format(src_path_text)
         else:
-            event_str = '{}'.format(event.path)
-        return event_str
+            event_text = '{}'.format(src_path_text)
+        return event_text
+
+    def _format_path(self, path, is_directory):
+        if is_directory:
+            return path.rstrip('/') + '/'
+        else:
+            return path
 
     def _render_times(self, times):
         times_text = [humanize.naturaltime(t) for t in times]
