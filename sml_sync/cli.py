@@ -13,6 +13,8 @@ DEFAULT_IGNORE_PATTERNS = [
     'node_modules',
     '__pycache__',
     '*.pyc',
+    '.ipynb_checkpoints',
+    '.tox',
     '.git'
 ]
 
