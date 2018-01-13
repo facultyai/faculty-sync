@@ -82,6 +82,9 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
                 'Ignoring change event {} as it is in list of excluded patterns.'.format(
                     watchdog_event)
             )
+        elif event_type == ChangeEventType.MODIFIED and is_directory:
+            # Ignore directory mtime changes
+            pass
         else:
             if event_type == ChangeEventType.MOVED:
                 dest_path = watchdog_event.dest_path

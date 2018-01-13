@@ -47,5 +47,8 @@ def compare_file_trees(left, right):
             right_obj = right_file_paths[left_obj.path]
             if left_obj.obj_type != right_obj.obj_type:
                 yield ('TYPE_DIFFERENT', left_obj, right_obj)
-            elif left_obj.attrs != right_obj.attrs:
+            elif (
+                    left_obj.attrs != right_obj.attrs and
+                    left_obj.obj_type == FsObjectType.FILE
+                ):
                 yield ('ATTRS_DIFFERENT', left_obj, right_obj)
