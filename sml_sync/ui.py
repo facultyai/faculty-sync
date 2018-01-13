@@ -54,6 +54,8 @@ class View(object):
         The screen must have a `main_container` attribute and,
         optionally, a `bindings` attribute.
         """
+        if self._current_screen is not None:
+            self._current_screen.stop()
         self._current_screen = screen
         if screen.bindings is not None:
             if screen.use_default_bindings:

@@ -11,3 +11,6 @@ class BaseScreen(object):
 
     def on_mount(self, application):
         pass
+
+    def stop(self):
+        pass
