@@ -16,8 +16,8 @@ You need a version of `rsync`. I have tested this with `rsync 2.6.9` and
 `3.1.1`. This has only really been tested on OSX and Ubuntu 16.04. It will
 almost certainly not work on Windows.
 
-You will need Python 3. I recommend installiong *sml-sync* in a virtual
-environment. 
+You will need Python 3. I recommend installing *sml-sync* in a virtual
+environment.
 
 To install, just type this in a terminal on your laptop:
 
@@ -59,7 +59,7 @@ To get help on command-line options, run:
 $ sml-sync --help
 ```
 
-When the app is running, you can often type `?` to get help on a particular
+When the application is running, you can often type `?` to get help on a particular
 screen.
 
 Working with git repositories
@@ -81,7 +81,7 @@ $ sml-sync jupyter-gmaps --ignore dist/ docs/build/
 
 You can pass shell glob-like patterns to `--ignore`. Some common patterns are ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__` among others; for a full list, look at the [cli module](sml_sync/cli.py)).
 
-Acknowledgements
+Acknowledgments
 ----------------
 
 Many people in the SherlockML team and in ASI Data Science have contributed to
