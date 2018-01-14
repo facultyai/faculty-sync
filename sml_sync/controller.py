@@ -5,9 +5,8 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from .screens import (
-    DifferencesScreen, WalkingFileTreesScreen,
-    SynchronizationScreen, WatchSyncScreen,
-    WalkingFileTreesStatus,
+    DifferencesScreen, WalkingFileTreesScreen, SynchronizationScreen,
+    SynchronizationScreenDirection, WatchSyncScreen, WalkingFileTreesStatus,
     RemoteDirectoryPromptScreen
 )
 from .file_trees import (
@@ -133,14 +132,16 @@ class Controller(object):
 
     def _sync_sherlockml_to_local(self):
         self._clear_current_subscriptions()
-        self._current_screen = SynchronizationScreen()
+        self._current_screen = SynchronizationScreen(
+            direction=SynchronizationScreenDirection.DOWN)
         self._view.mount(self._current_screen)
         self._synchronizer.down(rsync_opts=['--delete'])
         self._get_differences()
 
     def _sync_local_to_sherlockml(self):
         self._clear_current_subscriptions()
-        self._current_screen = SynchronizationScreen()
+        self._current_screen = SynchronizationScreen(
+            direction=SynchronizationScreenDirection.UP)
         self._view.mount(self._current_screen)
         self._synchronizer.up(rsync_opts=['--delete'])
         self._get_differences()
