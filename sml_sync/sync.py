@@ -94,7 +94,7 @@ class Synchronizer(object):
         exclude_list = self._get_exclude_list()
         rsync_cmd = [
             'rsync', '-a', '-e', ssh_cmd, '--itemize-changes', '--dry-run',
-            '--out-format', '%n||%f||%M', *exclude_list, *rsync_opts, path,
+            '--out-format', '%i||%n||%M', *exclude_list, *rsync_opts, path,
             '/dev/false'
         ]
         process = _run_ssh_cmd(rsync_cmd)
@@ -118,18 +118,21 @@ class Synchronizer(object):
         fs_objects = []
         for line in stdout.splitlines():
             try:
-                path_with_trailing_slash, path, mtime_string = line.split('||')
-                is_directory = path_with_trailing_slash != path
+                changes, path, mtime_string = line.split('||')
+                try:
+                    is_directory = changes[1] == 'd'
+                except IndexError:
+                    is_directory = False
                 mtime = datetime.strptime(mtime_string, '%Y/%m/%d-%H:%M:%S')
                 if is_directory:
                     fs_object = FsObject(
-                        path_with_trailing_slash,
+                        path,
                         FsObjectType.DIRECTORY,
                         DirectoryAttrs(mtime)
                     )
                 else:
                     fs_object = FsObject(
-                        path_with_trailing_slash,
+                        path,
                         FsObjectType.FILE,
                         FileAttrs(mtime)
                     )
