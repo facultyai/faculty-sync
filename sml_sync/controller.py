@@ -104,7 +104,7 @@ class Controller(object):
             if remote_is_dir(remote_dir, self._sftp):
                 logging.info('Setting {} as remote directory'.format(
                     remote_dir))
-                self._remote_dir = remote_dir
+                self._remote_dir = remote_dir.rstrip('/') + '/'
                 self._synchronizer = Synchronizer(
                     self._configuration.local_dir,
                     self._remote_dir,
