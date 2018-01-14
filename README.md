@@ -12,9 +12,18 @@ directory for changes and replicate those changes in a directory on SherlockML.
 Installation
 ------------
 
-You need a version of `rsync`. [WHICH VERSION?]
+You need a version of `rsync`. I have tested this with `rsync 2.6.9` and
+`3.1.1`. This has only really been tested on OSX and Ubuntu 16.04. It will
+almost certainly not work on Windows.
 
-This has only really been tested on OSX and Ubuntu 16.04.
+You will need Python 3. I recommend installiong *sml-sync* in a virtual
+environment. 
+
+To install, just type this in a terminal on your laptop:
+
+```
+$ pip install sml-sync
+```
 
 Getting started
 ---------------
