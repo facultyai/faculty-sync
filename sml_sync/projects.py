@@ -44,6 +44,11 @@ class Projects(sml.client.SherlockMLService):
                     project_id))
         return Project.from_json(resp.json())
 
+    def get_projects(self, user_id):
+        """List projects accessible by the given user."""
+        resp = self._get('/user/{}'.format(user_id))
+        return [Project.from_json(o) for o in resp.json()]
+
     def get_project_by_name(self, user_id, project_name):
         """List projects with a given name accessible by the given user."""
         try:
