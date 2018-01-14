@@ -134,15 +134,15 @@ class Controller(object):
     def _sync_sherlockml_to_local(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen()
-        self._synchronizer.down(rsync_opts=['--delete'])
         self._view.mount(self._current_screen)
+        self._synchronizer.down(rsync_opts=['--delete'])
         self._get_differences()
 
     def _sync_local_to_sherlockml(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen()
-        self._synchronizer.up(rsync_opts=['--delete'])
         self._view.mount(self._current_screen)
+        self._synchronizer.up(rsync_opts=['--delete'])
         self._get_differences()
 
     def _display_differences(self, differences):
