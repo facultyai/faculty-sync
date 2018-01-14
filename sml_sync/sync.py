@@ -117,22 +117,26 @@ class Synchronizer(object):
     def _parse_rsync_list_result(self, stdout):
         fs_objects = []
         for line in stdout.splitlines():
-            path_with_trailing_slash, path, mtime_string = line.split('||')
-            is_directory = path_with_trailing_slash != path
-            mtime = datetime.strptime(mtime_string, '%Y/%m/%d-%H:%M:%S')
-            if is_directory:
-                fs_object = FsObject(
-                    path_with_trailing_slash,
-                    FsObjectType.DIRECTORY,
-                    DirectoryAttrs(mtime)
-                )
-            else:
-                fs_object = FsObject(
-                    path_with_trailing_slash,
-                    FsObjectType.FILE,
-                    FileAttrs(mtime)
-                )
-            fs_objects.append(fs_object)
+            try:
+                path_with_trailing_slash, path, mtime_string = line.split('||')
+                is_directory = path_with_trailing_slash != path
+                mtime = datetime.strptime(mtime_string, '%Y/%m/%d-%H:%M:%S')
+                if is_directory:
+                    fs_object = FsObject(
+                        path_with_trailing_slash,
+                        FsObjectType.DIRECTORY,
+                        DirectoryAttrs(mtime)
+                    )
+                else:
+                    fs_object = FsObject(
+                        path_with_trailing_slash,
+                        FsObjectType.FILE,
+                        FileAttrs(mtime)
+                    )
+                fs_objects.append(fs_object)
+            except Exception as e:
+                logging.exception(
+                    'Failed to parse rsync output line {}'.format(line))
         return fs_objects
 
 
