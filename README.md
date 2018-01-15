@@ -9,6 +9,8 @@ This makes that easier.
 directory with a directory on SherlockML. It will automatically monitor a local
 directory for changes and replicate those changes in a directory on SherlockML.
 
+![Screencast demo](demo.gif)
+
 Installation
 ------------
 
