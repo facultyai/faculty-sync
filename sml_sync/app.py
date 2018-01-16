@@ -4,10 +4,10 @@ import logging
 import daiquiri
 
 from .cli import parse_command_line
-from .ssh import get_ssh_details
-from .pubsub import PubSubExchange
-from .ui import View
 from .controller import Controller
+from .pubsub import PubSubExchange
+from .ssh import get_ssh_details
+from .ui import View
 
 
 def run():

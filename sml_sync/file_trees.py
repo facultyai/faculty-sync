@@ -1,10 +1,10 @@
 
+import logging
 import os
 import stat
 from datetime import datetime
-import logging
 
-from .models import FsObject, FsObjectType, FileAttrs, DirectoryAttrs
+from .models import DirectoryAttrs, FileAttrs, FsObject, FsObjectType
 
 
 def get_remote_mtime(path, sftp):

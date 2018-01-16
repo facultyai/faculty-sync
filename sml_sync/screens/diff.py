@@ -1,17 +1,15 @@
 
 from enum import Enum
 
+import inflect
 from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit
+from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.containers import Window, FloatContainer
-
-import inflect
 
 from ..pubsub import Messages
-
-from .help import help_modal
 from .base import BaseScreen
+from .help import help_modal
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 

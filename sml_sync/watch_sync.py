@@ -1,17 +1,17 @@
 
-import threading
+import logging
 import os
 import queue
+import threading
 from datetime import datetime
-import logging
 
-import watchdog.observers
 import watchdog.events
+import watchdog.observers
 
-from .file_trees import get_remote_mtime, compare_file_trees
+from . import path_match
+from .file_trees import compare_file_trees, get_remote_mtime
 from .models import ChangeEventType, FsChangeEvent
 from .pubsub import Messages
-from . import path_match
 
 
 class TimestampDatabase(object):

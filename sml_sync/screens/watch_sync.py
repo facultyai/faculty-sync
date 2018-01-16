@@ -4,19 +4,18 @@ import threading
 import time
 from datetime import datetime
 
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout import HSplit, VSplit
-from prompt_toolkit.layout.containers import Window, FloatContainer
-from prompt_toolkit.key_binding.key_bindings import KeyBindings
 from prompt_toolkit.application.current import get_app
+from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.layout import HSplit, VSplit
+from prompt_toolkit.layout.containers import FloatContainer, Window
+from prompt_toolkit.layout.controls import FormattedTextControl
 
-from ..pubsub import Messages
-from ..models import ChangeEventType
-
-from .loading import LoadingIndicator
-from .base import BaseScreen
 from . import humanize
+from ..models import ChangeEventType
+from ..pubsub import Messages
+from .base import BaseScreen
 from .help import help_modal
+from .loading import LoadingIndicator
 
 HELP_TITLE = 'Incremental synchronization'
 

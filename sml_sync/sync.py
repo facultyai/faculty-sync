@@ -1,13 +1,13 @@
+import logging
 import os.path
 import subprocess
-from datetime import datetime
-import logging
 import time
+from datetime import datetime
 
 import sml.shell
 
+from .models import DirectoryAttrs, FileAttrs, FsObject, FsObjectType
 from .ssh import sftp_from_ssh_details
-from .models import FsObject, FsObjectType, DirectoryAttrs, FileAttrs
 
 SSH_OPTIONS = [
     '-o', 'IdentitiesOnly=yes',
