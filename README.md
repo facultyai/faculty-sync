@@ -85,7 +85,7 @@ You can pass shell glob-like patterns to `--ignore`. Some common patterns are
 ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__`
 among others; for a full list, look at the [cli module](sml_sync/cli.py)).
 
-Acknowledgments
+Acknowledgements
 ----------------
 
 Many people in the SherlockML team and in ASI Data Science have contributed to
