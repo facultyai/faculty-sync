@@ -24,7 +24,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-$ curl https://bitbucket.org/theasi/sml-sync/raw/0.1.1/install.sh | bash
+$ curl https://bitbucket.org/theasi/sml-sync/raw/0.1.2/install.sh | bash
 ```
 
 Getting started
