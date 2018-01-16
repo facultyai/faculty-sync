@@ -10,7 +10,7 @@ from .ui import View
 from .controller import Controller
 
 
-def main():
+def run():
     try:
         configuration = parse_command_line()
     except Exception as e:
@@ -40,6 +40,3 @@ def main():
     view.stop()
     exchange.stop()
     exchange.join()
-
-
-main()
