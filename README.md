@@ -24,7 +24,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-$ pip install sml-sync
+$ curl https://bitbucket.org/theasi/sml-sync/raw/0.1.0/install.sh | bash
 ```
 
 Getting started
