@@ -1,4 +1,3 @@
-
 SherlockML incremental synchronization
 ======================================
 
@@ -36,8 +35,8 @@ want to replicate this directory in the project *jupyter-gmaps* on SherlockML.
 
 First, make sure that:
 
-1. you have a server in the *jupyter-gmaps* project, 
-2. the directory `/project/gmaps` exists on SherlockML, and that it's empty. 
+1. you have a server in the *jupyter-gmaps* project,
+2. the directory `/project/gmaps` exists on SherlockML, and that it's empty.
 
 Then, in a terminal on  *your laptop*, head to `~/oss/gmaps` and run:
 
