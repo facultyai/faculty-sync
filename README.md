@@ -1,8 +1,8 @@
 SherlockML incremental synchronization
 ======================================
 
-You like writing code on your computer, but want to run the code on [SherlockML](https://sherlockml.com).
-This makes that easier.
+You like writing code on your computer, but want to run the code on
+[SherlockML](https://sherlockml.com). This makes that easier.
 
 *sml-sync* is a terminal application that helps automate synchronizing a local
 directory with a directory on SherlockML. It will automatically monitor a local
@@ -60,8 +60,8 @@ To get help on command-line options, run:
 $ sml-sync --help
 ```
 
-When the application is running, you can often type `?` to get help on a particular
-screen.
+When the application is running, you can often type `?` to get help on a
+particular screen.
 
 Working with git repositories
 -----------------------------
@@ -74,13 +74,16 @@ Ignoring certain paths
 ----------------------
 
 If you want to ignore file patterns, pass the `--ignore` argument to *sml-sync*
-with a list of path patterns. For instance, to ignore anything under `dist/` and `/docs/build`, run `sml-sync` with:
+with a list of path patterns. For instance, to ignore anything under `dist/`
+and `/docs/build`, run `sml-sync` with:
 
 ```
 $ sml-sync jupyter-gmaps --ignore dist/ docs/build/
 ```
 
-You can pass shell glob-like patterns to `--ignore`. Some common patterns are ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__` among others; for a full list, look at the [cli module](sml_sync/cli.py)).
+You can pass shell glob-like patterns to `--ignore`. Some common patterns are
+ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__`
+among others; for a full list, look at the [cli module](sml_sync/cli.py)).
 
 Acknowledgments
 ----------------
