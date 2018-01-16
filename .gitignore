@@ -1,5 +1,5 @@
-
-.cache
-__pycache__
-*pyc
 *.egg-info
+*.pyc
+.cache
+.mypy_cache/
+__pycache__
