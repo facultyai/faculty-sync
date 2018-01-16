@@ -5,6 +5,7 @@ setup(
     version='0.1.1-dev',
     description='SherlockML file synchronizer',
     author='The SherlockML team',
+    packages=['sml_sync'],
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
     },
