@@ -1,6 +1,6 @@
 
-import uuid
 import argparse
+import uuid
 
 import sml.auth
 import sml.casebook

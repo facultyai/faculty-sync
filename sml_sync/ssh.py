@@ -1,12 +1,11 @@
 
 import contextlib
-import tempfile
 import os
-import stat
 import shutil
+import stat
+import tempfile
 
 import paramiko
-
 import sml.galleon
 
 from .models import SshDetails

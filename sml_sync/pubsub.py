@@ -1,9 +1,9 @@
 
-import threading
-from queue import Queue, Empty
-import uuid
 import logging
+import threading
+import uuid
 from enum import Enum
+from queue import Empty, Queue
 
 
 class Messages(Enum):

@@ -1,17 +1,16 @@
 
-from enum import Enum
-import time
 import threading
+import time
+from enum import Enum
 
-from prompt_toolkit.layout import HSplit
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.application.current import get_app
+from prompt_toolkit.layout import HSplit
+from prompt_toolkit.layout.containers import Window
+from prompt_toolkit.layout.controls import FormattedTextControl
 
 from ..pubsub import Messages
-
-from .loading import LoadingIndicator
 from .base import BaseScreen
+from .loading import LoadingIndicator
 
 
 class WalkingFileTreesStatus(Enum):

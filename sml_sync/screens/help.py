@@ -1,8 +1,8 @@
 
-from prompt_toolkit.layout.widgets import Frame
-from prompt_toolkit.layout.containers import Window, Float
-from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout import HSplit
+from prompt_toolkit.layout.containers import Float, Window
+from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout.widgets import Frame
 
 
 def help_modal(title, text):

@@ -1,22 +1,19 @@
+import logging
 import threading
 import time
 import traceback
-import logging
 from concurrent.futures import ThreadPoolExecutor
 
-from .screens import (
-    DifferencesScreen, WalkingFileTreesScreen, SynchronizationScreen,
-    SynchronizationScreenDirection, WatchSyncScreen, WalkingFileTreesStatus,
-    RemoteDirectoryPromptScreen
-)
-from .file_trees import (
-    compare_file_trees,
-    remote_is_dir, get_remote_subdirectories
-)
+from .file_trees import (compare_file_trees, get_remote_subdirectories,
+                         remote_is_dir)
+from .pubsub import Messages
+from .screens import (DifferencesScreen, RemoteDirectoryPromptScreen,
+                      SynchronizationScreen, SynchronizationScreenDirection,
+                      WalkingFileTreesScreen, WalkingFileTreesStatus,
+                      WatchSyncScreen)
 from .ssh import sftp_from_ssh_details
 from .sync import Synchronizer
 from .watch_sync import WatcherSynchronizer
-from .pubsub import Messages
 
 
 class Controller(object):
