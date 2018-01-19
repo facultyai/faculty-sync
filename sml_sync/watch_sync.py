@@ -74,6 +74,7 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         self._excluded_patterns = excluded_patterns
 
     def on_any_event(self, watchdog_event):
+        logging.info('Registered filesystem event {}'.format(watchdog_event))
         event_type = self.watchdog_event_lookup[watchdog_event.event_type]
         is_directory = watchdog_event.is_directory
         path = self._relpath(watchdog_event.src_path)
