@@ -81,7 +81,8 @@ class Synchronizer(object):
         ssh_cmd = self._get_ssh_cmd()
         exclude_list = self._get_exclude_list()
         rsync_cmd = [
-            'rsync', '-a', '-e', ssh_cmd, *exclude_list, *rsync_opts,
+            'rsync', '-a', '--no-owner', '--no-group', '-e',
+            ssh_cmd, *exclude_list, *rsync_opts,
             path_from, path_to
         ]
 
