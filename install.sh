@@ -1,4 +1,4 @@
 #!/bin/sh
 
 pip install git+https://github.com/jonathanslenders/python-prompt-toolkit@2.0
-pip install https://bitbucket.org/theasi/sml-sync/get/0.1.3-rc1.zip
+pip install https://bitbucket.org/theasi/sml-sync/get/0.1.3.zip
