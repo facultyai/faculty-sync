@@ -2,7 +2,7 @@
 from enum import Enum
 
 import inflect
-from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit
 from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
