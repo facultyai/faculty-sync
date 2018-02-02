@@ -67,8 +67,8 @@ Working with git repositories
 -----------------------------
 
 *sml-sync* ignores certain paths by default. In particular, it ignores paths in
-`.git/`. If your code is under version control locally, git files will not be
-pushed to SherlockML (but all the source files will).
+`.git/`. If your code is under version control locally or on SherlockML, the git
+state will not be pushed to SherlockML (but all the source files will).
 
 Ignoring certain paths
 ----------------------
