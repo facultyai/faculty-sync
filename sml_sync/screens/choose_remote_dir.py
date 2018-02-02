@@ -8,11 +8,11 @@ from enum import Enum
 from queue import Empty, Queue
 
 from prompt_toolkit.application.current import get_app
-from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.widgets import TextArea
+from prompt_toolkit.widgets import TextArea
 
 from ..pubsub import Messages
 from .base import BaseScreen
@@ -282,4 +282,3 @@ class RemoteDirectoryPromptScreen(BaseScreen):
     def _handle_walker_status_change(self, path):
         self._completer_status_component.set_status(
             self._completer.current_status, path)
-

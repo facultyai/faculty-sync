@@ -1,5 +1,5 @@
 
-from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings
 
 
 class BaseScreen(object):

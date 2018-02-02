@@ -3,8 +3,7 @@ import threading
 import traceback
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.key_binding.key_bindings import (KeyBindings,
-                                                     merge_key_bindings)
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.layout import HSplit, Layout
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
