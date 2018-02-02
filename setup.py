@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='sml_sync',
-    version='0.1.4-rc1',
+    version='0.1.4',
     description='SherlockML file synchronizer',
     author='The SherlockML team',
     packages=['sml_sync', 'sml_sync.screens'],
