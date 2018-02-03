@@ -3,6 +3,7 @@ import collections
 import threading
 import time
 from datetime import datetime
+import logging
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -68,6 +69,19 @@ class Loading(object):
 
     def stop(self):
         self._stop_event.set()
+
+
+class DownSyncInformation(object):
+
+    def __init__(self):
+        self._control = FormattedTextControl('hello down sync')
+        self.container = Window(self._control, height=1)
+        self._render()
+
+    def _render(self):
+        logging.info('render!!')
+        app = get_app()
+        app.invalidate()
 
 
 class CurrentlySyncing(object):
@@ -277,6 +291,7 @@ class WatchSyncScreen(BaseScreen):
 
         @self.bindings.add('d')
         def _(event):
+            self._on_down_in_watch_sync()
             self._exchange.publish(Messages.DOWN_IN_WATCH_SYNC)
 
         @self.bindings.add('?')
@@ -322,6 +337,14 @@ class WatchSyncScreen(BaseScreen):
             self._recently_synced_component.add_item(fs_event)
         if self._currently_syncing_component:
             self._currently_syncing_component.set_current_event(None)
+
+    def _on_down_in_watch_sync(self):
+        self._stop_main_components()
+        self._stop_loading_component()
+        self._down_sync_info_component = DownSyncInformation()
+        self._screen_container.children = [
+            self._down_sync_info_component.container
+        ]
 
     def stop(self):
         self._stop_main_components()
