@@ -49,7 +49,7 @@ class Controller(object):
         )
         self._exchange.subscribe(
             Messages.START_INITIAL_FILE_TREE_WALK,
-            lambda _: self._submit(self._get_differences)
+            lambda _: self._submit(self._show_differences)
         )
         self._exchange.subscribe(
             Messages.DISPLAY_DIFFERENCES,
@@ -75,6 +75,10 @@ class Controller(object):
         self._exchange.subscribe(
             Messages.STOP_WATCH_SYNC,
             lambda _: self._submit(self._stop_watch_sync)
+        )
+        self._exchange.subscribe(
+            Messages.DOWN_IN_WATCH_SYNC,
+            lambda _: self._submit(self._down_in_watch_sync)
         )
 
         def run():
@@ -133,7 +137,7 @@ class Controller(object):
             direction=SynchronizationScreenDirection.DOWN)
         self._view.mount(self._current_screen)
         self._synchronizer.down(rsync_opts=['--delete'])
-        self._get_differences()
+        self._show_differences()
 
     def _sync_local_to_sherlockml(self):
         self._clear_current_subscriptions()
@@ -141,14 +145,14 @@ class Controller(object):
             direction=SynchronizationScreenDirection.UP)
         self._view.mount(self._current_screen)
         self._synchronizer.up(rsync_opts=['--delete'])
-        self._get_differences()
+        self._show_differences()
 
     def _display_differences(self, differences):
         self._clear_current_subscriptions()
         self._current_screen = DifferencesScreen(differences, self._exchange)
         subscription_id = self._exchange.subscribe(
             Messages.REFRESH_DIFFERENCES,
-            lambda _: self._submit(self._get_differences)
+            lambda _: self._submit(self._show_differences)
         )
         self._current_screen_subscriptions.append(subscription_id)
         self._view.mount(self._current_screen)
@@ -157,34 +161,41 @@ class Controller(object):
         for subscription_id in self._current_screen_subscriptions:
             self._exchange.unsubscribe(subscription_id)
 
-    def _get_differences(self):
+    def _show_differences(self):
         self._clear_current_subscriptions()
         self._current_screen = WalkingFileTreesScreen(
             WalkingFileTreesStatus.CONNECTING, self._exchange)
         try:
             self._view.mount(self._current_screen)
-            self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
-            local_files = self._synchronizer.list_local()
-            logging.info(
-                'Found {} files locally at path {}.'.format(
-                    len(local_files), self._configuration.local_dir)
-            )
-            self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE,
-                WalkingFileTreesStatus.REMOTE_WALK)
-            remote_files = self._synchronizer.list_remote()
-            logging.info(
-                'Found {} files on SherlockML at path {}.'.format(
-                    len(remote_files), self._configuration.remote_dir)
-            )
-            self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE,
-                WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
-            differences = list(compare_file_trees(local_files, remote_files))
+            differences = self._calculate_differences(publish_progress=True)
             self._exchange.publish(Messages.DISPLAY_DIFFERENCES, differences)
         finally:
             self._current_screen.stop()
+
+    def _calculate_differences(self, publish_progress=True):
+        if publish_progress:
+            self._exchange.publish(
+                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
+        local_files = self._synchronizer.list_local()
+        logging.info(
+            'Found {} files locally at path {}.'.format(
+                len(local_files), self._configuration.local_dir)
+        )
+        if publish_progress:
+            self._exchange.publish(
+                Messages.WALK_STATUS_CHANGE,
+                WalkingFileTreesStatus.REMOTE_WALK)
+        remote_files = self._synchronizer.list_remote()
+        logging.info(
+            'Found {} files on SherlockML at path {}.'.format(
+                len(remote_files), self._configuration.remote_dir)
+        )
+        if publish_progress:
+            self._exchange.publish(
+                Messages.WALK_STATUS_CHANGE,
+                WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
+        differences = list(compare_file_trees(local_files, remote_files))
+        return differences
 
     def _start_watch_sync(self):
         self._clear_current_subscriptions()
@@ -208,7 +219,15 @@ class Controller(object):
         logging.info('Stopping watch-synchronization loop.')
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
-        self._get_differences()
+        self._show_differences()
+
+    def _down_in_watch_sync(self):
+        logging.info('Doing down synchronization as part of watch-sync.')
+        if self._watcher_synchronizer is not None:
+            self._watcher_synchronizer.stop()
+        differences = self._calculate_differences(publish_progress=False)
+        self._synchronizer.down(rsync_opts=['--delete'])
+        self._start_watch_sync()
 
     def join(self):
         self._thread.join()

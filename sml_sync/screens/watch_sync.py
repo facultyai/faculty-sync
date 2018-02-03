@@ -235,6 +235,7 @@ class WatchSyncScreen(BaseScreen):
 
         self.menu_bar = Window(FormattedTextControl(
                 '[s] Stop  '
+                '[d]  '
                 '[q] Quit  '
                 '[?] Help'
             ), height=1, style='reverse')
@@ -273,6 +274,10 @@ class WatchSyncScreen(BaseScreen):
         @self.bindings.add('s')
         def _(event):
             self._exchange.publish(Messages.STOP_WATCH_SYNC)
+
+        @self.bindings.add('d')
+        def _(event):
+            self._exchange.publish(Messages.DOWN_IN_WATCH_SYNC)
 
         @self.bindings.add('?')
         def _(event):
