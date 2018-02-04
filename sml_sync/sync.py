@@ -77,7 +77,16 @@ class Synchronizer(object):
                 raise
 
     def rmdir_remote(self, path):
-        self._sftp.rmdir(os.path.join(self.remote_dir, path))
+        logging.info('Removing remote directory {}.'.format(path))
+        try:
+            self._sftp.rmdir(os.path.join(self.remote_dir, path))
+        except IOError as e:
+            if e.errno == errno.ENOENT:
+                logging.info(
+                    'Remote directory {} did not exist on remote.'.format(
+                        path))
+            else:
+                raise
 
     def mvfile_remote(self, src_path, dest_path):
         self._sftp.rename(
