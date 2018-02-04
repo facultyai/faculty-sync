@@ -32,6 +32,9 @@ SherlockML while this process is running.
 Keys:
 
     [s] Stop incremental synchronization and go back to main screen
+    [d] Bring all the changes down from SherlockML. This only updates
+        files that are newer on SherlockML than locally. It will not
+        delete local files that exist on SherlockML.
     [q] Quit the application
     [?] Toggle this message
 """
@@ -236,7 +239,7 @@ class WatchSyncScreen(BaseScreen):
 
         self.menu_bar = Window(FormattedTextControl(
                 '[s] Stop  '
-                '[d]  '
+                '[d] Sync SherlockML files down  '
                 '[q] Quit  '
                 '[?] Help'
             ), height=1, style='reverse')
