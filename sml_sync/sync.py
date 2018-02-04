@@ -3,6 +3,7 @@ import os.path
 import subprocess
 import time
 from datetime import datetime
+import errno
 
 import sml.shell
 
@@ -65,10 +66,27 @@ class Synchronizer(object):
         self._sftp.mkdir(os.path.join(self.remote_dir, path))
 
     def rmfile_remote(self, path):
-        self._sftp.remove(os.path.join(self.remote_dir, path))
+        logging.info('Removing remote file {}.'.format(path))
+        try:
+            self._sftp.remove(os.path.join(self.remote_dir, path))
+        except IOError as e:
+            if e.errno == errno.ENOENT:
+                logging.info(
+                    'Remote file {} did not exist on remote.'.format(path))
+            else:
+                raise
 
     def rmdir_remote(self, path):
-        self._sftp.rmdir(os.path.join(self.remote_dir, path))
+        logging.info('Removing remote directory {}.'.format(path))
+        try:
+            self._sftp.rmdir(os.path.join(self.remote_dir, path))
+        except IOError as e:
+            if e.errno == errno.ENOENT:
+                logging.info(
+                    'Remote directory {} did not exist on remote.'.format(
+                        path))
+            else:
+                raise
 
     def mvfile_remote(self, src_path, dest_path):
         self._sftp.rename(
