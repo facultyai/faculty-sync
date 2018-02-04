@@ -34,7 +34,12 @@ class TimestampDatabase(object):
         return self._data.get(path, default)
 
     def remove(self, path):
-        del self._data[path]
+        try:
+            del self._data[path]
+        except KeyError:
+            logging.info(
+                'Path {} did not exist in timestamp database'.format(path)
+            )
 
     def _was_modified_since(self, path, timestamp):
         current_timestamp = self._data.get(path, datetime.min)
