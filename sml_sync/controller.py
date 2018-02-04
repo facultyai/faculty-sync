@@ -225,8 +225,10 @@ class Controller(object):
         logging.info('Doing down synchronization as part of watch-sync.')
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
-        differences = self._calculate_differences(publish_progress=False)
-        self._synchronizer.down(rsync_opts=['--delete'])
+        self._current_screen = SynchronizationScreen(
+            direction=SynchronizationScreenDirection.DOWN)
+        self._view.mount(self._current_screen)
+        self._synchronizer.down(rsync_opts=['--update'])
         self._start_watch_sync()
 
     def join(self):
