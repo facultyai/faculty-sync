@@ -3,7 +3,6 @@ import collections
 import threading
 import time
 from datetime import datetime
-import logging
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
