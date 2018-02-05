@@ -1,4 +1,3 @@
-
 import logging
 
 import daiquiri
@@ -19,7 +18,7 @@ def run():
 
     daiquiri.setup(
         level=logging.INFO if configuration.debug else logging.ERROR,
-        outputs=[daiquiri.output.File('/tmp/sml-sync.log')]
+        outputs=[daiquiri.output.File('/var/log/sml-sync.log')]
     )
 
     logging.info(
