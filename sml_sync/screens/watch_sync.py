@@ -33,7 +33,7 @@ Keys:
     [s] Stop incremental synchronization and go back to main screen
     [d] Bring all the changes down from SherlockML. This only updates
         files that are newer on SherlockML than locally. It will not
-        delete local files that exist on SherlockML.
+        delete local files that do not exist on SherlockML.
     [q] Quit the application
     [?] Toggle this message
 """
