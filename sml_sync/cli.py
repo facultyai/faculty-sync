@@ -15,7 +15,8 @@ DEFAULT_IGNORE_PATTERNS = [
     '*.pyc',
     '.ipynb_checkpoints',
     '.tox',
-    '.git'
+    '.git',
+    '.mypy_cache'
 ]
 
 
