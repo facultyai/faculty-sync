@@ -10,6 +10,7 @@ import daiquiri
 import semantic_version
 
 from .version import version
+from .dirs import ensure_parent_exists
 
 
 TAGS_URL = 'https://api.bitbucket.org/2.0/repositories/theasi/sml-sync/refs/tags?pagelen=100'  # noqa
@@ -17,17 +18,8 @@ TAGS_URL = 'https://api.bitbucket.org/2.0/repositories/theasi/sml-sync/refs/tags
 LOGGER = daiquiri.getLogger('version-check')
 
 
-def _ensure_parent_exists(path):
-    directory = os.path.dirname(path)
-    try:
-        os.makedirs(directory)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise
-
-
 def _set_mtime(path):
-    _ensure_parent_exists(path)
+    ensure_parent_exists(path)
     if os.path.exists(path):
         os.utime(path)
     else:

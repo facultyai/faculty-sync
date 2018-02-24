@@ -1,13 +1,12 @@
 import logging
 
-import daiquiri
-
 from .cli import parse_command_line
 from .controller import Controller
 from .pubsub import PubSubExchange
 from .ssh import get_ssh_details
 from .ui import View
 from .update import check_for_new_release
+from .logs import setup_logging
 
 
 def run():
@@ -17,10 +16,7 @@ def run():
         print(e)
         exit(1)
 
-    daiquiri.setup(
-        level=logging.INFO if configuration.debug else logging.ERROR,
-        outputs=[daiquiri.output.File('/var/log/sml-sync.log')]
-    )
+    setup_logging(configuration.debug)
 
     logging.info(
         'sml-sync started with configuration {}'.format(configuration))
