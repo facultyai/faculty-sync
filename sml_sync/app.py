@@ -7,6 +7,7 @@ from .controller import Controller
 from .pubsub import PubSubExchange
 from .ssh import get_ssh_details
 from .ui import View
+from .update import check_for_new_release
 
 
 def run():
@@ -39,3 +40,5 @@ def run():
     view.stop()
     exchange.stop()
     exchange.join()
+
+    check_for_new_release()

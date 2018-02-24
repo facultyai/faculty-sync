@@ -1,8 +1,12 @@
 from distutils.core import setup
 
+version_ns = {}
+with open(os.path.join(here, 'sml-sync', 'version.py')) as f:
+    exec(f.read(), {}, version_ns)
+
 setup(
     name='sml_sync',
-    version='0.1.5',
+    version=version_ns['version'],
     description='SherlockML file synchronizer',
     author='The SherlockML team',
     packages=['sml_sync', 'sml_sync.screens'],

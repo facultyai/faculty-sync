@@ -7,6 +7,7 @@ import sml.casebook
 
 from .models import Configuration
 from .projects import Projects
+from .version import version
 
 
 DEFAULT_IGNORE_PATTERNS = [
@@ -27,6 +28,7 @@ class NoValidServer(Exception):
 
 def parse_command_line(argv=None):
     parser = argparse.ArgumentParser(
+        prog='sml-sync',
         description='Autosync a local directory to a SherlockML project'
     )
     parser.add_argument('project', help='Project name or ID')
@@ -52,6 +54,11 @@ def parse_command_line(argv=None):
         default=False,
         action='store_true',
         help='Run in debug mode (sets the log level to info).'
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='sml-sync {version}'.format(version=version)
     )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
