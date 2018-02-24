@@ -1,4 +1,7 @@
+import os
 from distutils.core import setup
+
+here = os.path.dirname(os.path.abspath(__file__))
 
 version_ns = {}
 with open(os.path.join(here, 'sml-sync', 'version.py')) as f:
