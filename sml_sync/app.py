@@ -25,8 +25,6 @@ def run():
     logging.info(
         'sml-sync started with configuration {}'.format(configuration))
 
-    check_for_new_release()
-
     exchange = PubSubExchange()
     exchange.start()
     view = View(configuration, exchange)
@@ -42,3 +40,5 @@ def run():
     view.stop()
     exchange.stop()
     exchange.join()
+
+    check_for_new_release()

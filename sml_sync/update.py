@@ -82,11 +82,12 @@ def _check_for_new_release():
             latest, current, current < latest))
     if current < latest:
         template = (
-            "You are using sml-sync version {}, however "
-            "version {} is available.\n"
-            "You should upgrade with 'pip install --upgrade sml'."
+            "You are using sml-sync version {current}, however "
+            "version {latest} is available.\n"
+            "You should upgrade with:\n\n"
+            "curl https://bitbucket.org/theasi/sml-sync/raw/{latest}/install.sh | bash"  # noqa
         )
-        print(template.format(current, latest))
+        print(template.format(current=current, latest=latest))
     _set_mtime(_last_update_path())
 
 
