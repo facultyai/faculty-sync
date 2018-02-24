@@ -4,7 +4,7 @@ from distutils.core import setup
 here = os.path.dirname(os.path.abspath(__file__))
 
 version_ns = {}
-with open(os.path.join(here, 'sml-sync', 'version.py')) as f:
+with open(os.path.join(here, 'sml_sync', 'version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup(
