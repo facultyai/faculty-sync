@@ -7,6 +7,7 @@ from .controller import Controller
 from .pubsub import PubSubExchange
 from .ssh import get_ssh_details
 from .ui import View
+from .update import check_for_new_release
 
 
 def run():
@@ -23,6 +24,8 @@ def run():
 
     logging.info(
         'sml-sync started with configuration {}'.format(configuration))
+
+    check_for_new_release()
 
     exchange = PubSubExchange()
     exchange.start()
