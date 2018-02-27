@@ -60,9 +60,15 @@ def parse_command_line(argv=None):
         action='version',
         version='sml-sync {version}'.format(version=version)
     )
+    parser.add_argument(
+        '--server',
+        default=None,
+        help=('The name of the server in the project to use. If omitted, '
+              'a random server is used.')
+    )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
-    server_id = _any_server(project.id_)
+    server_id = _any_server(project.id_, server_name=arguments.server)
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
@@ -92,12 +98,24 @@ def _resolve_project(project):
     return project
 
 
-def _any_server(project_id, status=None):
+def _any_server(project_id, server_name=None, status=None):
     """Get any running server from project."""
     client = sml.galleon.Galleon()
     servers_ = client.get_servers(project_id, status=status)
+
     if not servers_:
         adjective = 'available' if status is None else status
         message = 'No {} server in project.'.format(adjective)
         raise NoValidServer(message)
-    return servers_[0].id_
+    if server_name is None:
+        return servers_[0].id_
+    else:
+        servers_ = list(filter(
+            lambda server: server.name == server_name, servers_
+        ))
+        if not servers_:
+            adjective = 'available' if status is None else status
+            message = ('No {} server named {} in project.'
+                       .format(adjective, server_name))
+            raise NoValidServer(message)
+        return servers_[0].id_
