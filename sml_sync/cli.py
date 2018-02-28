@@ -68,7 +68,8 @@ def parse_command_line(argv=None):
     )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
-    server_id = _any_server(project.id_, server_name=arguments.server)
+    server_id = _resolve_server(project.id_, arguments.server)
+    # server_id = _any_server(project.id_, server_name=arguments.server)
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
@@ -98,24 +99,41 @@ def _resolve_project(project):
     return project
 
 
-def _any_server(project_id, server_name=None, status=None):
+def _server_by_name(project_id, server_name, status=None):
+    """Resolve a project ID and server name to a server ID."""
+    client = sml.galleon.Galleon()
+    matching_servers = client.get_servers(project_id, server_name, status)
+    if len(matching_servers) == 1:
+        return matching_servers[0]
+    else:
+        if not matching_servers:
+            tpl = 'no {} server of name "{}" in this project'
+        else:
+            tpl = ('more than one {} server of name "{}", please select by '
+                   'server ID instead')
+        adjective = 'available' if status is None else status
+        raise NoValidServer(tpl.format(adjective, server_name))
+
+
+def _resolve_server(project_id, server=None, ensure_running=True):
+    """Resolve project and server names to project and server IDs."""
+    # project_id = _resolve_project(project)
+    status = 'running' if ensure_running else None
+    try:
+        server_id = uuid.UUID(server)
+    except ValueError:
+        server_id = _server_by_name(project_id, server, status).id_
+    except TypeError:
+        server_id = _any_server(project_id, status)
+    return server_id
+
+
+def _any_server(project_id, status=None):
     """Get any running server from project."""
     client = sml.galleon.Galleon()
     servers_ = client.get_servers(project_id, status=status)
-
     if not servers_:
         adjective = 'available' if status is None else status
         message = 'No {} server in project.'.format(adjective)
         raise NoValidServer(message)
-    if server_name is None:
-        return servers_[0].id_
-    else:
-        servers_ = list(filter(
-            lambda server: server.name == server_name, servers_
-        ))
-        if not servers_:
-            adjective = 'available' if status is None else status
-            message = ('No {} server named {} in project.'
-                       .format(adjective, server_name))
-            raise NoValidServer(message)
-        return servers_[0].id_
+    return servers_[0].id_
