@@ -63,13 +63,12 @@ def parse_command_line(argv=None):
     parser.add_argument(
         '--server',
         default=None,
-        help=('The name of the server in the project to use. If omitted, '
-              'a random server is used.')
+        help=('The name or ID of the server in the project to use. If omitted,'
+              ' a random server is used.')
     )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
     server_id = _resolve_server(project.id_, arguments.server)
-    # server_id = _any_server(project.id_, server_name=arguments.server)
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
