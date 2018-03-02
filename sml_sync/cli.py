@@ -116,7 +116,6 @@ def _server_by_name(project_id, server_name, status=None):
 
 def _resolve_server(project_id, server=None, ensure_running=True):
     """Resolve project and server names to project and server IDs."""
-    # project_id = _resolve_project(project)
     status = 'running' if ensure_running else None
     try:
         server_id = uuid.UUID(server)
