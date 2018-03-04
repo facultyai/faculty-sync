@@ -60,9 +60,15 @@ def parse_command_line(argv=None):
         action='version',
         version='sml-sync {version}'.format(version=version)
     )
+    parser.add_argument(
+        '--server',
+        default=None,
+        help=('The name or ID of the server in the project to use. If omitted,'
+              ' a random server is used.')
+    )
     arguments = parser.parse_args(argv)
     project = _resolve_project(arguments.project)
-    server_id = _any_server(project.id_)
+    server_id = _resolve_server(project.id_, arguments.server)
     local_dir = arguments.local
     remote_dir = arguments.remote
     local_dir = local_dir.rstrip('/') + '/'
@@ -90,6 +96,34 @@ def _resolve_project(project):
         project = projects_client.get_project_by_name(
             user_id, project)
     return project
+
+
+def _server_by_name(project_id, server_name, status=None):
+    """Resolve a project ID and server name to a server ID."""
+    client = sml.galleon.Galleon()
+    matching_servers = client.get_servers(project_id, server_name, status)
+    if len(matching_servers) == 1:
+        return matching_servers[0]
+    else:
+        if not matching_servers:
+            tpl = 'no {} server of name "{}" in this project'
+        else:
+            tpl = ('more than one {} server of name "{}", please select by '
+                   'server ID instead')
+        adjective = 'available' if status is None else status
+        raise NoValidServer(tpl.format(adjective, server_name))
+
+
+def _resolve_server(project_id, server=None, ensure_running=True):
+    """Resolve project and server names to project and server IDs."""
+    status = 'running' if ensure_running else None
+    try:
+        server_id = uuid.UUID(server)
+    except ValueError:
+        server_id = _server_by_name(project_id, server, status).id_
+    except TypeError:
+        server_id = _any_server(project_id, status)
+    return server_id
 
 
 def _any_server(project_id, status=None):
