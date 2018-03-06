@@ -26,6 +26,8 @@ def get_config(directory: str) -> configparser.ConfigParser:
         str(Path(key).expanduser().resolve()).rstrip('/'): value
         for key, value in config.items()
         if key.lower() != "default"
+        and not config.has_section(str(Path(key).expanduser()
+                                       .resolve()).rstrip('/'))
     })
 
     if str(directory) in config:

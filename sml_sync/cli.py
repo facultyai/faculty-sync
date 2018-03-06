@@ -95,9 +95,9 @@ def parse_command_line(argv=None):
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
 
-    ignore = DEFAULT_IGNORE_PATTERNS + config.get('ignore', [])
+    ignore = DEFAULT_IGNORE_PATTERNS + config.getlist('ignore', [])
     if arguments.ignore is not None:
-        ignore = arguments.ignore
+        ignore += arguments.ignore
 
     configuration = Configuration(
         project, server_id, local_dir, remote_dir,
