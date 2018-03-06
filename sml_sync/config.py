@@ -14,21 +14,18 @@ def get_config(directory: str) -> configparser.ConfigParser:
     project_conf_file = directory / "smlsync.conf"
     user_conf_file = Path("~/.config/sherlockml/smlsync.conf").expanduser()
 
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(
+        converters={'list': lambda string, delim=",": [
+            s.strip() for s in string.split(delim)
+        ]}
+    )
     config.read([project_conf_file, user_conf_file])
-    config = config._sections  # convert to normal dict
-
-    # convert ignores to list
-    for section in config.keys():
-        if "ignore" in config[section]:
-            config[section]["ignore"] = [
-                s.strip() for s in config[section]["ignore"].split(',')
-            ]
 
     # "normalise" the paths to avoid issues with symlinks and ~
-    config.update(**{
+    config.read_dict({
         str(Path(key).expanduser().resolve()).rstrip('/'): value
         for key, value in config.items()
+        if key.lower() != "default"
     })
 
     if str(directory) in config:
