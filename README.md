@@ -85,6 +85,39 @@ You can pass shell glob-like patterns to `--ignore`. Some common patterns are
 ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__`
 among others; for a full list, look at the [cli module](sml_sync/cli.py)).
 
+Using configuration files
+-------------------------
+
+If you find yourself providing the same arguments every time you call
+`sml-sync`, you may want to take advantage of configuration files.
+
+A configuration file can look like this:
+
+```
+[default]
+ignore = *pkl, *csv, **/*.ipynb
+
+[/path/to/local/directory]
+project = projectname
+remote = /project/remote_dir
+ignore = *pkl, *csv, **/*.ipynb, *hdf, *feather
+
+[/some/other/path]
+project = other_projectname
+remote = /project/remote_dir
+ignore = *pkl, *csv, *hdf, *xlsx
+```
+
+Configuration files need to be called `smlsync.conf` and be located either in
+the directory `~/.config/sherlockml/`, or in the top-level directory of the
+local directory / the working directory.
+
+`sml-sync` checks for a configuration file first in your local directory, so
+either as provided with `--local`, or the current working directory. If no file
+is located there, it will check in the user directory (`~/.config/sherlockml/`).
+This means you can keep a file outside of your local directory, if you want to
+keep it tidy, or inside it, if you want to have it inside version control.
+
 Acknowledgements
 ----------------
 
