@@ -11,11 +11,11 @@ def get_config(directory: str) -> configparser.ConfigParser:
     """
     directory = Path(directory).expanduser().resolve()
 
-    project_conf_file = directory / "smlsync.conf"
-    user_conf_file = Path("~/.config/sherlockml/smlsync.conf").expanduser()
+    project_conf_file = directory / '.sml-sync.conf'
+    user_conf_file = Path('~/.config/sml-sync/sml-sync.conf').expanduser()
 
     config = configparser.ConfigParser(
-        converters={'list': lambda string, delim=",": [
+        converters={'list': lambda string, delim=',': [
             s.strip() for s in string.split(delim)
         ]}
     )
@@ -25,7 +25,7 @@ def get_config(directory: str) -> configparser.ConfigParser:
     config.read_dict({
         str(Path(key).expanduser().resolve()).rstrip('/'): value
         for key, value in config.items()
-        if key.lower() != "default"
+        if key.lower() != 'default'
         and not config.has_section(str(Path(key).expanduser()
                                        .resolve()).rstrip('/'))
     })

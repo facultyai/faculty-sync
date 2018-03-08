@@ -76,21 +76,21 @@ def parse_command_line(argv=None):
     config = get_config(local_dir)
 
     project = arguments.project
-    if project is None and "project" not in config:
-        raise ValueError("You have to specify a project either "
-                         "as an argument, or in the config.")
+    if project is None and 'project' not in config:
+        raise ValueError('You have to specify a project either '
+                         'as an argument, or in the config.')
     elif project is None:
-        project = config.get("project", None)
+        project = config.get('project', None)
     project = _resolve_project(project)
 
     server = arguments.server
     if server is None:
-        server = config.get("server", None)
+        server = config.get('server', None)
     server_id = _resolve_server(project.id_, server)
 
     remote_dir = arguments.remote
     if remote_dir is None:
-        remote_dir = config.get("remote", None)
+        remote_dir = config.get('remote', None)
 
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
