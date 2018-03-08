@@ -100,7 +100,7 @@ ignore = *pkl, *csv, **/*.ipynb
 [/path/to/local/directory]
 project = projectname
 remote = /project/remote_dir
-ignore = *pkl, *csv, **/*.ipynb, *hdf, *feather
+ignore = *pkl, *csv, **/*.ipynb, *hdf, .cache/
 
 [/some/other/path]
 project = other_projectname
