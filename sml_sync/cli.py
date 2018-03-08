@@ -40,8 +40,9 @@ def parse_command_line(argv=None):
     parser.add_argument(
         '--remote',
         default=None,
-        help=('Remote directory, e.g. /project/src. If omitted, '
-              'you will be prompted for a directory.')
+        help=('Remote directory, e.g. /project/src. If omitted, sml-sync '
+              'will look first in configuration and, failing that, will '
+              'prompt for a directory.')
     )
     parser.add_argument(
         '--local',
@@ -80,17 +81,17 @@ def parse_command_line(argv=None):
         raise ValueError('You have to specify a project either '
                          'as an argument, or in the config.')
     elif project is None:
-        project = config.get('project', None)
+        project = config.get('project')
     project = _resolve_project(project)
 
     server = arguments.server
     if server is None:
-        server = config.get('server', None)
+        server = config.get('server')
     server_id = _resolve_server(project.id_, server)
 
     remote_dir = arguments.remote
     if remote_dir is None:
-        remote_dir = config.get('remote', None)
+        remote_dir = config.get('remote')
 
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
