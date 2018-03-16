@@ -8,6 +8,7 @@ import sml.casebook
 from .models import Configuration
 from .projects import Projects
 from .version import version
+from .config import get_config
 
 
 DEFAULT_IGNORE_PATTERNS = [
@@ -31,13 +32,17 @@ def parse_command_line(argv=None):
         prog='sml-sync',
         description='Autosync a local directory to a SherlockML project'
     )
-    parser.add_argument('project', help='Project name or ID')
+    parser.add_argument(
+        '--project', default=None,
+        help=('Project name or ID. If omitted, it has to be present '
+              'in the configuration file.')
+    )
     parser.add_argument(
         '--remote',
         default=None,
-        help=(
-            'Remote directory, e.g. /project/src. If omitted, '
-            'you will be prompted for a directory.')
+        help=('Remote directory, e.g. /project/src. If omitted, sml-sync '
+              'will look first in configuration and, failing that, will '
+              'prompt for a directory.')
     )
     parser.add_argument(
         '--local',
@@ -67,17 +72,34 @@ def parse_command_line(argv=None):
               ' a random server is used.')
     )
     arguments = parser.parse_args(argv)
-    project = _resolve_project(arguments.project)
-    server_id = _resolve_server(project.id_, arguments.server)
-    local_dir = arguments.local
+
+    local_dir = arguments.local.rstrip('/') + '/'
+    config = get_config(local_dir)
+
+    project = arguments.project
+    if project is None and 'project' not in config:
+        raise ValueError('You have to specify a project either '
+                         'as an argument, or in the config.')
+    elif project is None:
+        project = config.get('project')
+    project = _resolve_project(project)
+
+    server = arguments.server
+    if server is None:
+        server = config.get('server')
+    server_id = _resolve_server(project.id_, server)
+
     remote_dir = arguments.remote
-    local_dir = local_dir.rstrip('/') + '/'
+    if remote_dir is None:
+        remote_dir = config.get('remote')
+
     if remote_dir is not None:
         remote_dir = remote_dir.rstrip('/') + '/'
-    if arguments.ignore is None:
-        ignore = DEFAULT_IGNORE_PATTERNS
-    else:
-        ignore = arguments.ignore + DEFAULT_IGNORE_PATTERNS
+
+    ignore = DEFAULT_IGNORE_PATTERNS + config.getlist('ignore', [])
+    if arguments.ignore is not None:
+        ignore += arguments.ignore
+
     configuration = Configuration(
         project, server_id, local_dir, remote_dir,
         arguments.debug, ignore

@@ -85,6 +85,39 @@ You can pass shell glob-like patterns to `--ignore`. Some common patterns are
 ignored automatically (`.ipybnb_checkpoints`, `node_modules`, `__pycache__`
 among others; for a full list, look at the [cli module](sml_sync/cli.py)).
 
+Using configuration files
+-------------------------
+
+If you find yourself providing the same arguments every time you call
+`sml-sync`, you may want to take advantage of configuration files.
+
+A configuration file can look like this:
+
+```
+[default]
+ignore = *pkl, *csv, **/*.ipynb
+
+[/path/to/local/directory]
+project = projectname
+remote = /project/remote_dir
+ignore = *pkl, *csv, **/*.ipynb, *hdf, .cache/
+
+[/some/other/path]
+project = other_projectname
+remote = /project/remote_dir
+ignore = *pkl, *csv, *hdf, *xlsx
+```
+
+Configuration files need to be called `smlsync.conf` and be located either at
+the `~/.config/sml-sync/sml-sync.conf`, or in the top-level directory of the
+local directory at e.g. `~/projects/project/.sml-sync.conf`.
+
+`sml-sync` checks for a configuration file first in your local directory, so
+either as provided with `--local`, or the current working directory. If no file
+is located there, it will check in the user directory (`~/.config/sml-sync/sml-sync.conf`).
+This means you can keep a file outside of your local directory, if you want to
+keep it tidied away, or inside it, if you want to have it in version control.
+
 Acknowledgements
 ----------------
 
