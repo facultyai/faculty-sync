@@ -1,8 +1,23 @@
 from pathlib import Path
 import configparser
+from typing import NamedTuple, List, Optional
 
 
-def get_config(directory: str) -> configparser.ConfigParser:
+FileConfiguration = NamedTuple(
+    'FileConfiguration',
+    [
+        ('project', Optional[str]),
+        ('remote', Optional[str]),
+        ('server', Optional[str]),
+        ('ignore', List[str])
+    ]
+)
+
+def empty_file_configuration():
+    return FileConfiguration(None, None, None, [])
+
+
+def get_config(directory: str) -> FileConfiguration:
     """
     Parse a smlsync.conf file.
 
@@ -54,6 +69,13 @@ def get_config(directory: str) -> configparser.ConfigParser:
             })
 
     if str(directory) in config:
-        return config[str(directory)]
+        section = config[str(directory)]
+        parsed_configuration = FileConfiguration(
+            project=section.get('project'),
+            remote=section.get('remote'),
+            server=section.get('server'),
+            ignore=section.getlist('ignore')
+        )
     else:
-        return {}
+        parsed_configuration = empty_file_configuration()
+    return parsed_configuration
