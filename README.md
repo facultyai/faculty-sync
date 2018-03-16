@@ -125,6 +125,6 @@ Many people in the SherlockML team and in ASI Data Science have contributed to
 the vision for *sml-sync*, both technical and at the product level. Without
 their help and encouragement, *sml-sync* would not exist.
 
-For now, this is a personal endeavour and, until such day as we see fit to bring
+*sml-sync* is maintained by Pascal and Jan. Until such day as we see fit to bring
 it under the remit of the SherlockML team proper, support questions, bug reports
-etc. should be directed to Pascal personally, not to the team.
+etc. should be directed to them personally, rather than to the team.
