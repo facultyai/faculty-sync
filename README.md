@@ -108,9 +108,9 @@ remote = /project/remote_dir
 ignore = *pkl, *csv, *hdf, *xlsx
 ```
 
-Configuration files need to be called `smlsync.conf` and be located either at
-the `~/.config/sml-sync/sml-sync.conf`, or in the top-level directory of the
-local directory at e.g. `~/projects/project/.sml-sync.conf`.
+Configuration files need to be located either in your home directory at
+`~/.config/sml-sync/sml-sync.conf`, or in the top-level directory of the
+local directory at `~/projects/project/.sml-sync.conf`.
 
 `sml-sync` checks for a configuration file first in your local directory, so
 either as provided with `--local`, or the current working directory. If no file
