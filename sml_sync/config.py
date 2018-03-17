@@ -14,8 +14,17 @@ FileConfiguration = NamedTuple(
 )
 
 
-def empty_file_configuration():
+def _empty_file_configuration():
     return FileConfiguration(None, None, None, [])
+
+
+def _read_ignore_patterns(ignore_string: str) -> List[str]:
+    return [s.strip() for s in ignore_string.split(',') if s.strip()]
+
+
+def _create_parser():
+    converters = {'list': _read_ignore_patterns}
+    return configparser.ConfigParser(converters=converters)
 
 
 def get_config(
@@ -36,11 +45,7 @@ def get_config(
         user_conf_path = Path('~/.config/sml-sync/sml-sync.conf')
     user_conf_path = user_conf_path.expanduser()
 
-    config = configparser.ConfigParser(
-        converters={'list': lambda string, delim=',': [
-            s.strip() for s in string.split(delim) if s.strip()
-        ]}
-    )
+    config = _create_parser()
 
     if user_conf_path.exists():
         # read the user conf file
@@ -56,11 +61,7 @@ def get_config(
         })
 
     if project_conf_path.exists():
-        project_config = configparser.ConfigParser(
-            converters={'list': lambda string, delim=',': [
-                s.strip() for s in string.split(delim) if s.strip()
-            ]}
-        )
+        project_config = _create_parser()
         # read the project conf file
         project_config.read([project_conf_path])
         if len(project_config.sections()) > 1:
