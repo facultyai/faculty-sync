@@ -13,21 +13,28 @@ FileConfiguration = NamedTuple(
     ]
 )
 
+
 def empty_file_configuration():
     return FileConfiguration(None, None, None, [])
 
 
-def get_config(directory: str) -> FileConfiguration:
+def get_config(
+        local_directory: str,
+        project_conf_path=None,
+        user_conf_path=None) -> FileConfiguration:
     """
     Parse a smlsync.conf file.
 
     The function first checks in the passed directory, and if it doesn't
     find a configuration file, checks if there is one in the user directory.
     """
-    directory = Path(directory).expanduser().resolve()
+    directory = Path(local_directory).expanduser().resolve()
 
-    project_conf_file = directory / '.sml-sync.conf'
-    user_conf_file = Path('~/.config/sml-sync/sml-sync.conf').expanduser()
+    if project_conf_path is None:
+        project_conf_path = directory / '.sml-sync.conf'
+    if user_conf_path is None:
+        user_conf_path = Path('~/.config/sml-sync/sml-sync.conf')
+    user_conf_path = user_conf_path.expanduser()
 
     config = configparser.ConfigParser(
         converters={'list': lambda string, delim=',': [
@@ -35,9 +42,9 @@ def get_config(directory: str) -> FileConfiguration:
         ]}
     )
 
-    if user_conf_file.exists():
+    if user_conf_path.exists():
         # read the user conf file
-        config.read(user_conf_file)
+        config.read(user_conf_path)
 
         # "normalise" the paths to avoid issues with symlinks and ~
         config.read_dict({
@@ -48,14 +55,14 @@ def get_config(directory: str) -> FileConfiguration:
                                            .resolve()).rstrip('/'))
         })
 
-    if project_conf_file.exists():
+    if project_conf_path.exists():
         project_config = configparser.ConfigParser(
             converters={'list': lambda string, delim=',': [
                 s.strip() for s in string.split(delim)
             ]}
         )
         # read the project conf file
-        project_config.read([project_conf_file])
+        project_config.read([project_conf_path])
         if len(project_config.sections()) > 1:
             raise ValueError('The project config file is ambiguous, as it has '
                              'more than two sections.')
@@ -70,11 +77,14 @@ def get_config(directory: str) -> FileConfiguration:
 
     if str(directory) in config:
         section = config[str(directory)]
+        ignore = section.getlist('ignore')
+        if ignore is None:
+            ignore = []
         parsed_configuration = FileConfiguration(
             project=section.get('project'),
             remote=section.get('remote'),
             server=section.get('server'),
-            ignore=section.getlist('ignore')
+            ignore=ignore
         )
     else:
         parsed_configuration = empty_file_configuration()
