@@ -2,7 +2,10 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 
+import pytest
+
 from ..config import get_config, FileConfiguration
+
 
 @contextmanager
 def _temporary_configurations(user_config=None, project_config=None):
@@ -19,14 +22,49 @@ def _temporary_configurations(user_config=None, project_config=None):
         yield (project_configuration_path, user_configuration_path)
 
 
-def test_project_config():
-    configuration_file_value = """
-    [default]
-    project = acme
-    remote = /project/dir22
-    """
-    with _temporary_configurations(
-            project_config=configuration_file_value
-    ) as (project_path, user_path):
+@pytest.mark.parametrize(
+    'config,expected',
+    [
+        (
+            """
+            [default]
+            project = acme
+            remote = /project/dir22
+            """,
+            FileConfiguration('acme', '/project/dir22', None, [])
+        ),
+        (
+            """
+            [default]
+            project = acme
+            remote = /project/dir22
+            ignore = *.pyc
+            """,
+            FileConfiguration('acme', '/project/dir22', None, ['*.pyc'])
+        ),
+        (
+            """
+            [default]
+            project = acme
+            remote = /project/dir22
+            server = some-server-name
+            """,
+            FileConfiguration('acme', '/project/dir22', 'some-server-name', [])
+        ),
+        (
+            """
+            [default]
+            project = acme
+            remote = /project/dir22
+            ignore = *.pyc, pattern/
+            """,
+            FileConfiguration(
+                'acme', '/project/dir22', None, ['*.pyc', 'pattern/'])
+        )
+    ]
+)
+def test_project_config(config, expected):
+    with _temporary_configurations(project_config=config) as (
+            project_path, user_path):
         result = get_config('local-directory', project_path, user_path)
-        assert result == FileConfiguration('acme', '/project/dir22', None, [])
+        assert result == expected
