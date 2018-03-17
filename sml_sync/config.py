@@ -38,7 +38,7 @@ def get_config(
 
     config = configparser.ConfigParser(
         converters={'list': lambda string, delim=',': [
-            s.strip() for s in string.split(delim)
+            s.strip() for s in string.split(delim) if s.strip()
         ]}
     )
 
@@ -58,7 +58,7 @@ def get_config(
     if project_conf_path.exists():
         project_config = configparser.ConfigParser(
             converters={'list': lambda string, delim=',': [
-                s.strip() for s in string.split(delim)
+                s.strip() for s in string.split(delim) if s.strip()
             ]}
         )
         # read the project conf file

@@ -60,7 +60,17 @@ def _temporary_configurations(user_config=None, project_config=None):
             """,
             FileConfiguration(
                 'acme', '/project/dir22', None, ['*.pyc', 'pattern/'])
-        )
+        ),
+        (
+            """
+            [default]
+            project = acme
+            remote = /project/dir22
+            ignore =
+            """,
+            FileConfiguration(
+                'acme', '/project/dir22', None, [])
+        ),
     ]
 )
 def test_project_config(config, expected):
