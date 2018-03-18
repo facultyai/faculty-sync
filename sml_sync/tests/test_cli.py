@@ -3,6 +3,8 @@ import uuid
 from contextlib import contextmanager
 from unittest.mock import patch
 
+import pytest
+
 from .. import cli
 from .. import models
 from ..config import FileConfiguration
@@ -171,3 +173,11 @@ def test_no_configuration():
 
                 resolve_project_mock.assert_called_once_with(
                     'project-name')
+
+
+def test_no_configuration_no_project():
+    file_config = FileConfiguration(None, None, None, [])
+    argv = []
+    with _patched_config(file_config):
+        with pytest.raises(ValueError):
+            cli.parse_command_line(argv=argv)
