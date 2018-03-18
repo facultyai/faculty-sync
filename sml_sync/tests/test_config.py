@@ -81,6 +81,20 @@ def test_project_config(config, expected):
         assert result == expected
 
 
+def test_project_config_multiple_sections():
+    config = """
+    [default]
+    project = acme
+
+    [other-entry]
+    project = something-else
+    """
+    with _temporary_configurations(project_config=config) as (
+             project_path, user_path):
+        with pytest.raises(ValueError):
+            get_config('local-directory', project_path, user_path)
+
+
 @pytest.mark.parametrize(
     'local_directory,config,expected',
     [
