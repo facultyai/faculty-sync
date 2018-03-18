@@ -1,9 +1,24 @@
 
+import uuid
+
 import sml.client
 
 
 class InvalidProject(Exception):
     pass
+
+
+def resolve_project(project):
+    """Resolve a project name or ID to a project ID."""
+    projects_client = Projects()
+    try:
+        project_id = uuid.UUID(project)
+        project = projects_client.get_project_by_id(project_id)
+    except ValueError:
+        user_id = sml.auth.user_id()
+        project = projects_client.get_project_by_name(
+            user_id, project)
+    return project
 
 
 class Project(object):
