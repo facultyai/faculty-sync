@@ -88,5 +88,5 @@ def get_config(
             ignore=ignore
         )
     else:
-        parsed_configuration = empty_file_configuration()
+        parsed_configuration = _empty_file_configuration()
     return parsed_configuration
