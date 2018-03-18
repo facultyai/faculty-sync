@@ -148,3 +148,9 @@ def test_config_present_in_both_user_and_project():
             project_path, user_path):
         with pytest.raises(ValueError):
             get_config('/path/to/local-directory', project_path, user_path)
+
+
+def test_no_config():
+    with _temporary_configurations() as (project_path, user_path):
+        result = get_config('local-directory', project_path, user_path)
+        assert result == FileConfiguration(None, None, None, [])
