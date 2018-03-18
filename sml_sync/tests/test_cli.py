@@ -34,6 +34,7 @@ def test_no_args():
         None,
         []
     )
+    argv = []
     server_id = uuid.uuid4()
     project = Project(
         uuid.uuid4(),
@@ -43,7 +44,7 @@ def test_no_args():
     with _patched_config(file_config):
         with _patched_server(server_id) as resolve_server_mock:
             with _patched_project(project) as resolve_project_mock:
-                configuration = cli.parse_command_line(argv=[])
+                configuration = cli.parse_command_line(argv=argv)
                 assert configuration == models.Configuration(
                     project=project,
                     server_id=server_id,
@@ -56,3 +57,68 @@ def test_no_args():
                 resolve_project_mock.assert_called_once_with('project-name')
                 resolve_server_mock.assert_called_once_with(
                     project.id_, None)
+
+
+def test_override_project():
+    file_config = FileConfiguration(
+        'project-name',
+        '/project/remote/dir',
+        None,
+        []
+    )
+    argv = ['--project', 'other-project']
+    server_id = uuid.uuid4()
+    project = Project(
+        uuid.uuid4(),
+        'other-project',
+        uuid.uuid4()
+    )
+    with _patched_config(file_config):
+        with _patched_server(server_id):
+            with _patched_project(project) as resolve_project_mock:
+                cli.parse_command_line(argv=argv)
+                resolve_project_mock.assert_called_once_with('other-project')
+
+
+def test_specify_server_configuration():
+    file_config = FileConfiguration(
+        'project-name',
+        '/project/remote/dir',
+        'server-name',
+        []
+    )
+    argv = []
+    server_id = uuid.uuid4()
+    project = Project(
+        uuid.uuid4(),
+        'project-name',
+        uuid.uuid4()
+    )
+    with _patched_config(file_config):
+        with _patched_server(server_id) as resolve_server_mock:
+            with _patched_project(project):
+                cli.parse_command_line(argv=argv)
+                resolve_server_mock.assert_called_once_with(
+                    project.id_, 'server-name')
+
+
+def test_specify_server_command_line():
+    file_config = FileConfiguration(
+        'project-name',
+        '/project/remote/dir',
+        None,
+        []
+    )
+    argv = ['--server', 'server-name']
+    server_id = uuid.uuid4()
+    project = Project(
+        uuid.uuid4(),
+        'project-name',
+        uuid.uuid4()
+    )
+    with _patched_config(file_config):
+        with _patched_server(server_id) as resolve_server_mock:
+            with _patched_project(project):
+                cli.parse_command_line(argv=argv)
+                resolve_server_mock.assert_called_once_with(
+                    project.id_, 'server-name')
