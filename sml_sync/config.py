@@ -32,7 +32,7 @@ def get_config(
         project_conf_path=None,
         user_conf_path=None) -> FileConfiguration:
     """
-    Parse a smlsync.conf file.
+    Parse a sml-sync.conf file.
 
     The function first checks in the passed directory, and if it doesn't
     find a configuration file, checks if there is one in the user directory.
