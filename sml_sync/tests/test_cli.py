@@ -124,6 +124,29 @@ def test_specify_server_command_line():
                     project.id_, 'server-name')
 
 
+def test_add_ignore():
+    file_config = FileConfiguration(
+        'project-name',
+        '/project/remote/dir',
+        None,
+        ['ig1']
+    )
+    argv = ['--ignore', 'ig2', 'ig3']
+    server_id = uuid.uuid4()
+    project = Project(
+        uuid.uuid4(),
+        'project-name',
+        uuid.uuid4()
+    )
+    with _patched_config(file_config):
+        with _patched_server(server_id):
+            with _patched_project(project):
+                configuration = cli.parse_command_line(argv=argv)
+                expected_ignore_patterns = \
+                    cli.DEFAULT_IGNORE_PATTERNS + ['ig1', 'ig2', 'ig3']
+                assert configuration.ignore == expected_ignore_patterns
+
+
 def test_no_configuration():
     file_config = FileConfiguration(None, None, None, [])
     argv = ['--project', 'project-name']
