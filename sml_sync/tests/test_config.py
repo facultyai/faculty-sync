@@ -132,3 +132,19 @@ def test_user_config(local_directory, config, expected):
             project_path, user_path):
         result = get_config(local_directory, project_path, user_path)
         assert result == expected
+
+
+def test_config_present_in_both_user_and_project():
+    project_config = """
+    [defaut]
+    project = acme
+    """
+
+    user_config = """
+    [/path/to/local-directory]
+    project = other-project
+    """
+    with _temporary_configurations(user_config, project_config) as (
+            project_path, user_path):
+        with pytest.raises(ValueError):
+            get_config('/path/to/local-directory', project_path, user_path)
