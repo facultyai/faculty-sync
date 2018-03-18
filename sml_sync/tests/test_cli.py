@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 from .. import cli
+from .. import models
 from ..config import FileConfiguration
 from ..projects import Project
 
@@ -27,7 +28,7 @@ def _patched_project(project: Project):
 
 
 def test_no_args():
-    config = FileConfiguration(
+    file_config = FileConfiguration(
         'project-name',
         '/project/remote/dir',
         None,
@@ -39,16 +40,18 @@ def test_no_args():
         'project-name',
         uuid.uuid4()
     )
-    with _patched_config(config):
+    with _patched_config(file_config):
         with _patched_server(server_id) as resolve_server_mock:
             with _patched_project(project) as resolve_project_mock:
                 configuration = cli.parse_command_line(argv=[])
-                assert configuration.project == project
-                assert configuration.server_id == server_id
-                assert configuration.local_dir == './'
-                assert configuration.remote_dir == configuration.remote_dir
-                assert not configuration.debug
-                assert configuration.ignore == cli.DEFAULT_IGNORE_PATTERNS
+                assert configuration == models.Configuration(
+                    project=project,
+                    server_id=server_id,
+                    local_dir='./',
+                    remote_dir=file_config.remote + '/',
+                    debug=False,
+                    ignore=cli.DEFAULT_IGNORE_PATTERNS
+                )
 
                 resolve_project_mock.assert_called_once_with('project-name')
                 resolve_server_mock.assert_called_once_with(
