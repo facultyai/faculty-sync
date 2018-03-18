@@ -122,3 +122,29 @@ def test_specify_server_command_line():
                 cli.parse_command_line(argv=argv)
                 resolve_server_mock.assert_called_once_with(
                     project.id_, 'server-name')
+
+
+def test_no_configuration():
+    file_config = FileConfiguration(None, None, None, [])
+    argv = ['--project', 'project-name']
+    server_id = uuid.uuid4()
+    project = Project(
+        uuid.uuid4(),
+        'project-name',
+        uuid.uuid4()
+    )
+    with _patched_config(file_config):
+        with _patched_server(server_id):
+            with _patched_project(project) as resolve_project_mock:
+                configuration = cli.parse_command_line(argv=argv)
+                assert configuration == models.Configuration(
+                    project=project,
+                    server_id=server_id,
+                    local_dir='./',
+                    remote_dir=None,
+                    debug=False,
+                    ignore=cli.DEFAULT_IGNORE_PATTERNS
+                )
+
+                resolve_project_mock.assert_called_once_with(
+                    'project-name')
