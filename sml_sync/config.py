@@ -1,28 +1,55 @@
 from pathlib import Path
 import configparser
+from typing import NamedTuple, List, Optional
 
 
-def get_config(directory: str) -> configparser.ConfigParser:
+FileConfiguration = NamedTuple(
+    'FileConfiguration',
+    [
+        ('project', Optional[str]),
+        ('remote', Optional[str]),
+        ('server', Optional[str]),
+        ('ignore', List[str])
+    ]
+)
+
+
+def _empty_file_configuration():
+    return FileConfiguration(None, None, None, [])
+
+
+def _read_ignore_patterns(ignore_string: str) -> List[str]:
+    return [s.strip() for s in ignore_string.split(',') if s.strip()]
+
+
+def _create_parser():
+    converters = {'list': _read_ignore_patterns}
+    return configparser.ConfigParser(converters=converters)
+
+
+def get_config(
+        local_directory: str,
+        project_conf_path=None,
+        user_conf_path=None) -> FileConfiguration:
     """
-    Parse a smlsync.conf file.
+    Parse a sml-sync.conf file.
 
     The function first checks in the passed directory, and if it doesn't
     find a configuration file, checks if there is one in the user directory.
     """
-    directory = Path(directory).expanduser().resolve()
+    directory = Path(local_directory).expanduser().resolve()
 
-    project_conf_file = directory / '.sml-sync.conf'
-    user_conf_file = Path('~/.config/sml-sync/sml-sync.conf').expanduser()
+    if project_conf_path is None:
+        project_conf_path = directory / '.sml-sync.conf'
+    if user_conf_path is None:
+        user_conf_path = Path('~/.config/sml-sync/sml-sync.conf')
+    user_conf_path = user_conf_path.expanduser()
 
-    config = configparser.ConfigParser(
-        converters={'list': lambda string, delim=',': [
-            s.strip() for s in string.split(delim)
-        ]}
-    )
+    config = _create_parser()
 
-    if user_conf_file.exists():
+    if user_conf_path.exists():
         # read the user conf file
-        config.read(user_conf_file)
+        config.read(user_conf_path)
 
         # "normalise" the paths to avoid issues with symlinks and ~
         config.read_dict({
@@ -33,14 +60,10 @@ def get_config(directory: str) -> configparser.ConfigParser:
                                            .resolve()).rstrip('/'))
         })
 
-    if project_conf_file.exists():
-        project_config = configparser.ConfigParser(
-            converters={'list': lambda string, delim=',': [
-                s.strip() for s in string.split(delim)
-            ]}
-        )
+    if project_conf_path.exists():
+        project_config = _create_parser()
         # read the project conf file
-        project_config.read([project_conf_file])
+        project_config.read([project_conf_path])
         if len(project_config.sections()) > 1:
             raise ValueError('The project config file is ambiguous, as it has '
                              'more than two sections.')
@@ -54,6 +77,16 @@ def get_config(directory: str) -> configparser.ConfigParser:
             })
 
     if str(directory) in config:
-        return config[str(directory)]
+        section = config[str(directory)]
+        ignore = section.getlist('ignore')
+        if ignore is None:
+            ignore = []
+        parsed_configuration = FileConfiguration(
+            project=section.get('project'),
+            remote=section.get('remote'),
+            server=section.get('server'),
+            ignore=ignore
+        )
     else:
-        return {}
+        parsed_configuration = _empty_file_configuration()
+    return parsed_configuration
