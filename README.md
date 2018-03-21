@@ -118,6 +118,29 @@ is located there, it will check in the user directory (`~/.config/sml-sync/sml-s
 This means you can keep a file outside of your local directory, if you want to
 keep it tidied away, or inside it, if you want to have it in version control.
 
+How to release
+--------------
+
+*sml-sync* uses Bitbucket to host its artifacts, for now.
+
+By convention, we normally create a release candidate before doing a full release. Release candidates have version numbers like `0.2.1-rc1`, where `0.2.1` is an as-yet unreleased full release. We start incrementing release candidates from `rc1`.
+
+To run a pre-release:
+
+ - Bump the version in `version.py` and in the install script.
+ - Commit the changes.
+ - Tag the release with an annotated tag: `git tag -a 0.2.1-rc1`.
+ - Push the tag to bitbucket.
+ - Test that the prerelease installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/<tag>/install.sh | bash` in a new virtual environment.
+ 
+To run a full release:
+
+ - Bump the version in `version.py`, in the install script and in the installation instructions in the README.
+ - Commit the changes.
+ - Tag the release with an annotated tag: `git tag -a 0.2.1`. Include some brief release notes.
+ - Push the tag to bitbucket.
+ - Test that the release installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/0.2.1/install.sh | bash` in a new virtual environment.
+
 Acknowledgements
 ----------------
 
