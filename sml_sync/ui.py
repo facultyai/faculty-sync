@@ -81,7 +81,7 @@ class View(object):
 
     def stop(self):
         if self.application.is_running:
-            self.application.set_result(None)
+            self.application.exit()
 
     def _render_top_toolbar(self):
         top_text = (
