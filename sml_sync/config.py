@@ -37,7 +37,7 @@ def get_config(
     The function first checks in the passed directory, and if it doesn't
     find a configuration file, checks if there is one in the user directory.
     """
-    directory = Path(local_directory).expanduser().resolve()
+    directory = Path(local_directory).expanduser()
 
     if project_conf_path is None:
         project_conf_path = directory / '.sml-sync.conf'
@@ -54,11 +54,11 @@ def get_config(
 
             # "normalise" the paths to avoid issues with symlinks and ~
             config.read_dict({
-                str(Path(key).expanduser().resolve()).rstrip('/'): value
+                str(Path(key).expanduser()).rstrip('/'): value
                 for key, value in config.items()
                 if key.lower() != 'default'
                 and not config.has_section(
-                    str(Path(key).expanduser().resolve()).rstrip('/'))
+                    str(Path(key).expanduser()).rstrip('/'))
             })
     except FileNotFoundError:
         pass
