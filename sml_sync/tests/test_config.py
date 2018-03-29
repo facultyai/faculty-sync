@@ -8,6 +8,11 @@ import pytest
 from ..config import get_config, FileConfiguration
 
 
+# Note that, for compatibility with Python3.5, the local directory
+# has to exist. In most of these tests, we just pass os.getcwd()
+# as the local directory.
+
+
 @contextmanager
 def _temporary_configurations(user_config=None, project_config=None):
     with tempfile.TemporaryDirectory() as temporary_directory:
