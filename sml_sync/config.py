@@ -47,34 +47,43 @@ def get_config(
 
     config = _create_parser()
 
-    if user_conf_path.exists():
-        # read the user conf file
-        config.read(user_conf_path)
+    try:
+        with user_conf_path.open() as fp:
+            # read the user conf file
+            config.read_file(fp)
 
-        # "normalise" the paths to avoid issues with symlinks and ~
-        config.read_dict({
-            str(Path(key).expanduser().resolve()).rstrip('/'): value
-            for key, value in config.items()
-            if key.lower() != 'default'
-            and not config.has_section(str(Path(key).expanduser()
-                                           .resolve()).rstrip('/'))
-        })
+            # "normalise" the paths to avoid issues with symlinks and ~
+            config.read_dict({
+                str(Path(key).expanduser().resolve()).rstrip('/'): value
+                for key, value in config.items()
+                if key.lower() != 'default'
+                and not config.has_section(
+                    str(Path(key).expanduser().resolve()).rstrip('/'))
+            })
+    except FileNotFoundError:
+        pass
 
-    if project_conf_path.exists():
+    try:
         project_config = _create_parser()
         # read the project conf file
-        project_config.read([project_conf_path])
-        if len(project_config.sections()) > 1:
-            raise ValueError('The project config file is ambiguous, as it has '
-                             'more than two sections.')
-        elif len(project_config.sections()) == 1:
-            if str(directory) in config:
-                raise ValueError('You can\'t specify configurations for a '
-                                 'project in both the home and project '
-                                 'directory.')
-            config.read_dict({
-                str(directory): project_config[project_config.sections()[0]]
-            })
+        with project_conf_path.open() as fp:
+            project_config.read_file(fp)
+            if len(project_config.sections()) > 1:
+                raise ValueError(
+                    'The project config file is ambiguous, as it has '
+                    'more than two sections.')
+            elif len(project_config.sections()) == 1:
+                if str(directory) in config:
+                    raise ValueError(
+                        'You can\'t specify configurations for a '
+                        'project in both the home and project '
+                        'directory.')
+                config.read_dict({
+                    str(directory):
+                        project_config[project_config.sections()[0]]
+                })
+    except FileNotFoundError:
+        pass
 
     if str(directory) in config:
         section = config[str(directory)]
