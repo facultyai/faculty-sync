@@ -77,7 +77,7 @@ def _temporary_configurations(user_config=None, project_config=None):
 def test_project_config(config, expected):
     with _temporary_configurations(project_config=config) as (
             project_path, user_path):
-        result = get_config('local-directory', project_path, user_path)
+        result = get_config('.', project_path, user_path)
         assert result == expected
 
 
@@ -92,37 +92,29 @@ def test_project_config_multiple_sections():
     with _temporary_configurations(project_config=config) as (
              project_path, user_path):
         with pytest.raises(ValueError):
-            get_config('local-directory', project_path, user_path)
+            get_config('.', project_path, user_path)
 
 
 @pytest.mark.parametrize(
     'local_directory,config,expected',
     [
         (
-            '/absolute/path/to/project',
+            os.getcwd(),
             """
-            [/absolute/path/to/project]
+            [{}]
             project = acme
             remote = /project/dir22
-            """,
+            """.format(os.getcwd()),
             FileConfiguration('acme', '/project/dir22', None, [])
         ),
         (
-            os.path.expanduser('~/relative/from/home'),
+            # Test tilde expansion
+            os.getcwd(),
             """
-            [~/relative/from/home]
+            [{}]
             project = acme
             remote = /project/dir22
-            """,
-            FileConfiguration('acme', '/project/dir22', None, [])
-        ),
-        (
-            os.path.expanduser('~/relative/from/home'),
-            """
-            [~/relative/from/home]
-            project = acme
-            remote = /project/dir22
-            """,
+            """.format(os.getcwd().replace(os.path.expanduser('~'), '~', 1)),
             FileConfiguration('acme', '/project/dir22', None, [])
         )
     ]
@@ -141,16 +133,16 @@ def test_config_present_in_both_user_and_project():
     """
 
     user_config = """
-    [/path/to/local-directory]
+    [{}]
     project = other-project
-    """
+    """.format(os.getcwd())
     with _temporary_configurations(user_config, project_config) as (
             project_path, user_path):
         with pytest.raises(ValueError):
-            get_config('/path/to/local-directory', project_path, user_path)
+            get_config('.', project_path, user_path)
 
 
 def test_no_config():
     with _temporary_configurations() as (project_path, user_path):
-        result = get_config('local-directory', project_path, user_path)
+        result = get_config('.', project_path, user_path)
         assert result == FileConfiguration(None, None, None, [])
