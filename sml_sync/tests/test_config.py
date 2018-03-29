@@ -12,6 +12,14 @@ from ..config import get_config, FileConfiguration
 # has to exist. In most of these tests, we just pass os.getcwd()
 # as the local directory.
 
+LOCAL_DIRECTORY = os.getcwd()
+
+# Another version of the local directory, but
+# with `/path/to/home` replaced by a tilde.
+LOCAL_DIRECTORY_WITH_TILDE = LOCAL_DIRECTORY.replace(
+    os.path.expanduser('~'), '~', 1
+)
+
 
 @contextmanager
 def _temporary_configurations(user_config=None, project_config=None):
@@ -104,22 +112,22 @@ def test_project_config_multiple_sections():
     'local_directory,config,expected',
     [
         (
-            os.getcwd(),
+            LOCAL_DIRECTORY,
             """
             [{}]
             project = acme
             remote = /project/dir22
-            """.format(os.getcwd()),
+            """.format(LOCAL_DIRECTORY),
             FileConfiguration('acme', '/project/dir22', None, [])
         ),
         (
             # Test tilde expansion
-            os.getcwd(),
+            LOCAL_DIRECTORY,
             """
             [{}]
             project = acme
             remote = /project/dir22
-            """.format(os.getcwd().replace(os.path.expanduser('~'), '~', 1)),
+            """.format(LOCAL_DIRECTORY_WITH_TILDE),
             FileConfiguration('acme', '/project/dir22', None, [])
         )
     ]
@@ -140,7 +148,7 @@ def test_config_present_in_both_user_and_project():
     user_config = """
     [{}]
     project = other-project
-    """.format(os.getcwd())
+    """.format(LOCAL_DIRECTORY)
     with _temporary_configurations(user_config, project_config) as (
             project_path, user_path):
         with pytest.raises(ValueError):
