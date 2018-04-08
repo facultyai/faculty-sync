@@ -23,7 +23,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-$ curl https://bitbucket.org/theasi/sml-sync/raw/0.2.2/install.sh | bash
+$ curl https://bitbucket.org/theasi/sml-sync/raw/0.2.3/install.sh | bash
 ```
 
 Getting started
@@ -132,7 +132,7 @@ To run a pre-release:
  - Tag the release with an annotated tag: `git tag -a 0.2.1-rc1`.
  - Push the tag to bitbucket.
  - Test that the prerelease installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/<tag>/install.sh | bash` in a new virtual environment.
- 
+
 To run a full release:
 
  - Bump the version in `version.py`, in the install script *and* in the installation instructions in the README.
