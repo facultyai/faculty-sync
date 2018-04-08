@@ -130,7 +130,7 @@ To run a pre-release:
  - Bump the version in `version.py` and in the install script.
  - Commit the changes.
  - Tag the release with an annotated tag: `git tag -a 0.2.1-rc1`.
- - Push the tag to bitbucket.
+ - Push the tag to bitbucket (`git push --tags`).
  - Test that the prerelease installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/<tag>/install.sh | bash` in a new virtual environment.
 
 To run a full release:
