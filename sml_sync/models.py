@@ -24,11 +24,6 @@ FileAttrs = collections.namedtuple('FileAttrs', ['last_modified'])
 DirectoryAttrs = collections.namedtuple('DirectoryAttrs', ['last_modified'])
 
 
-Configuration = collections.namedtuple(
-    'Configuration',
-    ['project', 'server_id', 'local_dir', 'remote_dir', 'debug', 'ignore']
-)
-
 SshDetails = collections.namedtuple(
     'SshDetails',
     ['hostname', 'port', 'username', 'key_file']

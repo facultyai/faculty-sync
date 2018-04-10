@@ -7,8 +7,8 @@ import pytest
 
 from .. import cli
 from .. import models
-from ..config import FileConfiguration
-from ..projects import Project
+from ..cli.config import FileConfiguration
+from ..cli.projects import Project
 
 
 @contextmanager

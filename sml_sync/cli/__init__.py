@@ -3,7 +3,7 @@ import argparse
 
 from .models import Configuration
 from .projects import resolve_project
-from .version import version
+from ..version import version
 from .config import get_config
 from .servers import resolve_server
 
