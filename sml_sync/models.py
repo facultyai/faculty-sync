@@ -20,7 +20,7 @@ class FsObject(
         )
 
 
-FileAttrs = collections.namedtuple('FileAttrs', ['last_modified'])
+FileAttrs = collections.namedtuple('FileAttrs', ['last_modified', 'size'])
 DirectoryAttrs = collections.namedtuple('DirectoryAttrs', ['last_modified'])
 
 
