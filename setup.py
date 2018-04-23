@@ -11,8 +11,7 @@ setup(
     name='sml_sync',
     version=version_ns['version'],
     description='SherlockML file synchronizer',
-    author='Pascal Bugnion',
-    author_email='pascal@bugnion.org',
+    author='ASI Data Science',
     packages=['sml_sync', 'sml_sync.screens'],
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
