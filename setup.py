@@ -11,7 +11,7 @@ setup(
     name='sml_sync',
     version=version_ns['version'],
     description='SherlockML file synchronizer',
-    author='The SherlockML team',
+    author='ASI Data Science',
     packages=['sml_sync', 'sml_sync.screens'],
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
@@ -23,6 +23,7 @@ setup(
         'inflect',
         'watchdog',
         'semantic_version'
-        # This is currently missing prompt-toolkit (waiting for 2.0 to be released)
+        # This is currently missing prompt-toolkit
+        # (waiting for 2.0 to be released)
     ]
 )
