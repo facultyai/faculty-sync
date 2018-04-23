@@ -23,6 +23,7 @@ setup(
         'inflect',
         'watchdog',
         'semantic_version'
-        # This is currently missing prompt-toolkit (waiting for 2.0 to be released)
+        # This is currently missing prompt-toolkit
+        # (waiting for 2.0 to be released)
     ]
 )
