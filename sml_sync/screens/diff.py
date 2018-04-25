@@ -8,6 +8,7 @@ from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 
 from ..pubsub import Messages
+from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
 
@@ -95,16 +96,17 @@ class Summary(object):
 
     def _render_containers(self, differences):
         extra_local_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'LEFT_ONLY'
+            difference.left.path for difference in differences
+            if difference.difference_type == DifferenceType.LEFT_ONLY
         ]
         extra_remote_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'RIGHT_ONLY'
+            difference.right.path for difference in differences
+            if difference.difference_type == DifferenceType.RIGHT_ONLY
         ]
         other_differences = [
-            difference[1].path for difference in differences
-            if difference[0] in {'TYPE_DIFFERENT', 'ATTRS_DIFFERENT'}
+            difference.left.path for difference in differences
+            if difference.difference_type in
+            {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
         ]
         are_synchronized = (
             not extra_local_paths
@@ -177,23 +179,24 @@ class Details(object):
             self._container = Window()
         elif self._focus == SummaryContainerName.LOCAL:
             paths = [
-                difference[1].path
+                difference.left.path
                 for difference in self._differences
-                if difference[0] == 'LEFT_ONLY'
+                if difference.difference_type == DifferenceType.LEFT_ONLY
             ]
             self._render_paths(paths)
         elif self._focus == SummaryContainerName.REMOTE:
             paths = [
-                difference[1].path
+                difference.right.path
                 for difference in self._differences
-                if difference[0] == 'RIGHT_ONLY'
+                if difference.difference_type == DifferenceType.RIGHT_ONLY
             ]
             self._render_paths(paths)
         else:
             paths = [
-                difference[1].path
+                difference.left.path
                 for difference in self._differences
-                if difference[0] in {'TYPE_DIFFERENT', 'ATTRS_DIFFERENT'}
+                if difference.difference_type in
+                {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
             ]
             self._render_paths(paths)
 
