@@ -106,18 +106,26 @@ class Summary(object):
             difference[1].path for difference in differences
             if difference[0] in {'TYPE_DIFFERENT', 'ATTRS_DIFFERENT'}
         ]
-        if not extra_local_paths and not extra_remote_paths and not other_differences:
-            self._has_differences = False
-            self._menu_containers = [
-                Window(
-                    FormattedTextControl(
-                        'Local directory and SherlockML are synchronized.'),
-                    height=1)
-            ]
+        are_synchronized = (
+            not extra_local_paths
+            and not extra_remote_paths
+            and not other_differences
+        )
+        if are_synchronized:
+                self._has_differences = False
+                self._menu_containers = [
+                    Window(
+                        FormattedTextControl(
+                            'Local directory and SherlockML are synchronized.'
+                        ),
+                        height=1)
+                ]
         else:
             self._has_differences = True
             if extra_local_paths:
-                text = 'There {} {} {} that {} locally but not on SherlockML'.format(
+                template = \
+                    'There {} {} {} that {} locally but not on SherlockML'
+                text = template.format(
                     self._plural_verb('is', len(extra_local_paths)),
                     len(extra_local_paths),
                     self._plural('file', len(extra_local_paths)),
@@ -127,7 +135,8 @@ class Summary(object):
                 self._menu_containers.append(container)
                 self._menu_container_names.append(SummaryContainerName.LOCAL)
             if extra_remote_paths:
-                text = 'There {} {} {} that {} only on SherlockML'.format(
+                template = 'There {} {} {} that {} only on SherlockML'
+                text = template.format(
                     self._plural_verb('is', len(extra_remote_paths)),
                     len(extra_remote_paths),
                     self._plural('file', len(extra_remote_paths)),
@@ -137,7 +146,8 @@ class Summary(object):
                 self._menu_containers.append(container)
                 self._menu_container_names.append(SummaryContainerName.REMOTE)
             if other_differences:
-                text = 'There {} {} {} that {} not synchronized'.format(
+                template = 'There {} {} {} that {} not synchronized'
+                text = template.format(
                     self._plural_verb('is', len(other_differences)),
                     len(other_differences),
                     self._plural('file', len(other_differences)),
@@ -209,34 +219,34 @@ class DifferencesScreen(BaseScreen):
         self._details = Details(differences, self._summary.current_focus)
         self.bindings = KeyBindings()
 
-        @self.bindings.add('d')
+        @self.bindings.add('d')  # noqa: F811
         def _(event):
             self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
 
-        @self.bindings.add('u')
+        @self.bindings.add('u')  # noqa: F811
         def _(event):
             self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
 
-        @self.bindings.add('r')
+        @self.bindings.add('r')  # noqa: F811
         def _(event):
             self._exchange.publish(Messages.REFRESH_DIFFERENCES)
 
-        @self.bindings.add('w')
+        @self.bindings.add('w')  # noqa: F811
         def _(event):
             self._exchange.publish(Messages.START_WATCH_SYNC)
 
-        @self.bindings.add('?')
+        @self.bindings.add('?')  # noqa: F811
         def _(event):
             self._toggle_help()
 
-        @self.bindings.add('tab')
+        @self.bindings.add('tab')  # noqa: F811
         @self.bindings.add('down')
         @self.bindings.add('left')
         def _(event):
             new_focus = self._summary.focus_next()
             self._details.set_focus(new_focus)
 
-        @self.bindings.add('s-tab')
+        @self.bindings.add('s-tab')  # noqa: F811
         @self.bindings.add('up')
         @self.bindings.add('right')
         def _(event):
