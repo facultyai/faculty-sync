@@ -1,10 +1,9 @@
 
-import logging
 import os
 import stat
 from datetime import datetime
 
-from .models import DirectoryAttrs, FileAttrs, FsObject, FsObjectType
+from .models import FsObjectType, Difference, DifferenceType
 
 
 def get_remote_mtime(path, sftp):
@@ -37,18 +36,18 @@ def compare_file_trees(left, right):
     right_file_paths = {obj.path: obj for obj in right}
     left_only = [obj for obj in left if obj.path not in right_file_paths]
     for obj in left_only:
-        yield ('LEFT_ONLY', obj)
+        yield Difference(DifferenceType.LEFT_ONLY, left=obj, right=None)
     right_only = [obj for obj in right if obj.path not in left_file_paths]
     for obj in right_only:
-        yield ('RIGHT_ONLY', obj)
+        yield Difference(DifferenceType.RIGHT_ONLY, left=None, right=obj)
 
     for left_obj in left:
         if left_obj.path in right_file_paths:
             right_obj = right_file_paths[left_obj.path]
             if left_obj.obj_type != right_obj.obj_type:
-                yield ('TYPE_DIFFERENT', left_obj, right_obj)
-            elif (
-                    left_obj.attrs != right_obj.attrs and
-                    left_obj.obj_type == FsObjectType.FILE
-                ):
-                yield ('ATTRS_DIFFERENT', left_obj, right_obj)
+                yield Difference(
+                    DifferenceType.TYPE_DIFFERENT, left_obj, right_obj)
+            elif (left_obj.attrs != right_obj.attrs and
+                  left_obj.obj_type == FsObjectType.FILE):
+                yield Difference(
+                    DifferenceType.ATTRS_DIFFERENT, left_obj, right_obj)
