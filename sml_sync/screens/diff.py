@@ -178,30 +178,33 @@ class Details(object):
         if self._focus is None:
             self._container = Window()
         elif self._focus == SummaryContainerName.LOCAL:
-            paths = [
-                difference.left.path
+            file_objects = [
+                difference.left
                 for difference in self._differences
                 if difference.difference_type == DifferenceType.LEFT_ONLY
             ]
-            self._render_paths(paths)
+            self._render_differences(file_objects)
         elif self._focus == SummaryContainerName.REMOTE:
-            paths = [
-                difference.right.path
+            file_objects = [
+                difference.right
                 for difference in self._differences
                 if difference.difference_type == DifferenceType.RIGHT_ONLY
             ]
-            self._render_paths(paths)
+            self._render_differences(file_objects)
         else:
-            paths = [
-                difference.left.path
+            file_objects = [
+                difference.left
                 for difference in self._differences
                 if difference.difference_type in
                 {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
             ]
-            self._render_paths(paths)
+            self._render_differences(file_objects)
 
-    def _render_paths(self, paths):
-        path_texts = ['    {}'.format(path) for path in paths]
+    def _render_differences(self, file_objects):
+        path_texts = [
+            '    {}'.format(file_object.path)
+            for file_object in file_objects
+        ]
         self._control.text = '\n'.join(path_texts)
 
 
