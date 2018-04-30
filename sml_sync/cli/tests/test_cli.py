@@ -5,10 +5,10 @@ from unittest.mock import patch
 
 import pytest
 
-from .. import cli
+from ... import cli
 from .. import models
-from ..cli.config import FileConfiguration
-from ..cli.projects import Project
+from ..config import FileConfiguration
+from ..projects import Project
 
 
 @contextmanager
