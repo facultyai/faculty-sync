@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ..cli.config import get_config, FileConfiguration
+from ..config import get_config, FileConfiguration
 
 
 # Note that, for compatibility with Python3.5, the local directory
