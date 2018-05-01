@@ -39,3 +39,13 @@ def test_different_length_rows():
 
     with pytest.raises(ValueError):
         Table([col1, col2])
+
+
+def test_no_rows():
+    col1 = TableColumn(rows=[], header='t1')
+    col2 = TableColumn(rows=[], header='t2')
+
+    table = Table([col1, col2])
+
+    assert table._header_control.text == 't1 t2'
+    assert table._body_control.buffer.text == ''
