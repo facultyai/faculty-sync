@@ -49,3 +49,10 @@ def test_no_rows():
 
     assert table._header_control.text == 't1 t2'
     assert table._body_control.buffer.text == ''
+
+
+def test_no_columns():
+    table = Table([])
+
+    assert table._header_control.text == ''
+    assert table._body_control.buffer.text == ''

@@ -14,7 +14,7 @@ TableColumn = namedtuple('Column', ['rows', 'header'])
 class Table(object):
 
     def __init__(self, columns: List[TableColumn]):
-        if len(set(len(column.rows) for column in columns)) != 1:
+        if len(set(len(column.rows) for column in columns)) not in {0, 1}:
             raise ValueError('All columns must have the same number of rows.')
 
         formatted_headers = []
