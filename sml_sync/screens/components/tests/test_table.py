@@ -1,5 +1,7 @@
 import textwrap
 
+import pytest
+
 from .. import Table, TableColumn
 
 
@@ -29,3 +31,11 @@ def test_table_varying_row_lengths():
         """\
         a               long
         some-long-value b   """)
+
+
+def test_different_length_rows():
+    col1 = TableColumn(rows=['a', 'b', 'c'], header='t1')
+    col2 = TableColumn(rows=['e'], header='t2')
+
+    with pytest.raises(ValueError):
+        Table([col1, col2])
