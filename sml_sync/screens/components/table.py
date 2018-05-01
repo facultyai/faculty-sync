@@ -22,7 +22,7 @@ class Table(object):
         for column in columns:
             width = max(
                     len(column.header),
-                    max(len(row) for row in column.rows)
+                    max((len(row) for row in column.rows), default=0)
             )
             formatted_rows = [row.ljust(width, ' ') for row in column.rows]
             formatted_headers.append(column.header.ljust(width, ' '))
