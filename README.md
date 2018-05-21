@@ -23,7 +23,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-$ curl https://bitbucket.org/theasi/sml-sync/raw/0.2.3/install.sh | bash
+pip install https://github.com/ASIDataScience/sml-sync/archive/0.2.3.zip --process-dependency-links
 ```
 
 Getting started
