@@ -11,13 +11,17 @@ def test_simple_table():
 
     table = Table([col1, col2])
 
-    assert table._header_control.text == 't1 t2'
-    assert table._body_control.buffer.text == textwrap.dedent(
+    assert len(table.window.children) == 2
+    [header_window, body_window] = table.window.children
+
+    assert header_window.content.text == 't1 t2'
+    assert body_window.content.buffer.text == textwrap.dedent(
         """\
         a  d 
         b  e 
         c  f """)  # noqa: W291 (ignore trailing whitespace)
     assert table.preferred_width(100).preferred == 5
+    assert table.preferred_height(5, 100).preferred == 4
 
 
 def test_table_varying_row_lengths():
@@ -26,13 +30,17 @@ def test_table_varying_row_lengths():
 
     table = Table([col1, col2])
 
-    assert table._header_control.text == textwrap.dedent("""\
+    assert len(table.window.children) == 2
+    [header_window, body_window] = table.window.children
+
+    assert header_window.content.text == textwrap.dedent("""\
         t1              t2  """)
-    assert table._body_control.buffer.text == textwrap.dedent(
+    assert body_window.content.buffer.text == textwrap.dedent(
         """\
         a               long
         some-long-value b   """)
     assert table.preferred_width(100).preferred == 20
+    assert table.preferred_height(5, 100).preferred == 3
 
 
 def test_different_length_rows():
@@ -49,14 +57,18 @@ def test_no_rows():
 
     table = Table([col1, col2])
 
-    assert table._header_control.text == 't1 t2'
-    assert table._body_control.buffer.text == ''
+    assert len(table.window.children) == 1
+    [header_window] = table.window.children
+
+    assert header_window.content.text == 't1 t2'
     assert table.preferred_width(100).preferred == 5
+    assert table.preferred_height(5, 100).preferred == 1
 
 
 def test_no_columns():
     table = Table([])
 
-    assert table._header_control.text == ''
-    assert table._body_control.buffer.text == ''
+    assert len(table.window.children) == 1
+
     assert table.preferred_width(100).preferred == 0
+    assert table.preferred_height(0, 100).preferred == 1
