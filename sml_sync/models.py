@@ -19,6 +19,12 @@ class FsObject(
             self.attrs
         )
 
+    def is_file(self):
+        return self.obj_type == FsObjectType.FILE
+
+    def is_directory(self):
+        return self.obj_type == FsObjectType.DIRECTORY
+
 
 FileAttrs = collections.namedtuple('FileAttrs', ['last_modified', 'size'])
 DirectoryAttrs = collections.namedtuple('DirectoryAttrs', ['last_modified'])
