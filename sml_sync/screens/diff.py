@@ -154,6 +154,26 @@ class Details(object):
         else:
             self._render_differences(self._differences, self._focus.name)
 
+    def _render_local_mtime(self, difference):
+        if difference.left is not None and difference.left.is_file():
+            return str(difference.left.attrs.last_modified)
+        return ''
+
+    def _render_remote_mtime(self, difference):
+        if difference.right is not None and difference.right.is_file():
+            return str(difference.right.attrs.last_modified)
+        return ''
+
+    def _render_local_size(self, difference):
+        if difference.left is not None and difference.left.is_file():
+            return str(difference.left.attrs.size)
+        return ''
+
+    def _render_remote_size(self, difference):
+        if difference.right is not None and difference.right.is_file():
+            return str(difference.right.attrs.size)
+        return ''
+
     def _render_differences(self, differences, direction):
         action_map = {
             (DifferenceType.LEFT_ONLY, 'UP'): 'create',
@@ -163,6 +183,10 @@ class Details(object):
         }
         paths = []
         actions = []
+        local_mtimes = []
+        remote_mtimes = []
+        local_sizes = []
+        remote_sizes = []
 
         for difference in differences:
             if difference.difference_type == DifferenceType.LEFT_ONLY:
@@ -172,6 +196,12 @@ class Details(object):
             else:
                 paths.append(difference.left.path)
 
+            local_mtimes.append(self._render_local_mtime(difference))
+            remote_mtimes.append(self._render_remote_mtime(difference))
+
+            local_sizes.append(self._render_local_size(difference))
+            remote_sizes.append(self._render_remote_size(difference))
+
             actions.append(
                 action_map.get(
                     (difference.difference_type, direction), 'replace')
@@ -179,7 +209,11 @@ class Details(object):
 
         columns = [
             TableColumn(paths, 'PATH'),
-            TableColumn(actions, 'ACTION')
+            TableColumn(actions, 'ACTION'),
+            TableColumn(local_mtimes, 'LOCAL MTIME'),
+            TableColumn(remote_mtimes, 'REMOTE MTIME'),
+            TableColumn(local_sizes, 'LOCAL SIZE'),
+            TableColumn(remote_sizes, 'REMOTE SIZE'),
         ]
         self.container.children = [to_container(Table(columns))]
 
