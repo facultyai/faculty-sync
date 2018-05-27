@@ -207,10 +207,8 @@ class Details(object):
             local_sizes.append(self._render_local_size(difference))
             remote_sizes.append(self._render_remote_size(difference))
 
-            actions.append(
-                action_map.get(
-                    (difference.difference_type, direction), 'replace')
-            )
+            action = action_map[(difference.difference_type, direction)]
+            actions.append(action)
 
         columns = [
             TableColumn(paths, 'PATH'),
