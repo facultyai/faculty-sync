@@ -12,6 +12,7 @@ from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
 from .components import Table, TableColumn
+from .humanize import naturaltime, naturalsize
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
@@ -156,22 +157,22 @@ class Details(object):
 
     def _render_local_mtime(self, difference):
         if difference.left is not None and difference.left.is_file():
-            return str(difference.left.attrs.last_modified)
+            return naturaltime(difference.left.attrs.last_modified)
         return ''
 
     def _render_remote_mtime(self, difference):
         if difference.right is not None and difference.right.is_file():
-            return str(difference.right.attrs.last_modified)
+            return naturaltime(difference.right.attrs.last_modified)
         return ''
 
     def _render_local_size(self, difference):
         if difference.left is not None and difference.left.is_file():
-            return str(difference.left.attrs.size)
+            return naturalsize(difference.left.attrs.size)
         return ''
 
     def _render_remote_size(self, difference):
         if difference.right is not None and difference.right.is_file():
-            return str(difference.right.attrs.size)
+            return naturalsize(difference.right.attrs.size)
         return ''
 
     def _render_differences(self, differences, direction):
