@@ -177,10 +177,14 @@ class Details(object):
 
     def _render_differences(self, differences, direction):
         action_map = {
-            (DifferenceType.LEFT_ONLY, 'UP'): 'create',
-            (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create',
-            (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete',
-            (DifferenceType.RIGHT_ONLY, 'UP'): 'delete'
+            (DifferenceType.LEFT_ONLY, 'UP'): 'create remote',
+            (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create local',
+            (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete local',
+            (DifferenceType.RIGHT_ONLY, 'UP'): 'delete remote',
+            (DifferenceType.TYPE_DIFFERENT, 'UP'): 'replace remote',
+            (DifferenceType.TYPE_DIFFERENT, 'DOWN'): 'replace local',
+            (DifferenceType.ATTRS_DIFFERENT, 'UP'): 'replace remote',
+            (DifferenceType.ATTRS_DIFFERENT, 'DOWN'): 'replace local'
         }
         paths = []
         actions = []
