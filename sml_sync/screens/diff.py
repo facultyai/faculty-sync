@@ -40,9 +40,8 @@ Keys:
 
 
 class SummaryContainerName(Enum):
-    LOCAL = 'LOCAL'
-    REMOTE = 'REMOTE'
-    BOTH = 'BOTH'
+    UP = 'UP'
+    DOWN = 'DOWN'
 
 
 class Summary(object):
@@ -125,40 +124,14 @@ class Summary(object):
                 ]
         else:
             self._has_differences = True
-            if extra_local_paths:
-                template = \
-                    'There {} {} {} that {} locally but not on SherlockML'
-                text = template.format(
-                    self._plural_verb('is', len(extra_local_paths)),
-                    len(extra_local_paths),
-                    self._plural('file', len(extra_local_paths)),
-                    self._plural_verb('exists', len(extra_local_paths))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.LOCAL)
-            if extra_remote_paths:
-                template = 'There {} {} {} that {} only on SherlockML'
-                text = template.format(
-                    self._plural_verb('is', len(extra_remote_paths)),
-                    len(extra_remote_paths),
-                    self._plural('file', len(extra_remote_paths)),
-                    self._plural_verb('exists', len(extra_remote_paths))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.REMOTE)
-            if other_differences:
-                template = 'There {} {} {} that {} not synchronized'
-                text = template.format(
-                    self._plural_verb('is', len(other_differences)),
-                    len(other_differences),
-                    self._plural('file', len(other_differences)),
-                    self._plural_verb('is', len(other_differences))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.BOTH)
+            text = 'Up'
+            container = Window(FormattedTextControl(text), height=1)
+            self._menu_containers.append(container)
+            self._menu_container_names.append(SummaryContainerName.UP)
+            text = 'Down'
+            container = Window(FormattedTextControl(text), height=1)
+            self._menu_containers.append(container)
+            self._menu_container_names.append(SummaryContainerName.DOWN)
             self._set_selection_index(0)
 
 
@@ -178,26 +151,18 @@ class Details(object):
     def _render(self):
         if self._focus is None:
             self.container.children = []
-        elif self._focus == SummaryContainerName.LOCAL:
+        elif self._focus == SummaryContainerName.UP:
             file_objects = [
                 difference.left
                 for difference in self._differences
                 if difference.difference_type == DifferenceType.LEFT_ONLY
             ]
             self._render_differences(file_objects)
-        elif self._focus == SummaryContainerName.REMOTE:
+        elif self._focus == SummaryContainerName.DOWN:
             file_objects = [
                 difference.right
                 for difference in self._differences
                 if difference.difference_type == DifferenceType.RIGHT_ONLY
-            ]
-            self._render_differences(file_objects)
-        else:
-            file_objects = [
-                difference.left
-                for difference in self._differences
-                if difference.difference_type in
-                {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
             ]
             self._render_differences(file_objects)
 
