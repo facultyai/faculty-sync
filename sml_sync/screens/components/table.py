@@ -50,5 +50,8 @@ class Table(object):
             )
         ])
 
+    def preferred_width(self, max_available_width):
+        return self.window.preferred_width(max_available_width)
+
     def __pt_container__(self):
         return self.window
