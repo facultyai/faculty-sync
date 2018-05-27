@@ -3,7 +3,7 @@ from enum import Enum
 
 import inflect
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout import HSplit, VSplit
+from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 
@@ -11,6 +11,7 @@ from ..pubsub import Messages
 from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
+from .components import Table, TableColumn
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
@@ -166,8 +167,8 @@ class Details(object):
     def __init__(self, differences, initial_focus):
         self._focus = initial_focus
         self._differences = differences
-        self._control = FormattedTextControl('')
-        self.container = Window(self._control)
+        self.container = VSplit([Window(FormattedTextControl('Loading...'))])
+
         self._render()
 
     def set_focus(self, new_focus):
@@ -176,7 +177,7 @@ class Details(object):
 
     def _render(self):
         if self._focus is None:
-            self._container = Window()
+            self.container.children = []
         elif self._focus == SummaryContainerName.LOCAL:
             file_objects = [
                 difference.left
@@ -201,11 +202,22 @@ class Details(object):
             self._render_differences(file_objects)
 
     def _render_differences(self, file_objects):
-        path_texts = [
-            '    {}'.format(file_object.path)
+        file_paths = [file_object.path for file_object in file_objects]
+        file_sizes = [
+            str(file_object.attrs.size) if file_object.is_file() else ''
             for file_object in file_objects
         ]
-        self._control.text = '\n'.join(path_texts)
+        file_mtimes = [
+            str(file_object.attrs.last_modified)
+            if file_object.is_file() else ''
+            for file_object in file_objects
+        ]
+        columns = [
+            TableColumn(file_paths, 'PATH'),
+            TableColumn(file_sizes, 'SIZE'),
+            TableColumn(file_mtimes, 'LAST MODIFIED')
+        ]
+        self.container.children = [to_container(Table(columns))]
 
 
 class DifferencesScreen(BaseScreen):
