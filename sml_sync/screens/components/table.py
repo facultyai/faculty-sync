@@ -35,23 +35,37 @@ class Table(object):
         rows_string = [' '.join(row) for row in rows]
         table_body = '\n'.join(rows_string)
 
-        self._header_control = FormattedTextControl(
-            ' '.join(formatted_headers))
+        if rows:
+            document = Document(table_body, 0)
+            _buffer = Buffer(document=document, read_only=True)
+            self._body_control = BufferControl(_buffer)
+            body_windows = [
+                Window(
+                    self._body_control,
+                    right_margins=[ScrollbarMargin(display_arrows=True)]
+                )
+            ]
+        else:
+            body_windows = []
 
-        document = Document(table_body, 0)
-        _buffer = Buffer(document=document, read_only=True)
-        self._body_control = BufferControl(_buffer)
+        self.window = HSplit(
+            self._header_windows(formatted_headers) + body_windows
+        )
 
-        self.window = HSplit([
-            Window(self._header_control, height=1),
-            Window(
-                self._body_control,
-                right_margins=[ScrollbarMargin(display_arrows=True)]
-            )
-        ])
+    def _header_windows(self, formatted_headers):
+        if len(formatted_headers):
+            header_control = FormattedTextControl(
+                ' '.join(formatted_headers))
+            header_windows = [Window(header_control, height=1)]
+        else:
+            header_windows = [Window(height=1, width=0)]
+        return header_windows
 
     def preferred_width(self, max_available_width):
         return self.window.preferred_width(max_available_width)
+
+    def preferred_height(self, width, max_available_height):
+        return self.window.preferred_height(width, max_available_height)
 
     def __pt_container__(self):
         return self.window
