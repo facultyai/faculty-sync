@@ -17,6 +17,7 @@ def test_simple_table():
         a  d 
         b  e 
         c  f """)  # noqa: W291 (ignore trailing whitespace)
+    assert table.preferred_width(100).preferred == 5
 
 
 def test_table_varying_row_lengths():
@@ -31,6 +32,7 @@ def test_table_varying_row_lengths():
         """\
         a               long
         some-long-value b   """)
+    assert table.preferred_width(100).preferred == 20
 
 
 def test_different_length_rows():
@@ -49,6 +51,7 @@ def test_no_rows():
 
     assert table._header_control.text == 't1 t2'
     assert table._body_control.buffer.text == ''
+    assert table.preferred_width(100).preferred == 5
 
 
 def test_no_columns():
@@ -56,3 +59,4 @@ def test_no_columns():
 
     assert table._header_control.text == ''
     assert table._body_control.buffer.text == ''
+    assert table.preferred_width(100).preferred == 0
