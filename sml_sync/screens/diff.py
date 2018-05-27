@@ -151,36 +151,35 @@ class Details(object):
     def _render(self):
         if self._focus is None:
             self.container.children = []
-        elif self._focus == SummaryContainerName.UP:
-            file_objects = [
-                difference.left
-                for difference in self._differences
-                if difference.difference_type == DifferenceType.LEFT_ONLY
-            ]
-            self._render_differences(file_objects)
-        elif self._focus == SummaryContainerName.DOWN:
-            file_objects = [
-                difference.right
-                for difference in self._differences
-                if difference.difference_type == DifferenceType.RIGHT_ONLY
-            ]
-            self._render_differences(file_objects)
+        else:
+            self._render_differences(self._differences, self._focus.name)
 
-    def _render_differences(self, file_objects):
-        file_paths = [file_object.path for file_object in file_objects]
-        file_sizes = [
-            str(file_object.attrs.size) if file_object.is_file() else ''
-            for file_object in file_objects
-        ]
-        file_mtimes = [
-            str(file_object.attrs.last_modified)
-            if file_object.is_file() else ''
-            for file_object in file_objects
-        ]
+    def _render_differences(self, differences, direction):
+        action_map = {
+            (DifferenceType.LEFT_ONLY, 'UP'): 'create',
+            (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create',
+            (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete',
+            (DifferenceType.RIGHT_ONLY, 'UP'): 'delete'
+        }
+        paths = []
+        actions = []
+
+        for difference in differences:
+            if difference.difference_type == DifferenceType.LEFT_ONLY:
+                paths.append(difference.left.path)
+            elif difference.difference_type == DifferenceType.RIGHT_ONLY:
+                paths.append(difference.right.path)
+            else:
+                paths.append(difference.left.path)
+
+            actions.append(
+                action_map.get(
+                    (difference.difference_type, direction), 'replace')
+            )
+
         columns = [
-            TableColumn(file_paths, 'PATH'),
-            TableColumn(file_sizes, 'SIZE'),
-            TableColumn(file_mtimes, 'LAST MODIFIED')
+            TableColumn(paths, 'PATH'),
+            TableColumn(actions, 'ACTION')
         ]
         self.container.children = [to_container(Table(columns))]
 
