@@ -66,3 +66,21 @@ def test_key_up():
     assert menu_line2 == ('', 'menu entry 2\n')
 
     assert menu.current_selection == 1
+
+
+def test_wrap_keys():
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+
+    menu = VerticalMenu([entry1, entry2])
+
+    simulate_key(menu, 'down')
+    simulate_key(menu, 'down')
+
+    menu_text = get_menu_text(menu)
+    assert len(menu_text) == 2
+    [menu_line1, menu_line2] = menu_text
+    assert menu_line1 == ('reverse', 'menu entry 1\n')
+    assert menu_line2 == ('', 'menu entry 2\n')
+
+    assert menu.current_selection == 1
