@@ -33,13 +33,13 @@ def test_simple_menu():
     assert menu_line2 == ('', 'menu entry 2\n')
 
 
-def test_change_entry():
+def test_key_down():
     entry1 = MenuEntry(1, 'menu entry 1')
     entry2 = MenuEntry(2, 'menu entry 2')
 
     menu = VerticalMenu([entry1, entry2])
 
-    simulate_key(menu, 'up')
+    simulate_key(menu, 'down')
 
     menu_text = get_menu_text(menu)
     assert len(menu_text) == 2
@@ -48,3 +48,21 @@ def test_change_entry():
     assert menu_line2 == ('reverse', 'menu entry 2\n')
 
     assert menu.current_selection == 2
+
+
+def test_key_up():
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+
+    menu = VerticalMenu([entry1, entry2])
+
+    simulate_key(menu, 'down')
+    simulate_key(menu, 'up')
+
+    menu_text = get_menu_text(menu)
+    assert len(menu_text) == 2
+    [menu_line1, menu_line2] = menu_text
+    assert menu_line1 == ('reverse', 'menu entry 1\n')
+    assert menu_line2 == ('', 'menu entry 2\n')
+
+    assert menu.current_selection == 1
