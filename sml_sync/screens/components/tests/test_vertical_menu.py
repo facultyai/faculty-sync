@@ -1,4 +1,6 @@
 
+from unittest.mock import Mock
+
 from prompt_toolkit.layout import to_container
 from prompt_toolkit.key_binding.key_processor import KeyProcessor, KeyPress
 
@@ -84,3 +86,18 @@ def test_wrap_keys():
     assert menu_line2 == ('', 'menu entry 2\n')
 
     assert menu.current_selection == 1
+
+
+def test_callback_called():
+    mock_callback = Mock()
+
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+
+    menu = VerticalMenu([entry1, entry2])
+
+    menu.register_menu_change_callback(mock_callback)
+
+    simulate_key(menu, 'down')
+
+    mock_callback.assert_called_with(2)
