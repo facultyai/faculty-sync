@@ -39,6 +39,18 @@ Keys:
     [?] Toggle this message.
 """
 
+UP_SYNC_HELP_TEXT = """\
+Press [u] to modify the SherlockML workspace so that it mirrors your local disk.
+
+This will make the following changes to your SherlockML workspace:
+"""
+
+DOWN_SYNC_HELP_TEXT = """\
+Press [d] to modify your local filesystem so that it mirrors the SherlockML workspace.
+
+This will make the following changes to your local disk:
+"""
+
 
 class SelectionName(Enum):
     UP = 'UP'
@@ -92,7 +104,7 @@ class Details(object):
         self._selection = initial_selection
         self._differences = differences
         self._table = None
-        self.container = VSplit([])
+        self.container = HSplit([])
 
         self._render()
 
@@ -131,7 +143,7 @@ class Details(object):
             return naturalsize(difference.right.attrs.size)
         return ''
 
-    def _render_differences(self, differences, direction):
+    def _render_table(self, differences, direction):
         action_map = {
             (DifferenceType.LEFT_ONLY, 'UP'): 'create remote',
             (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create local',
@@ -174,8 +186,21 @@ class Details(object):
             TableColumn(local_sizes, 'LOCAL SIZE'),
             TableColumn(remote_sizes, 'REMOTE SIZE'),
         ]
-        self._table = Table(columns)
-        self.container.children = [to_container(self._table)]
+        table = Table(columns)
+        return table
+
+    def _render_differences(self, differences, direction):
+        self._table = self._render_table(differences, direction)
+        help_text = (
+            UP_SYNC_HELP_TEXT if direction == 'UP' else DOWN_SYNC_HELP_TEXT
+        )
+        help_box = Window(FormattedTextControl(help_text), height=3)
+        self.container.children = [
+            Window(height=1),
+            help_box,
+            Window(height=1),
+            to_container(self._table),
+        ]
 
 
 class DifferencesScreen(BaseScreen):
@@ -227,7 +252,9 @@ class DifferencesScreen(BaseScreen):
         self._screen_container = HSplit([
             VSplit([
                 self._summary.container,
+                Window(width=1),
                 Window(width=1, char=styles.get_vertical_border_char()),
+                Window(width=1),
                 self._details.container
             ]),
             self._bottom_toolbar
