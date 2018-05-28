@@ -22,7 +22,11 @@ class VerticalMenu(object):
 
     @property
     def current_selection(self):
-        return self._entries[self._current_index].id_
+        if self._entries:
+            return self._entries[self._current_index].id_
+        else:
+            # No items in the menu
+            return None
 
     def register_menu_change_callback(self, callback):
         self._menu_change_callbacks.append(callback)
@@ -51,11 +55,12 @@ class VerticalMenu(object):
         return bindings
 
     def _set_selection_index(self, new_index):
-        new_index = new_index % len(self._entries)
-        if self._current_index != new_index:
-            self._current_index = new_index
-            self._set_control_text()
-            self._execute_callbacks(self.current_selection)
+        if self._entries:
+            new_index = new_index % len(self._entries)
+            if self._current_index != new_index:
+                self._current_index = new_index
+                self._set_control_text()
+                self._execute_callbacks(self.current_selection)
 
     def _set_control_text(self):
         control_lines = []
