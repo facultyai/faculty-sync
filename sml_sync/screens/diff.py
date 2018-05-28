@@ -58,7 +58,6 @@ Press [w] to enter `watch` mode. Any time you save, move or delete a file, the c
 """
 
 
-
 class SelectionName(Enum):
     UP = 'UP'
     DOWN = 'DOWN'
