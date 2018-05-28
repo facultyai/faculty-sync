@@ -101,3 +101,12 @@ def test_callback_called():
     simulate_key(menu, 'down')
 
     mock_callback.assert_called_with(2)
+
+
+def test_zero_entries():
+    menu = VerticalMenu([])
+    menu_text = get_menu_text(menu)
+    assert len(menu_text) == 0
+    assert menu.current_selection is None
+    simulate_key(menu, 'up')
+    assert menu.current_selection is None
