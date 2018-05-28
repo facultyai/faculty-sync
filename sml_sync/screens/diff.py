@@ -52,10 +52,16 @@ Press [d] to modify your local filesystem so that it mirrors the SherlockML work
 This will make the following changes to your local disk:
 """
 
+WATCH_HELP_TEXT = """\
+Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on SherlockML.
+"""
+
+
 
 class SelectionName(Enum):
     UP = 'UP'
     DOWN = 'DOWN'
+    WATCH = 'WATCH'
 
 
 class DiffScreenMessages(Enum):
@@ -72,7 +78,8 @@ class Summary(object):
         self._current_index = 0
         self._menu_container = VerticalMenu([
             MenuEntry(SelectionName.UP, 'Up'),
-            MenuEntry(SelectionName.DOWN, 'Down')
+            MenuEntry(SelectionName.DOWN, 'Down'),
+            MenuEntry(SelectionName.WATCH, 'Watch'),
         ], width=10)
         self._menu_container.register_menu_change_callback(
             lambda new_selection: self._on_new_selection(new_selection)
@@ -83,8 +90,7 @@ class Summary(object):
                 Window(height=1),
                 self._menu_container,
                 Window()
-            ]),
-            Window(width=4),
+            ])
         ])
 
     @property
@@ -122,7 +128,11 @@ class Details(object):
         self._render()
 
     def _render(self):
-        self._render_differences(self._differences, self._selection.name)
+        if self._selection in {SelectionName.UP, SelectionName.DOWN}:
+            self._render_differences(self._differences, self._selection.name)
+        else:
+            self._render_watch()
+        get_app().invalidate()
 
     def _render_local_mtime(self, difference):
         if difference.left is not None and difference.left.is_file():
@@ -143,6 +153,16 @@ class Details(object):
         if difference.right is not None and difference.right.is_file():
             return naturalsize(difference.right.attrs.size)
         return ''
+
+    def _render_watch(self):
+        help_text = WATCH_HELP_TEXT
+        help_box = Window(FormattedTextControl(help_text), height=3)
+        self.container.children = [
+            Window(height=1),
+            help_box,
+            Window()
+        ]
+
 
     def _render_table(self, differences, direction):
         action_map = {
@@ -202,7 +222,6 @@ class Details(object):
             Window(height=1),
             to_container(self._table),
         ]
-        get_app().invalidate()
 
 
 class DifferencesScreen(BaseScreen):
