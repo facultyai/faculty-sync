@@ -110,3 +110,19 @@ def test_zero_entries():
     assert menu.current_selection is None
     simulate_key(menu, 'up')
     assert menu.current_selection is None
+
+
+def test_single_entry():
+    menu = VerticalMenu([MenuEntry('only', 'menu entry')])
+    menu_text = get_menu_text(menu)
+    assert len(menu_text) == 1
+    [menu_line1] = menu_text
+    assert menu_line1 == ('reverse', 'menu entry\n')
+    assert menu.current_selection == 'only'
+    simulate_key(menu, 'up')
+
+    menu_text = get_menu_text(menu)
+    assert len(menu_text) == 1
+    [menu_line1] = menu_text
+    assert menu_line1 == ('reverse', 'menu entry\n')
+    assert menu.current_selection == 'only'
