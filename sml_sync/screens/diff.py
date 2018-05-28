@@ -6,6 +6,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.widgets import TextArea
 
 from ..pubsub import Messages
 from ..models import DifferenceType
@@ -154,15 +155,14 @@ class Details(object):
             return naturalsize(difference.right.attrs.size)
         return ''
 
-    def _render_watch(self):
-        help_text = WATCH_HELP_TEXT
-        help_box = Window(FormattedTextControl(help_text), height=3)
-        self.container.children = [
-            Window(height=1),
-            help_box,
-            Window()
-        ]
+    def _render_help_box(self, text):
+        text_area = TextArea(
+            text, focusable=False, read_only=True, dont_extend_height=True)
+        return to_container(text_area)
 
+    def _render_watch(self):
+        help_box = self._render_help_box(WATCH_HELP_TEXT)
+        self.container.children = [Window(height=1), help_box, Window()]
 
     def _render_table(self, differences, direction):
         action_map = {
@@ -212,14 +212,12 @@ class Details(object):
 
     def _render_differences(self, differences, direction):
         self._table = self._render_table(differences, direction)
-        help_text = (
+        help_box = self._render_help_box(
             UP_SYNC_HELP_TEXT if direction == 'UP' else DOWN_SYNC_HELP_TEXT
         )
-        help_box = Window(FormattedTextControl(help_text), height=3)
         self.container.children = [
             Window(height=1),
             help_box,
-            Window(height=1),
             to_container(self._table),
         ]
 
