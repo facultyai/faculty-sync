@@ -10,7 +10,7 @@ from ..pubsub import Messages
 from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
-from .components import Table, TableColumn
+from .components import Table, TableColumn, VerticalMenu, MenuEntry
 from .humanize import naturaltime, naturalsize
 from . import styles
 
@@ -40,18 +40,30 @@ Keys:
 """
 
 
-class SummaryContainerName(Enum):
+class SelectionName(Enum):
     UP = 'UP'
     DOWN = 'DOWN'
 
 
+class DiffScreenMessages(Enum):
+    """
+    Messages used internally in the differences screen
+    """
+    SELECTION_UPDATED = 'SELECTION_UPDATED'
+
+
 class Summary(object):
 
-    def __init__(self):
+    def __init__(self, exchange):
+        self._exchange = exchange
         self._current_index = 0
-        self._focus_names = [
-            SummaryContainerName.UP, SummaryContainerName.DOWN]
-        self._menu_container = HSplit([])
+        self._menu_container = VerticalMenu([
+            MenuEntry(SelectionName.UP, 'Up'),
+            MenuEntry(SelectionName.DOWN, 'Down')
+        ])
+        self._menu_container.register_menu_change_callback(
+            lambda new_selection: self._on_new_selection(new_selection)
+        )
         self.container = VSplit([
             Window(width=1),
             HSplit([
@@ -61,53 +73,43 @@ class Summary(object):
             ]),
             Window(width=4),
         ])
-        self._render()
 
     @property
-    def current_focus(self):
-        return self._focus_names[self._current_index]
+    def current_selection(self):
+        return self._menu_container.current_selection
 
-    def focus_next(self):
-        self._set_selection_index(self._current_index + 1)
-        return self.current_focus
+    def gain_focus(self, app):
+        app.layout.focus(self._menu_container)
 
-    def focus_previous(self):
-        self._set_selection_index(self._current_index - 1)
-        return self.current_focus
-
-    def _set_selection_index(self, new_index):
-        self._current_index = new_index % len(self._focus_names)
-        self._render()
-
-    def _render(self):
-        menu_entries = ['Up', 'Down']
-        windows = []
-        for ientry, entry in enumerate(menu_entries):
-            style = 'reverse' if ientry == self._current_index else ''
-            control = FormattedTextControl(entry, style)
-            window = Window(control, height=1)
-            windows.append(window)
-        self._menu_container.children = windows
+    def _on_new_selection(self, new_selection):
+        self._exchange.publish(
+            DiffScreenMessages.SELECTION_UPDATED, new_selection)
 
 
 class Details(object):
 
-    def __init__(self, differences, initial_focus):
-        self._focus = initial_focus
+    def __init__(self, exchange, differences, initial_selection):
+        self._selection = initial_selection
         self._differences = differences
-        self.container = VSplit([Window(FormattedTextControl('Loading...'))])
+        self._table = None
+        self.container = VSplit([])
 
         self._render()
 
-    def set_focus(self, new_focus):
-        self._focus = new_focus
+        exchange.subscribe(
+            DiffScreenMessages.SELECTION_UPDATED,
+            self._set_selection
+        )
+
+    def gain_focus(self, app):
+        app.layout.focus(self._table)
+
+    def _set_selection(self, new_selection):
+        self._selection = new_selection
         self._render()
 
     def _render(self):
-        if self._focus is None:
-            self.container.children = []
-        else:
-            self._render_differences(self._differences, self._focus.name)
+        self._render_differences(self._differences, self._selection.name)
 
     def _render_local_mtime(self, difference):
         if difference.left is not None and difference.left.is_file():
@@ -172,7 +174,8 @@ class Details(object):
             TableColumn(local_sizes, 'LOCAL SIZE'),
             TableColumn(remote_sizes, 'REMOTE SIZE'),
         ]
-        self.container.children = [to_container(Table(columns))]
+        self._table = Table(columns)
+        self.container.children = [to_container(self._table)]
 
 
 class DifferencesScreen(BaseScreen):
@@ -188,8 +191,9 @@ class DifferencesScreen(BaseScreen):
             '[?] Help  '
             '[q] Quit'
         ), height=2, style='reverse')
-        self._summary = Summary()
-        self._details = Details(differences, self._summary.current_focus)
+        self._summary = Summary(exchange)
+        self._details = Details(
+            exchange, differences, self._summary.current_selection)
         self.bindings = KeyBindings()
 
         @self.bindings.add('d')  # noqa: F811
@@ -212,19 +216,13 @@ class DifferencesScreen(BaseScreen):
         def _(event):
             self._toggle_help()
 
-        @self.bindings.add('tab')  # noqa: F811
-        @self.bindings.add('down')
-        @self.bindings.add('left')
+        @self.bindings.add('right')  # noqa: F811
         def _(event):
-            new_focus = self._summary.focus_next()
-            self._details.set_focus(new_focus)
+            self._details.gain_focus(event.app)
 
-        @self.bindings.add('s-tab')  # noqa: F811
-        @self.bindings.add('up')
-        @self.bindings.add('right')
+        @self.bindings.add('left')  # noqa: F811
         def _(event):
-            new_focus = self._summary.focus_previous()
-            self._details.set_focus(new_focus)
+            self._summary.gain_focus(event.app)
 
         self._screen_container = HSplit([
             VSplit([
@@ -238,6 +236,9 @@ class DifferencesScreen(BaseScreen):
             self._screen_container,
             floats=[]
         )
+
+    def on_mount(self, app):
+        self._summary.gain_focus(app)
 
     def _toggle_help(self):
         if self.main_container.floats:
