@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from typing import List
+from typing import List, Optional
 
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import Window, FormattedTextControl
@@ -10,14 +10,20 @@ MenuEntry = namedtuple('MenuEntry', ['id_', 'text'])
 
 class VerticalMenu(object):
 
-    def __init__(self, entries: List[MenuEntry]):
+    def __init__(self, entries: List[MenuEntry], width: Optional[int]=None):
         self._current_index = 0
         self._entries = entries
+        if width is None:
+            self._formatted_entries = [entry.text for entry in self._entries]
+        else:
+            self._formatted_entries = [
+                _ensure_width(entry.text, width) for entry in self._entries
+            ]
         self._control = FormattedTextControl(
             '', focusable=True, show_cursor=False,
             key_bindings=self._get_key_bindings())
         self._set_control_text()
-        self._window = Window(self._control)
+        self._window = Window(self._control, width=width)
         self._menu_change_callbacks = []
 
     @property
@@ -64,10 +70,17 @@ class VerticalMenu(object):
 
     def _set_control_text(self):
         control_lines = []
-        for ientry, entry in enumerate(self._entries):
+        for ientry, entry in enumerate(self._formatted_entries):
             style = 'reverse' if ientry == self._current_index else ''
-            control_lines.append((style, entry.text + '\n'))
+            control_lines.append((style, entry + '\n'))
         self._control.text = control_lines
 
     def __pt_container__(self):
         return self._window
+
+
+def _ensure_width(inp: str, width: int):
+    """
+    Ensure that string `inp` is exactly `width` characters long.
+    """
+    return inp[:width].ljust(width)

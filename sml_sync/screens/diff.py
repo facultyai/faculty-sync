@@ -73,7 +73,7 @@ class Summary(object):
         self._menu_container = VerticalMenu([
             MenuEntry(SelectionName.UP, 'Up'),
             MenuEntry(SelectionName.DOWN, 'Down')
-        ])
+        ], width=10)
         self._menu_container.register_menu_change_callback(
             lambda new_selection: self._on_new_selection(new_selection)
         )
