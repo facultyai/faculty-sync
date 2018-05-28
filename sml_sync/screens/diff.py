@@ -1,7 +1,6 @@
 
 from enum import Enum
 
-import inflect
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
@@ -13,6 +12,7 @@ from .base import BaseScreen
 from .help import help_modal
 from .components import Table, TableColumn
 from .humanize import naturaltime, naturalsize
+from . import styles
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
@@ -47,93 +47,47 @@ class SummaryContainerName(Enum):
 
 class Summary(object):
 
-    def __init__(self, differences):
-        self._differences = differences
-        self._has_differences = False
-        self._current_index = None
-        self._menu_containers = []
-        self._menu_container_names = []
-        self._margin_control = FormattedTextControl('')
-        self._margin = Window(self._margin_control, width=4)
-
-        self._inflect = inflect.engine()
-        self._plural = self._inflect.plural
-        self._plural_verb = self._inflect.plural_verb
-
-        self._render_containers(differences)
+    def __init__(self):
+        self._current_index = 0
+        self._focus_names = [
+            SummaryContainerName.UP, SummaryContainerName.DOWN]
+        self._menu_container = HSplit([])
+        self.container = VSplit([
+            Window(width=1),
+            HSplit([
+                Window(height=1),
+                self._menu_container,
+                Window()
+            ]),
+            Window(width=4),
+        ])
+        self._render()
 
     @property
     def current_focus(self):
-        if self._has_differences:
-            return self._menu_container_names[self._current_index]
-        else:
-            return None
-
-    @property
-    def containers(self):
-        return [VSplit([self._margin, HSplit(self._menu_containers)])]
+        return self._focus_names[self._current_index]
 
     def focus_next(self):
-        if self._has_differences:
-            return self._set_selection_index(self._current_index + 1)
+        self._set_selection_index(self._current_index + 1)
+        return self.current_focus
 
     def focus_previous(self):
-        if self._has_differences:
-            return self._set_selection_index(self._current_index - 1)
+        self._set_selection_index(self._current_index - 1)
+        return self.current_focus
 
     def _set_selection_index(self, new_index):
-        if self._has_differences:
-            # Wrap around when selecting
-            self._current_index = new_index % len(self._menu_containers)
-            margin_lines = []
-            for icontainer in range(len(self._menu_containers)):
-                margin_lines.append(
-                    '  > ' if icontainer == self._current_index
-                    else (' ' * 4)
-                )
-            margin_text = '\n'.join(margin_lines)
-            self._margin_control.text = margin_text
-            return self._menu_container_names[self._current_index]
+        self._current_index = new_index % len(self._focus_names)
+        self._render()
 
-    def _render_containers(self, differences):
-        extra_local_paths = [
-            difference.left.path for difference in differences
-            if difference.difference_type == DifferenceType.LEFT_ONLY
-        ]
-        extra_remote_paths = [
-            difference.right.path for difference in differences
-            if difference.difference_type == DifferenceType.RIGHT_ONLY
-        ]
-        other_differences = [
-            difference.left.path for difference in differences
-            if difference.difference_type in
-            {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
-        ]
-        are_synchronized = (
-            not extra_local_paths
-            and not extra_remote_paths
-            and not other_differences
-        )
-        if are_synchronized:
-                self._has_differences = False
-                self._menu_containers = [
-                    Window(
-                        FormattedTextControl(
-                            'Local directory and SherlockML are synchronized.'
-                        ),
-                        height=1)
-                ]
-        else:
-            self._has_differences = True
-            text = 'Up'
-            container = Window(FormattedTextControl(text), height=1)
-            self._menu_containers.append(container)
-            self._menu_container_names.append(SummaryContainerName.UP)
-            text = 'Down'
-            container = Window(FormattedTextControl(text), height=1)
-            self._menu_containers.append(container)
-            self._menu_container_names.append(SummaryContainerName.DOWN)
-            self._set_selection_index(0)
+    def _render(self):
+        menu_entries = ['Up', 'Down']
+        windows = []
+        for ientry, entry in enumerate(menu_entries):
+            style = 'reverse' if ientry == self._current_index else ''
+            control = FormattedTextControl(entry, style)
+            window = Window(control, height=1)
+            windows.append(window)
+        self._menu_container.children = windows
 
 
 class Details(object):
@@ -234,7 +188,7 @@ class DifferencesScreen(BaseScreen):
             '[?] Help  '
             '[q] Quit'
         ), height=2, style='reverse')
-        self._summary = Summary(differences)
+        self._summary = Summary()
         self._details = Details(differences, self._summary.current_focus)
         self.bindings = KeyBindings()
 
@@ -272,13 +226,14 @@ class DifferencesScreen(BaseScreen):
             new_focus = self._summary.focus_previous()
             self._details.set_focus(new_focus)
 
-        self._screen_container = HSplit(
-            [Window(height=1)] +
-            self._summary.containers +
-            [Window(height=1), Window(char='-', height=1), Window(height=1)] +
-            [self._details.container] +
-            [self._bottom_toolbar]
-        )
+        self._screen_container = HSplit([
+            VSplit([
+                self._summary.container,
+                Window(width=1, char=styles.get_vertical_border_char()),
+                self._details.container
+            ]),
+            self._bottom_toolbar
+        ])
         self.main_container = FloatContainer(
             self._screen_container,
             floats=[]
