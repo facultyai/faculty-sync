@@ -1,6 +1,7 @@
 
 from enum import Enum
 
+from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
@@ -201,6 +202,7 @@ class Details(object):
             Window(height=1),
             to_container(self._table),
         ]
+        get_app().invalidate()
 
 
 class DifferencesScreen(BaseScreen):
