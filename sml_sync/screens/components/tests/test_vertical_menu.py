@@ -126,3 +126,38 @@ def test_single_entry():
     [menu_line1] = menu_text
     assert menu_line1 == ('reverse', 'menu entry\n')
     assert menu.current_selection == 'only'
+
+
+def test_different_entry_widths():
+    entry1 = MenuEntry(1, 'short')
+    entry2 = MenuEntry(2, 'very long entry')
+
+    menu = VerticalMenu([entry1, entry2])
+    menu_text = get_menu_text(menu)
+
+    assert len(menu_text) == 2
+    [menu_line1, menu_line2] = menu_text
+    assert menu_line1 == ('reverse', 'short\n')
+    assert menu_line2 == ('', 'very long entry\n')
+
+    width = to_container(menu).preferred_width(100)
+    assert width.preferred == 15
+    assert width.min == 0
+    assert width.max > 100
+
+
+def test_fixed_width():
+    entry1 = MenuEntry(1, 'short')
+    entry2 = MenuEntry(2, 'very long entry')
+
+    menu = VerticalMenu([entry1, entry2], width=8)
+    menu_text = get_menu_text(menu)
+
+    assert len(menu_text) == 2
+    [menu_line1, menu_line2] = menu_text
+    assert menu_line1 == ('reverse', 'short   \n')
+    assert menu_line2 == ('', 'very lon\n')
+
+    width = to_container(menu).preferred_width(100)
+    assert width.preferred == 8
+    assert width.min == width.max == 8
