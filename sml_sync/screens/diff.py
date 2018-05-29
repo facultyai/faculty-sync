@@ -141,22 +141,22 @@ class Details(object):
     def _render_local_mtime(self, difference):
         if difference.left is not None and difference.left.is_file():
             return naturaltime(difference.left.attrs.last_modified)
-        return ''
+        return '-'
 
     def _render_remote_mtime(self, difference):
         if difference.right is not None and difference.right.is_file():
             return naturaltime(difference.right.attrs.last_modified)
-        return ''
+        return '-'
 
     def _render_local_size(self, difference):
         if difference.left is not None and difference.left.is_file():
             return naturalsize(difference.left.attrs.size)
-        return ''
+        return '-'
 
     def _render_remote_size(self, difference):
         if difference.right is not None and difference.right.is_file():
             return naturalsize(difference.right.attrs.size)
-        return ''
+        return '-'
 
     def _render_help_box(self, text):
         text_area = TextArea(
