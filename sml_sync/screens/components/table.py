@@ -13,9 +13,11 @@ TableColumn = namedtuple('Column', ['rows', 'header'])
 
 class Table(object):
 
-    def __init__(self, columns: List[TableColumn]):
+    def __init__(self, columns: List[TableColumn], sep: str = ' '):
         if len(set(len(column.rows) for column in columns)) not in {0, 1}:
             raise ValueError('All columns must have the same number of rows.')
+
+        self._sep = sep
 
         formatted_headers = []
         formatted_columns = []
@@ -32,7 +34,7 @@ class Table(object):
             itertools.zip_longest(*formatted_columns, fillvalue='')
         )
 
-        rows_string = [' '.join(row) for row in rows]
+        rows_string = [sep.join(row) for row in rows]
         table_body = '\n'.join(rows_string)
 
         if rows:
@@ -55,7 +57,7 @@ class Table(object):
     def _header_windows(self, formatted_headers):
         if len(formatted_headers):
             header_control = FormattedTextControl(
-                ' '.join(formatted_headers))
+                self._sep.join(formatted_headers))
             header_windows = [Window(header_control, height=1)]
         else:
             header_windows = [Window(height=1, width=0)]
