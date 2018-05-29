@@ -210,7 +210,7 @@ class Details(object):
             TableColumn(local_sizes, 'LOCAL SIZE'),
             TableColumn(remote_sizes, 'REMOTE SIZE'),
         ]
-        table = Table(columns)
+        table = Table(columns, sep='  ')
         return table
 
     def _render_differences(self, differences, direction):
