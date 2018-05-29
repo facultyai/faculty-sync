@@ -72,3 +72,22 @@ def test_no_columns():
 
     assert table.preferred_width(100).preferred == 0
     assert table.preferred_height(0, 100).preferred == 1
+
+
+def test_custom_separator():
+    col1 = TableColumn(rows=['a', 'b', 'c'], header='t1')
+    col2 = TableColumn(rows=['d', 'e', 'f'], header='t2')
+
+    table = Table([col1, col2], sep=' | ')
+
+    assert len(table.window.children) == 2
+    [header_window, body_window] = table.window.children
+
+    assert header_window.content.text == 't1 | t2'
+    assert body_window.content.buffer.text == textwrap.dedent(
+        """\
+        a  | d 
+        b  | e 
+        c  | f """)  # noqa: W291 (ignore trailing whitespace)
+    assert table.preferred_width(100).preferred == 7
+    assert table.preferred_height(5, 100).preferred == 4
