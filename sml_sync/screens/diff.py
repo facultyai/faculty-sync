@@ -241,11 +241,13 @@ class DifferencesScreen(BaseScreen):
 
         @self.bindings.add('d')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
+            if self._summary.current_selection == SelectionName.DOWN:
+                self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
 
         @self.bindings.add('u')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
+            if self._summary.current_selection == SelectionName.UP:
+                self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
 
         @self.bindings.add('r')  # noqa: F811
         def _(event):
@@ -253,7 +255,8 @@ class DifferencesScreen(BaseScreen):
 
         @self.bindings.add('w')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.START_WATCH_SYNC)
+            if self._summary.current_selection == SelectionName.WATCH:
+                self._exchange.publish(Messages.START_WATCH_SYNC)
 
         @self.bindings.add('?')  # noqa: F811
         def _(event):
