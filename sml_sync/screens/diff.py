@@ -57,6 +57,10 @@ WATCH_HELP_TEXT = """\
 Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on SherlockML.
 """
 
+FULLY_SYNCHRONIZED_HELP_TEXT = """\
+Your local disk and the SherlockML workspace are fully synchronized.
+"""
+
 
 class SelectionName(Enum):
     UP = 'UP'
@@ -210,15 +214,19 @@ class Details(object):
         return table
 
     def _render_differences(self, differences, direction):
-        self._table = self._render_table(differences, direction)
-        help_box = self._render_help_box(
-            UP_SYNC_HELP_TEXT if direction == 'UP' else DOWN_SYNC_HELP_TEXT
-        )
-        self.container.children = [
-            Window(height=1),
-            help_box,
-            to_container(self._table),
-        ]
+        if not differences:
+            help_box = self._render_help_box(FULLY_SYNCHRONIZED_HELP_TEXT)
+            self.container.children = [Window(height=1), help_box, Window()]
+        else:
+            self._table = self._render_table(differences, direction)
+            help_box = self._render_help_box(
+                UP_SYNC_HELP_TEXT if direction == 'UP' else DOWN_SYNC_HELP_TEXT
+            )
+            self.container.children = [
+                Window(height=1),
+                help_box,
+                to_container(self._table),
+            ]
 
 
 class DifferencesScreen(BaseScreen):
