@@ -12,7 +12,8 @@ from ..pubsub import Messages
 from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
-from .components import Table, TableColumn, VerticalMenu, MenuEntry
+from .components import (
+    Table, TableColumn, VerticalMenu, MenuEntry, ColumnSettings, Alignment)
 from .humanize import naturaltime, naturalsize
 from . import styles
 
@@ -205,10 +206,22 @@ class Details(object):
         columns = [
             TableColumn(paths, 'PATH'),
             TableColumn(actions, 'ACTION'),
-            TableColumn(local_mtimes, 'LOCAL MTIME'),
-            TableColumn(remote_mtimes, 'REMOTE MTIME'),
-            TableColumn(local_sizes, 'LOCAL SIZE'),
-            TableColumn(remote_sizes, 'REMOTE SIZE'),
+            TableColumn(
+                local_mtimes,
+                'LOCAL MTIME',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                remote_mtimes,
+                'REMOTE MTIME',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                local_sizes,
+                'LOCAL SIZE',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                remote_sizes,
+                'REMOTE SIZE',
+                ColumnSettings(alignment=Alignment.RIGHT))
         ]
         table = Table(columns, sep='  ')
         return table
