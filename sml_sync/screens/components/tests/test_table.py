@@ -2,7 +2,7 @@ import textwrap
 
 import pytest
 
-from .. import Table, TableColumn
+from .. import Table, TableColumn, ColumnSettings, Alignment
 
 
 def test_simple_table():
@@ -91,3 +91,28 @@ def test_custom_separator():
         c  | f """)  # noqa: W291 (ignore trailing whitespace)
     assert table.preferred_width(100).preferred == 7
     assert table.preferred_height(5, 100).preferred == 4
+
+
+def test_right_align():
+    col1 = TableColumn(rows=['a', 'b', 'c'], header='header1')
+    col2 = TableColumn(
+        rows=['d', 'e', 'f'],
+        header='header2',
+        settings=ColumnSettings(alignment=Alignment.RIGHT)
+    )
+
+    table = Table([col1, col2], sep='|')
+
+    assert len(table.window.children) == 2
+    [header_window, body_window] = table.window.children
+
+    retrieved_table = (
+        header_window.content.text + '\n' +
+        body_window.content.buffer.text
+    )
+    assert retrieved_table == textwrap.dedent(
+        """\
+        header1|header2
+        a      |      d
+        b      |      e
+        c      |      f""")  # noqa: W291 (ignore trailing whitespace)
