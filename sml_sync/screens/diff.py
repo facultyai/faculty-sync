@@ -190,15 +190,38 @@ class Details(object):
         help_box = self._render_help_box(WATCH_HELP_TEXT)
         self.container.children = [Window(height=1), help_box, Window()]
 
+    def _size_transferred(self, difference, direction):
+        if (
+            difference.difference_type == DifferenceType.LEFT_ONLY
+            and difference.left.is_file()
+        ):
+            return difference.left.attrs.size
+        elif (
+            difference.difference_type == DifferenceType.RIGHT_ONLY
+            and difference.right.is_file()
+        ):
+            return difference.right.attrs.size
+        elif (
+                difference.difference_type in
+                {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
+        ):
+            if direction == 'UP' and difference.left.is_file():
+                return difference.left.attrs.size
+            elif direction == 'DOWN' and difference.right.is_file():
+                return difference.right.attrs.size
+            return 0
+        return 0
+
     def _render_table(self, differences, direction):
         def sort_key(difference):
             text = ACTION_TEXT[(difference.difference_type, direction)]
+            size = self._size_transferred(difference, direction)
             if 'delete' in text:
-                return 0
+                return (0, -size)
             elif 'replace' in text:
-                return 1
+                return (1, -size)
             else:
-                return 2
+                return (2, -size)
 
         sorted_differences = sorted(differences, key=sort_key)
 
