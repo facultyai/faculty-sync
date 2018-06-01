@@ -1,4 +1,5 @@
 
+import logging
 from enum import Enum
 
 from prompt_toolkit.application.current import get_app
@@ -115,18 +116,28 @@ class Details(object):
     def __init__(self, exchange, differences, initial_selection):
         self._selection = initial_selection
         self._differences = differences
+        self._exchange = exchange
         self._table = None
         self.container = HSplit([])
 
         self._render()
 
-        exchange.subscribe(
+        self._subscription_id = self._exchange.subscribe(
             DiffScreenMessages.SELECTION_UPDATED,
             self._set_selection
         )
 
     def gain_focus(self, app):
         app.layout.focus(self._table)
+
+    def stop(self):
+        try:
+            self._exchange.unsubscribe(self._subscription_id)
+        except AttributeError:
+            logging.warning(
+                'Tried to unsubscribe from exchange before '
+                'subscription was activated.'
+            )
 
     def _set_selection(self, new_selection):
         self._selection = new_selection
@@ -308,6 +319,9 @@ class DifferencesScreen(BaseScreen):
 
     def on_mount(self, app):
         self._summary.gain_focus(app)
+
+    def stop(self):
+        self._details.stop()
 
     def _toggle_help(self):
         if self.main_container.floats:
