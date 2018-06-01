@@ -7,7 +7,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.widgets import TextArea, VerticalLine
 
 from ..pubsub import Messages
 from ..models import DifferenceType
@@ -16,7 +16,6 @@ from .help import help_modal
 from .components import (
     Table, TableColumn, VerticalMenu, MenuEntry, ColumnSettings, Alignment)
 from .humanize import naturaltime, naturalsize
-from . import styles
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
@@ -341,7 +340,7 @@ class DifferencesScreen(BaseScreen):
             VSplit([
                 self._summary.container,
                 Window(width=1),
-                Window(width=1, char=styles.get_vertical_border_char()),
+                VerticalLine(),
                 Window(width=1),
                 self._details.container
             ]),
