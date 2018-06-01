@@ -43,6 +43,17 @@ Keys:
     [?] Toggle this message.
 """
 
+ACTION_TEXT = {
+    (DifferenceType.LEFT_ONLY, 'UP'): 'create remote',
+    (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create local',
+    (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete local',
+    (DifferenceType.RIGHT_ONLY, 'UP'): 'delete remote',
+    (DifferenceType.TYPE_DIFFERENT, 'UP'): 'replace remote',
+    (DifferenceType.TYPE_DIFFERENT, 'DOWN'): 'replace local',
+    (DifferenceType.ATTRS_DIFFERENT, 'UP'): 'replace remote',
+    (DifferenceType.ATTRS_DIFFERENT, 'DOWN'): 'replace local'
+}
+
 UP_SYNC_HELP_TEXT = """\
 Press [u] to modify the SherlockML workspace so that it mirrors your local disk.
 
@@ -180,16 +191,17 @@ class Details(object):
         self.container.children = [Window(height=1), help_box, Window()]
 
     def _render_table(self, differences, direction):
-        action_map = {
-            (DifferenceType.LEFT_ONLY, 'UP'): 'create remote',
-            (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create local',
-            (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete local',
-            (DifferenceType.RIGHT_ONLY, 'UP'): 'delete remote',
-            (DifferenceType.TYPE_DIFFERENT, 'UP'): 'replace remote',
-            (DifferenceType.TYPE_DIFFERENT, 'DOWN'): 'replace local',
-            (DifferenceType.ATTRS_DIFFERENT, 'UP'): 'replace remote',
-            (DifferenceType.ATTRS_DIFFERENT, 'DOWN'): 'replace local'
-        }
+        def sort_key(difference):
+            text = ACTION_TEXT[(difference.difference_type, direction)]
+            if 'delete' in text:
+                return 0
+            elif 'replace' in text:
+                return 1
+            else:
+                return 2
+
+        sorted_differences = sorted(differences, key=sort_key)
+
         paths = []
         actions = []
         local_mtimes = []
@@ -197,7 +209,7 @@ class Details(object):
         local_sizes = []
         remote_sizes = []
 
-        for difference in differences:
+        for difference in sorted_differences:
             if difference.difference_type == DifferenceType.LEFT_ONLY:
                 paths.append(difference.left.path)
             elif difference.difference_type == DifferenceType.RIGHT_ONLY:
@@ -211,7 +223,7 @@ class Details(object):
             local_sizes.append(self._render_local_size(difference))
             remote_sizes.append(self._render_remote_size(difference))
 
-            action = action_map[(difference.difference_type, direction)]
+            action = ACTION_TEXT[(difference.difference_type, direction)]
             actions.append(action)
 
         columns = [
