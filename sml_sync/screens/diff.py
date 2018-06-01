@@ -330,7 +330,8 @@ class DifferencesScreen(BaseScreen):
 
         @self.bindings.add('right')  # noqa: F811
         def _(event):
-            self._details.gain_focus(event.app)
+            if self._summary.current_selection != SelectionName.WATCH:
+                self._details.gain_focus(event.app)
 
         @self.bindings.add('left')  # noqa: F811
         def _(event):
