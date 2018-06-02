@@ -215,6 +215,7 @@ class Details(object):
 
     def _render_table(self, differences, direction):
         def sort_key(difference):
+            """ Order first by action, then by size """
             text = ACTION_TEXT[(difference.difference_type, direction)]
             size = self._size_transferred(difference, direction)
             if 'delete' in text:
