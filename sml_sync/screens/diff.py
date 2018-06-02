@@ -42,16 +42,6 @@ Keys:
     [?] Toggle this message.
 """
 
-ACTION_TEXT = {
-    (DifferenceType.LEFT_ONLY, 'UP'): 'create remote',
-    (DifferenceType.RIGHT_ONLY, 'DOWN'): 'create local',
-    (DifferenceType.LEFT_ONLY, 'DOWN'): 'delete local',
-    (DifferenceType.RIGHT_ONLY, 'UP'): 'delete remote',
-    (DifferenceType.TYPE_DIFFERENT, 'UP'): 'replace remote',
-    (DifferenceType.TYPE_DIFFERENT, 'DOWN'): 'replace local',
-    (DifferenceType.ATTRS_DIFFERENT, 'UP'): 'replace remote',
-    (DifferenceType.ATTRS_DIFFERENT, 'DOWN'): 'replace local'
-}
 
 UP_SYNC_HELP_TEXT = """\
 Press [u] to modify the SherlockML workspace so that it mirrors your local disk.
@@ -85,6 +75,18 @@ class DiffScreenMessages(Enum):
     Messages used internally in the differences screen
     """
     SELECTION_UPDATED = 'SELECTION_UPDATED'
+
+
+ACTION_TEXT = {
+    (DifferenceType.LEFT_ONLY, SelectionName.UP): 'create remote',
+    (DifferenceType.RIGHT_ONLY, SelectionName.DOWN): 'create local',
+    (DifferenceType.LEFT_ONLY, SelectionName.DOWN): 'delete local',
+    (DifferenceType.RIGHT_ONLY, SelectionName.UP): 'delete remote',
+    (DifferenceType.TYPE_DIFFERENT, SelectionName.UP): 'replace remote',
+    (DifferenceType.TYPE_DIFFERENT, SelectionName.DOWN): 'replace local',
+    (DifferenceType.ATTRS_DIFFERENT, SelectionName.UP): 'replace remote',
+    (DifferenceType.ATTRS_DIFFERENT, SelectionName.DOWN): 'replace local'
+}
 
 
 class Summary(object):
@@ -155,7 +157,7 @@ class Details(object):
 
     def _render(self):
         if self._selection in {SelectionName.UP, SelectionName.DOWN}:
-            self._render_differences(self._differences, self._selection.name)
+            self._render_differences(self._differences, self._selection)
         else:
             self._render_watch()
         get_app().invalidate()
@@ -204,9 +206,9 @@ class Details(object):
                 difference.difference_type in
                 {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
         ):
-            if direction == 'UP' and difference.left.is_file():
+            if direction == SelectionName.UP and difference.left.is_file():
                 return difference.left.attrs.size
-            elif direction == 'DOWN' and difference.right.is_file():
+            elif direction == SelectionName.DOWN and difference.right.is_file():
                 return difference.right.attrs.size
             return 0
         return 0
@@ -278,7 +280,7 @@ class Details(object):
         else:
             self._table = self._render_table(differences, direction)
             help_box = self._render_help_box(
-                UP_SYNC_HELP_TEXT if direction == 'UP' else DOWN_SYNC_HELP_TEXT
+                UP_SYNC_HELP_TEXT if direction == SelectionName.UP else DOWN_SYNC_HELP_TEXT
             )
             self.container.children = [
                 Window(height=1),
