@@ -20,7 +20,6 @@ setup(
         'sml',
         'daiquiri',
         'paramiko',
-        'inflect',
         'watchdog',
         'semantic_version',
         'prompt_toolkit>=2.0'
