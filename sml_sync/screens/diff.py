@@ -20,24 +20,24 @@ from .humanize import naturaltime, naturalsize
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
 HELP_TEXT = """\
-This is a summary of the differences between SherlockML and
-your local directory. It summarizes the files that exist
-only on SherlockML, the files that exist on locally and the
-files that are on both, but with different modification times.
+Synchronize your local filesystem and the SherlockML filesystem.
+
+Three synchronization modes are supported:
+
+'Up' will push all local changes to SherlockML. This will
+erase any file that is on SherlockML, but not available locally.
+
+'Down' will bring all the changes down from SherlockML. This
+will erase any file that is present locally but not on SherlockML.
+
+'Watch' enters `watch` mode. Any time you save, move or delete
+a file or a directory, the change is automatically replicated
+on SherlockML.
 
 Keys:
 
-    [u] Push all the local changes to SherlockML. This will
-        erase any file that is on SherlockML, but not available
-        locally.
-    [d] Bring all the changes down from SherlockML. This will
-        erase any file that is present locally but not on
-        SherlockML.
     [r] Refresh differences between the local file system
         and SherlockML.
-    [w] Enter incremental synchronization mode, where changes
-        to the local file system are automatically replicated
-        on SherlockML.
     [q] Quit the application.
     [?] Toggle this message.
 """
