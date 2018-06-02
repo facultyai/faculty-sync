@@ -296,13 +296,10 @@ class DifferencesScreen(BaseScreen):
         super().__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
-            '[d] Sync SherlockML files down  '
-            '[u] Sync local files up  '
             '[r] Refresh  '
-            '[w] Incremental sync from local changes\n'
             '[?] Help  '
             '[q] Quit'
-        ), height=2, style='reverse')
+        ), height=1, style='reverse')
         self._summary = Summary(exchange)
         self._details = Details(
             exchange, differences, self._summary.current_selection)
