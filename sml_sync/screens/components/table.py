@@ -44,10 +44,7 @@ class Table(object):
         formatted_headers = []
         formatted_columns = []
         for column in columns:
-            width = max(
-                    len(column.header),
-                    max((len(row) for row in column.rows), default=0)
-            )
+            width = self._get_column_width(column)
             formatted_rows = [
                 self._format_cell(row, column.settings, width)
                 for row in column.rows
@@ -55,29 +52,17 @@ class Table(object):
             formatted_headers.append(column.header.ljust(width, ' '))
             formatted_columns.append(formatted_rows)
 
-        rows = list(
-            itertools.zip_longest(*formatted_columns, fillvalue='')
-        )
-
-        rows_string = [sep.join(row) for row in rows]
-        table_body = '\n'.join(rows_string)
-
-        if rows:
-            document = Document(table_body, 0)
-            _buffer = Buffer(document=document, read_only=True)
-            self._body_control = BufferControl(_buffer)
-            body_windows = [
-                Window(
-                    self._body_control,
-                    right_margins=[ScrollbarMargin(display_arrows=True)]
-                )
-            ]
-        else:
-            body_windows = []
-
         self.window = HSplit(
-            self._header_windows(formatted_headers) + body_windows
+            self._header_windows(formatted_headers) +
+            self._body_windows(formatted_columns)
         )
+
+    def _get_column_width(self, column):
+        width = max(
+            len(column.header),
+            max((len(row) for row in column.rows), default=0)
+        )
+        return width
 
     def _format_cell(self, content, column_settings, width):
         if column_settings.alignment == Alignment.LEFT:
@@ -93,6 +78,25 @@ class Table(object):
         else:
             header_windows = [Window(height=1, width=0)]
         return header_windows
+
+    def _body_windows(self, formatted_columns):
+        rows = list(itertools.zip_longest(*formatted_columns, fillvalue=''))
+        if rows:
+            rows_string = [self._sep.join(row) for row in rows]
+            table_body = '\n'.join(rows_string)
+
+            document = Document(table_body, 0)
+            _buffer = Buffer(document=document, read_only=True)
+            self._body_control = BufferControl(_buffer)
+            body_windows = [
+                Window(
+                    self._body_control,
+                    right_margins=[ScrollbarMargin(display_arrows=True)]
+                )
+            ]
+        else:
+            body_windows = []
+        return body_windows
 
     def preferred_width(self, max_available_width):
         return self.window.preferred_width(max_available_width)
