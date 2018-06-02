@@ -206,9 +206,15 @@ class Details(object):
                 difference.difference_type in
                 {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
         ):
-            if direction == SelectionName.UP and difference.left.is_file():
+            if (
+                direction == SelectionName.UP
+                and difference.left.is_file()
+            ):
                 return difference.left.attrs.size
-            elif direction == SelectionName.DOWN and difference.right.is_file():
+            elif (
+                direction == SelectionName.DOWN
+                and difference.right.is_file()
+            ):
                 return difference.right.attrs.size
             return 0
         return 0
@@ -281,7 +287,9 @@ class Details(object):
         else:
             self._table = self._render_table(differences, direction)
             help_box = self._render_help_box(
-                UP_SYNC_HELP_TEXT if direction == SelectionName.UP else DOWN_SYNC_HELP_TEXT
+                UP_SYNC_HELP_TEXT
+                if direction == SelectionName.UP else
+                DOWN_SYNC_HELP_TEXT
             )
             self.container.children = [
                 Window(height=1),
