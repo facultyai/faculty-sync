@@ -16,7 +16,7 @@ class Alignment(Enum):
 
 class ColumnSettings(object):
 
-    def __init__(self, alignment=Alignment.LEFT):
+    def __init__(self, alignment: Alignment = Alignment.LEFT) -> None:
         self.alignment = alignment
 
 
@@ -35,7 +35,7 @@ class TableColumn(
 
 class Table(object):
 
-    def __init__(self, columns: List[TableColumn], sep: str = ' '):
+    def __init__(self, columns: List[TableColumn], sep: str = ' ') -> None:
         if len(set(len(column.rows) for column in columns)) not in {0, 1}:
             raise ValueError('All columns must have the same number of rows.')
 
@@ -70,7 +70,7 @@ class Table(object):
         else:
             return content.rjust(width)
 
-    def _header_windows(self, formatted_headers):
+    def _header_windows(self, formatted_headers: List[str]) -> List[Window]:
         if len(formatted_headers):
             header_control = FormattedTextControl(
                 self._sep.join(formatted_headers))
@@ -79,13 +79,16 @@ class Table(object):
             header_windows = [Window(height=1, width=0)]
         return header_windows
 
-    def _body_windows(self, formatted_columns):
+    def _body_windows(
+            self,
+            formatted_columns: List[List[str]]
+    ) -> List[Window]:
         rows = list(itertools.zip_longest(*formatted_columns, fillvalue=''))
         if rows:
             rows_string = [self._sep.join(row) for row in rows]
             table_body = '\n'.join(rows_string)
 
-            document = Document(table_body, 0)
+            document = Document(table_body, cursor_position=0)
             _buffer = Buffer(document=document, read_only=True)
             self._body_control = BufferControl(_buffer)
             body_windows = [

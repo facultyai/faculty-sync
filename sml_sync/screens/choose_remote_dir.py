@@ -7,11 +7,9 @@ import time
 from enum import Enum
 from queue import Empty, Queue
 
-from prompt_toolkit.application.current import get_app
+from prompt_toolkit.application import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout import HSplit, VSplit
-from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout import HSplit, VSplit, Window, FormattedTextControl
 from prompt_toolkit.widgets import TextArea
 
 from ..pubsub import Messages

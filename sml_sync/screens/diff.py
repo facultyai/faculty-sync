@@ -2,11 +2,12 @@
 import logging
 from enum import Enum
 
-from prompt_toolkit.application.current import get_app
+from prompt_toolkit.application import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout import HSplit, VSplit, to_container
-from prompt_toolkit.layout.containers import FloatContainer, Window
-from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout import (
+    HSplit, VSplit, to_container, FloatContainer, Window,
+    FormattedTextControl
+)
 from prompt_toolkit.widgets import TextArea, VerticalLine
 
 from ..pubsub import Messages

@@ -1,4 +1,3 @@
-
 from unittest.mock import Mock
 
 from prompt_toolkit.layout import to_container

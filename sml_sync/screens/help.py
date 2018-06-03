@@ -1,7 +1,5 @@
 
-from prompt_toolkit.layout import HSplit
-from prompt_toolkit.layout.containers import Float, Window
-from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout import HSplit, Window, FormattedTextControl, Float
 from prompt_toolkit.widgets import Frame
 
 

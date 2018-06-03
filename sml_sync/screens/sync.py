@@ -3,10 +3,8 @@ import threading
 import time
 from enum import Enum
 
-from prompt_toolkit.application.current import get_app
-from prompt_toolkit.layout import HSplit
-from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.application import get_app
+from prompt_toolkit.layout import HSplit, Window, FormattedTextControl
 
 from .base import BaseScreen
 from .loading import LoadingIndicator

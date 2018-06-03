@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from typing import List, Optional
+from typing import List, Optional, Any, Callable
 
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import Window, FormattedTextControl
@@ -10,7 +10,11 @@ MenuEntry = namedtuple('MenuEntry', ['id_', 'text'])
 
 class VerticalMenu(object):
 
-    def __init__(self, entries: List[MenuEntry], width: Optional[int]=None):
+    def __init__(
+            self,
+            entries: List[MenuEntry],
+            width: Optional[int] = None
+    ) -> None:
         self._current_index = 0
         self._entries = entries
         if width is None:
@@ -24,17 +28,20 @@ class VerticalMenu(object):
             key_bindings=self._get_key_bindings())
         self._set_control_text()
         self._window = Window(self._control, width=width)
-        self._menu_change_callbacks = []
+        self._menu_change_callbacks: List[Callable[[Any], None]] = []
 
     @property
-    def current_selection(self):
+    def current_selection(self) -> Any:
         if self._entries:
             return self._entries[self._current_index].id_
         else:
             # No items in the menu
             return None
 
-    def register_menu_change_callback(self, callback):
+    def register_menu_change_callback(
+            self,
+            callback: Callable[[Any], None]
+    ) -> None:
         self._menu_change_callbacks.append(callback)
 
     def _execute_callbacks(self, new_selection):
@@ -79,7 +86,7 @@ class VerticalMenu(object):
         return self._window
 
 
-def _ensure_width(inp: str, width: int):
+def _ensure_width(inp: str, width: int) -> str:
     """
     Ensure that string `inp` is exactly `width` characters long.
     """
