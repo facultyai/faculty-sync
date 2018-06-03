@@ -101,17 +101,5 @@ class Table(object):
             body_windows = []
         return body_windows
 
-    def preferred_width(self, max_available_width):
-        return self.window.preferred_width(max_available_width)
-
-    def preferred_height(self, width, max_available_height):
-        return self.window.preferred_height(width, max_available_height)
-
-    def write_to_screen(self, *args, **kwargs):
-        return self.window.write_to_screen(*args, **kwargs)
-
-    def get_children(self):
-        return self.window.get_children()
-
     def __pt_container__(self):
         return self.window
