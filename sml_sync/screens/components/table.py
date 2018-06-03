@@ -6,7 +6,9 @@ from typing import List, Optional
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
 from prompt_toolkit.layout import (
-    Window, HSplit, FormattedTextControl, BufferControl, ScrollbarMargin)
+    Window, HSplit, FormattedTextControl, BufferControl, ScrollbarMargin,
+    Container
+)
 
 
 class Alignment(Enum):
@@ -27,7 +29,7 @@ class TableColumn(
             cls, rows: List[str],
             header: str,
             settings: Optional[ColumnSettings] = None
-    ):
+    ) -> 'TableColumn':
         if settings is None:
             settings = ColumnSettings()
         return super(TableColumn, cls).__new__(cls, rows, header, settings)
@@ -57,14 +59,19 @@ class Table(object):
             self._body_windows(formatted_columns)
         )
 
-    def _get_column_width(self, column):
+    def _get_column_width(self, column: TableColumn) -> int:
         width = max(
             len(column.header),
             max((len(row) for row in column.rows), default=0)
         )
         return width
 
-    def _format_cell(self, content, column_settings, width):
+    def _format_cell(
+            self,
+            content: str,
+            column_settings: ColumnSettings,
+            width: int
+    ) -> str:
         if column_settings.alignment == Alignment.LEFT:
             return content.ljust(width)
         else:
@@ -101,5 +108,5 @@ class Table(object):
             body_windows = []
         return body_windows
 
-    def __pt_container__(self):
+    def __pt_container__(self) -> Container:
         return self.window

@@ -3,7 +3,7 @@ from collections import namedtuple
 from typing import List, Optional, Any, Callable
 
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout import Window, FormattedTextControl
+from prompt_toolkit.layout import Window, FormattedTextControl, Container
 
 MenuEntry = namedtuple('MenuEntry', ['id_', 'text'])
 
@@ -44,30 +44,30 @@ class VerticalMenu(object):
     ) -> None:
         self._menu_change_callbacks.append(callback)
 
-    def _execute_callbacks(self, new_selection):
+    def _execute_callbacks(self, new_selection: Any) -> None:
         for callback in self._menu_change_callbacks:
             callback(new_selection)
 
-    def _select_next(self):
+    def _select_next(self) -> None:
         self._set_selection_index(self._current_index + 1)
 
-    def _select_previous(self):
+    def _select_previous(self) -> None:
         self._set_selection_index(self._current_index - 1)
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self) -> KeyBindings:
         bindings = KeyBindings()
 
-        @bindings.add('up')  # noqa: F811
-        def _(event):
+        @bindings.add('up')
+        def up_key(event: Any) -> None:
             self._select_previous()
 
-        @bindings.add('down')  # noqa: F811
-        def _(event):
+        @bindings.add('down')
+        def down_key(event: Any) -> None:
             self._select_next()
 
         return bindings
 
-    def _set_selection_index(self, new_index):
+    def _set_selection_index(self, new_index: int) -> None:
         if self._entries:
             new_index = new_index % len(self._entries)
             if self._current_index != new_index:
@@ -75,14 +75,14 @@ class VerticalMenu(object):
                 self._set_control_text()
                 self._execute_callbacks(self.current_selection)
 
-    def _set_control_text(self):
+    def _set_control_text(self) -> None:
         control_lines = []
         for ientry, entry in enumerate(self._formatted_entries):
             style = 'reverse' if ientry == self._current_index else ''
             control_lines.append((style, entry + '\n'))
         self._control.text = control_lines
 
-    def __pt_container__(self):
+    def __pt_container__(self) -> Container:
         return self._window
 
 

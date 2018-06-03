@@ -1,5 +1,5 @@
 
-from typing import Optional, Any, List, Iterable
+from typing import Optional, Any, List, Iterable, Union, Tuple
 
 from .key_binding import KeyBindings
 from .buffer import Buffer
@@ -12,9 +12,11 @@ class UIControl(object):
 
 class FormattedTextControl(UIControl):
 
+    text: Union[str, List[Tuple[str, str]]]
+
     def __init__(
             self,
-            text: str,
+            text: Union[str, List[Tuple[str, str]]],
             focusable: bool = False,
             show_cursor: bool = False,
             key_bindings: Optional[KeyBindings] = None) -> None: ...
