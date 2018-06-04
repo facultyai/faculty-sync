@@ -23,7 +23,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-pip install https://github.com/ASIDataScience/sml-sync/archive/0.2.4.zip
+pip install https://github.com/ASIDataScience/sml-sync/archive/0.2.5.zip
 ```
 
 Getting started
@@ -130,7 +130,7 @@ To run a pre-release:
  - Bump the version in `version.py` and in the install script.
  - Commit the changes.
  - Tag the release with an annotated tag: `git tag -a 0.2.1-rc1`.
- - Push the tag to bitbucket (`git push --tags`).
+ - Push the tag to GitHub (`git push --tags`).
  - Test that the prerelease installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/<tag>/install.sh | bash` in a new virtual environment.
 
 To run a full release:
@@ -138,8 +138,8 @@ To run a full release:
  - Bump the version in `version.py` and in the installation instructions in the README.
  - Commit the changes.
  - Tag the release with an annotated tag: `git tag -a 0.2.1`. Include some brief release notes.
- - Push the tag to bitbucket.
- - Test that the release installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/0.2.1/install.sh | bash` in a new virtual environment.
+ - Push the tag to GitHub.
+ - Test that the release installs correctly by installing in a new virtual environment.
 
 Acknowledgements
 ----------------
