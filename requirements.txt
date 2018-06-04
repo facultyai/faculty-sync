@@ -4,4 +4,4 @@ paramiko
 inflect
 watchdog
 semantic_version
-git+https://github.com/jonathanslenders/python-prompt-toolkit@2.0
+prompt_toolkit >= 2.0
