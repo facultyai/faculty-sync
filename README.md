@@ -135,7 +135,7 @@ To run a pre-release:
 
 To run a full release:
 
- - Bump the version in `version.py`, in the install script *and* in the installation instructions in the README.
+ - Bump the version in `version.py` and in the installation instructions in the README.
  - Commit the changes.
  - Tag the release with an annotated tag: `git tag -a 0.2.1`. Include some brief release notes.
  - Push the tag to bitbucket.
