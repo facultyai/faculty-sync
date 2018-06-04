@@ -23,7 +23,7 @@ environment.
 To install, just type this in a terminal on your laptop:
 
 ```
-pip install https://github.com/ASIDataScience/sml-sync/archive/0.2.4.zip --process-dependency-links
+pip install https://github.com/ASIDataScience/sml-sync/archive/0.2.4.zip
 ```
 
 Getting started
