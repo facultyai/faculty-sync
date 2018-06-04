@@ -16,10 +16,6 @@ setup(
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
     },
-    # prompt_toolkit 2.0 is currently only available from github:
-    dependency_links=['https://github.com/'
-                      'jonathanslenders/python-prompt-toolkit/'
-                      'tarball/2.0#egg=prompt_toolkit-2.0'],
     install_requires=[
         'sml',
         'daiquiri',
