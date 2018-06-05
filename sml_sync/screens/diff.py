@@ -139,8 +139,9 @@ class Details(object):
             self._set_selection
         )
 
-    def gain_focus(self, app):
-        app.layout.focus(self._table)
+    def gain_focus_if_possible(self, app):
+        if self._table is not None and self._selection != SelectionName.WATCH:
+            app.layout.focus(self._table)
 
     def stop(self):
         try:
@@ -338,8 +339,7 @@ class DifferencesScreen(BaseScreen):
 
         @self.bindings.add('right')  # noqa: F811
         def _(event):
-            if self._summary.current_selection != SelectionName.WATCH:
-                self._details.gain_focus(event.app)
+            self._details.gain_focus_if_possible(event.app)
 
         @self.bindings.add('left')  # noqa: F811
         def _(event):
