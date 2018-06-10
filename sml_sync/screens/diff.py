@@ -309,6 +309,7 @@ class DifferencesScreen(BaseScreen):
         super().__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
+            '[arrows] Navigation '
             '[r] Refresh  '
             '[?] Help  '
             '[q] Quit'
