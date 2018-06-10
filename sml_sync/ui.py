@@ -1,12 +1,15 @@
 
+import logging
 import threading
 import traceback
+import signal
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.layout import HSplit, Layout
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.eventloop import get_event_loop
 
 from .pubsub import Messages
 
@@ -18,6 +21,7 @@ class View(object):
         self._local_dir = configuration.local_dir
         self._remote_directory = None
         self._exchange = exchange
+        self._loop = get_event_loop()
 
         self._current_screen = None
         self.root_container = HSplit([Window()])
@@ -78,10 +82,28 @@ class View(object):
                 print(e)
         self._thread = threading.Thread(target=run)
         self._thread.start()
+        self._register_resize_handler()
 
     def stop(self):
         if self.application.is_running:
             self.application.exit()
+            self._remove_resize_handler()
+
+    def _register_resize_handler(self):
+        self._has_sigwinch = hasattr(signal, 'SIGWINCH')
+        if self._has_sigwinch:
+            self._previous_sigwinch_handler = self._loop.add_signal_handler(
+                signal.SIGWINCH, self._on_resize)
+
+    def _remove_resize_handler(self):
+        # Remove WINCH handler.
+        if self._has_sigwinch:
+            self._loop.add_signal_handler(
+                signal.SIGWINCH, self._previous_winch_handler)
+
+    def _on_resize(self):
+        logging.info('Handling application resize event.')
+        self.application.invalidate()
 
     def _render_top_toolbar(self):
         remote_directory_text = (
