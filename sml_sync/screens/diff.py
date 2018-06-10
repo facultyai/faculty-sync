@@ -115,6 +115,10 @@ class Summary(object):
     def current_selection(self):
         return self._menu_container.current_selection
 
+    @current_selection.setter
+    def current_selection(self, new_selection):
+        self._menu_container.current_selection = new_selection
+
     def gain_focus(self, app):
         app.layout.focus(self._menu_container)
 
@@ -318,11 +322,15 @@ class DifferencesScreen(BaseScreen):
         def _(event):
             if self._summary.current_selection == SelectionName.DOWN:
                 self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
+            else:
+                self._summary.current_selection = SelectionName.DOWN
 
         @self.bindings.add('u')  # noqa: F811
         def _(event):
             if self._summary.current_selection == SelectionName.UP:
                 self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
+            else:
+                self._summary.current_selection = SelectionName.UP
 
         @self.bindings.add('r')  # noqa: F811
         def _(event):
@@ -332,6 +340,8 @@ class DifferencesScreen(BaseScreen):
         def _(event):
             if self._summary.current_selection == SelectionName.WATCH:
                 self._exchange.publish(Messages.START_WATCH_SYNC)
+            else:
+                self._summary.current_selection = SelectionName.WATCH
 
         @self.bindings.add('?')  # noqa: F811
         def _(event):
