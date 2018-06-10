@@ -84,6 +84,11 @@ class View(object):
             self.application.exit()
 
     def _render_top_toolbar(self):
+        remote_directory_text = (
+            ':{}'.format(self._remote_directory)
+            if self._remote_directory is not None
+            else ''
+        )
         top_text = (
             '[SherlockML synchronizer]  '
             '{local_dir} -> '
@@ -91,7 +96,7 @@ class View(object):
         ).format(
             local_dir=self._local_dir,
             project_name=self._project_name,
-            remote_directory_text=':{}'.format(self._remote_directory) if self._remote_directory is not None else ''
+            remote_directory_text=remote_directory_text
         )
         top_toolbar = Window(
             FormattedTextControl(top_text),
