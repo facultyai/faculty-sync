@@ -36,6 +36,10 @@ on SherlockML.
 
 Keys:
 
+    [left/right] Switch focus between the left-hand menu and
+                 the action lists.
+    [up/down] Navigate the left-hand menu or the table of
+              files, depending on which one is focussed.
     [r] Refresh differences between the local file system
         and SherlockML.
     [q] Quit the application.
