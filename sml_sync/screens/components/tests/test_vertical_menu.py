@@ -1,4 +1,5 @@
 
+import pytest
 from unittest.mock import Mock
 
 from prompt_toolkit.layout import to_container
@@ -161,3 +162,44 @@ def test_fixed_width():
     width = to_container(menu).preferred_width(100)
     assert width.preferred == 8
     assert width.min == width.max == 8
+
+
+def test_set_selection():
+    mock_callback = Mock()
+
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+
+    menu = VerticalMenu([entry1, entry2])
+
+    menu.register_menu_change_callback(mock_callback)
+
+    assert menu.current_selection == 1
+    menu.current_selection = 2
+    assert menu.current_selection == 2
+    mock_callback.assert_called_with(2)
+
+
+def test_set_selection_same_as_current():
+    mock_callback = Mock()
+
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+
+    menu = VerticalMenu([entry1, entry2])
+
+    menu.register_menu_change_callback(mock_callback)
+
+    assert menu.current_selection == 1
+    menu.current_selection = 1
+    assert menu.current_selection == 1
+    mock_callback.assert_not_called()
+
+
+def test_set_invalid_entry():
+    entry1 = MenuEntry(1, 'menu entry 1')
+    entry2 = MenuEntry(2, 'menu entry 2')
+    menu = VerticalMenu([entry1, entry2])
+
+    with pytest.raises(ValueError):
+        menu.current_selection = 3

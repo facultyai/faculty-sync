@@ -13,6 +13,10 @@ class VerticalMenu(object):
     def __init__(self, entries: List[MenuEntry], width: Optional[int]=None):
         self._current_index = 0
         self._entries = entries
+        self._entry_indices = {
+            entry.id_: ientry for (ientry, entry)
+            in enumerate(entries)
+        }
         if width is None:
             self._formatted_entries = [entry.text for entry in self._entries]
         else:
@@ -33,6 +37,14 @@ class VerticalMenu(object):
         else:
             # No items in the menu
             return None
+
+    @current_selection.setter
+    def current_selection(self, new_selection):
+        try:
+            index = self._entry_indices[new_selection]
+        except KeyError:
+            raise ValueError(str(new_selection))
+        self._set_selection_index(index)
 
     def register_menu_change_callback(self, callback):
         self._menu_change_callbacks.append(callback)
