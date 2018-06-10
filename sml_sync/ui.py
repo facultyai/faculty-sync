@@ -94,7 +94,7 @@ class View(object):
         # when the terminal has been resized.
         self._has_sigwinch = hasattr(signal, 'SIGWINCH')
         if self._has_sigwinch:
-            self._previous_sigwinch_handler = self._loop.add_signal_handler(
+            self._previous_winch_handler = self._loop.add_signal_handler(
                 signal.SIGWINCH, self._on_resize)
 
     def _remove_resize_handler(self):
