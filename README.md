@@ -42,7 +42,7 @@ Then, in a terminal on  *your laptop*, head to `~/oss/gmaps` and run:
 
 ```
 $ cd ~/oss/gmaps
-$ sml-sync jupyter-gmaps
+$ sml-sync --project jupyter-gmaps
 ```
 
 You will be prompted for a remote directory. Choose `/project/gmaps`. *sml-sync*
@@ -78,7 +78,7 @@ with a list of path patterns. For instance, to ignore anything under `dist/`
 and `/docs/build`, run `sml-sync` with:
 
 ```
-$ sml-sync jupyter-gmaps --ignore dist/ docs/build/
+$ sml-sync --project jupyter-gmaps --ignore dist/ docs/build/
 ```
 
 You can pass shell glob-like patterns to `--ignore`. Some common patterns are
