@@ -24,5 +24,10 @@ setup(
         'watchdog',
         'semantic_version',
         'prompt_toolkit>=2.0'
+    ],
+    classifiers=[
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
     ]
+
 )

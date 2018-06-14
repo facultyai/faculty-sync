@@ -17,8 +17,8 @@ You need a version of `rsync`. I have tested this with `rsync 2.6.9` and
 `3.1.1`. This has only really been tested on macOS and Ubuntu 16.04. It will
 almost certainly not work on Windows.
 
-You will need Python 3. I recommend installing *sml-sync* in a virtual
-environment.
+You will need Python 3.5 or later. I recommend installing *sml-sync* in a
+virtual environment.
 
 To install, just type this in a terminal on your laptop:
 
