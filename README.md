@@ -1,6 +1,8 @@
 SherlockML incremental synchronization
 ======================================
 
+[![Build Status](https://travis-ci.org/ASIDataScience/sml-sync.svg?branch=master)](https://travis-ci.org/ASIDataScience/sml-sync)
+
 You like writing code on your computer, but want to run the code on
 [SherlockML](https://sherlockml.com). This makes that easier.
 
