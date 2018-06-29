@@ -141,6 +141,7 @@ To run a full release:
  - Commit the changes.
  - Tag the release with an annotated tag: `git tag -a 0.3.0`. Include some brief release notes.
  - Push the tag to GitHub.
+ - Create and push a source distribution to Pypi with `python setup.py sdist upload`.
  - Test that the release installs correctly by installing in a new virtual environment.
 
 Acknowledgements
