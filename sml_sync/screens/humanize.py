@@ -123,3 +123,24 @@ def naturaltime(value, future=False, months=True):
         return "now"
 
     return ago % delta
+
+
+suffixes = ('kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+
+
+def naturalsize(value, format='%.1f'):
+    """Format a number of byteslike a human readable filesize (eg. 10 kB) """
+
+    base = 1024
+    bytes = float(value)
+
+    if bytes == 1:
+        return '1 Byte'
+    elif bytes < base:
+        return '%d Bytes' % bytes
+
+    for i, s in enumerate(suffixes):
+        unit = base ** (i+2)
+        if bytes < unit:
+            return (format + ' %s') % ((base * bytes / unit), s)
+    return (format + ' %s') % ((base * bytes / unit), s)

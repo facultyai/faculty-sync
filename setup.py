@@ -7,12 +7,19 @@ version_ns = {}
 with open(os.path.join(here, 'sml_sync', 'version.py')) as f:
     exec(f.read(), {}, version_ns)
 
+packages = [
+    'sml_sync',
+    'sml_sync.screens',
+    'sml_sync.cli',
+    'sml_sync.screens.components'
+]
+
 setup(
     name='sml_sync',
     version=version_ns['version'],
     description='SherlockML file synchronizer',
     author='ASI Data Science',
-    packages=['sml_sync', 'sml_sync.screens', 'sml_sync.cli'],
+    packages=packages,
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
     },
@@ -20,7 +27,6 @@ setup(
         'sml',
         'daiquiri',
         'paramiko',
-        'inflect',
         'watchdog',
         'semantic_version',
         'prompt_toolkit>=2.0'

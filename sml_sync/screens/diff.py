@@ -1,195 +1,310 @@
 
+import logging
 from enum import Enum
 
-import inflect
+from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout import HSplit, VSplit
+from prompt_toolkit.layout import HSplit, VSplit, to_container
 from prompt_toolkit.layout.containers import FloatContainer, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.widgets import TextArea, VerticalLine
 
 from ..pubsub import Messages
+from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
+from .components import (
+    Table, TableColumn, VerticalMenu, MenuEntry, ColumnSettings, Alignment)
+from .humanize import naturaltime, naturalsize
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
 
 HELP_TEXT = """\
-This is a summary of the differences between SherlockML and
-your local directory. It summarizes the files that exist
-only on SherlockML, the files that exist on locally and the
-files that are on both, but with different modification times.
+Synchronize your local filesystem and the SherlockML filesystem.
+
+Three synchronization modes are supported:
+
+'Up' will push all local changes to SherlockML. This will
+erase any file that is on SherlockML, but not available locally.
+
+'Down' will bring all the changes down from SherlockML. This
+will erase any file that is present locally but not on SherlockML.
+
+'Watch' enters `watch` mode. Any time you save, move or delete
+a file or a directory, the change is automatically replicated
+on SherlockML.
 
 Keys:
 
-    [u] Push all the local changes to SherlockML. This will
-        erase any file that is on SherlockML, but not available
-        locally.
-    [d] Bring all the changes down from SherlockML. This will
-        erase any file that is present locally but not on
-        SherlockML.
+    [left/right] Switch focus between the left-hand menu and
+                 the action lists.
+    [up/down] Navigate the left-hand menu or the table of
+              files, depending on which one is focussed.
     [r] Refresh differences between the local file system
         and SherlockML.
-    [w] Enter incremental synchronization mode, where changes
-        to the local file system are automatically replicated
-        on SherlockML.
     [q] Quit the application.
     [?] Toggle this message.
 """
 
 
-class SummaryContainerName(Enum):
-    LOCAL = 'LOCAL'
-    REMOTE = 'REMOTE'
-    BOTH = 'BOTH'
+UP_SYNC_HELP_TEXT = """\
+Press [u] to modify the SherlockML workspace so that it mirrors your local disk.
+
+This will make the following changes to your SherlockML workspace:
+"""
+
+DOWN_SYNC_HELP_TEXT = """\
+Press [d] to modify your local filesystem so that it mirrors the SherlockML workspace.
+
+This will make the following changes to your local disk:
+"""
+
+WATCH_HELP_TEXT = """\
+Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on SherlockML.
+"""
+
+FULLY_SYNCHRONIZED_HELP_TEXT = """\
+Your local disk and the SherlockML workspace are fully synchronized.
+"""
+
+
+class SelectionName(Enum):
+    UP = 'UP'
+    DOWN = 'DOWN'
+    WATCH = 'WATCH'
+
+
+class DiffScreenMessages(Enum):
+    """
+    Messages used internally in the differences screen
+    """
+    SELECTION_UPDATED = 'SELECTION_UPDATED'
+
+
+ACTION_TEXT = {
+    (DifferenceType.LEFT_ONLY, SelectionName.UP): 'create remote',
+    (DifferenceType.RIGHT_ONLY, SelectionName.DOWN): 'create local',
+    (DifferenceType.LEFT_ONLY, SelectionName.DOWN): 'delete local',
+    (DifferenceType.RIGHT_ONLY, SelectionName.UP): 'delete remote',
+    (DifferenceType.TYPE_DIFFERENT, SelectionName.UP): 'replace remote',
+    (DifferenceType.TYPE_DIFFERENT, SelectionName.DOWN): 'replace local',
+    (DifferenceType.ATTRS_DIFFERENT, SelectionName.UP): 'replace remote',
+    (DifferenceType.ATTRS_DIFFERENT, SelectionName.DOWN): 'replace local'
+}
 
 
 class Summary(object):
 
-    def __init__(self, differences):
-        self._differences = differences
-        self._has_differences = False
-        self._current_index = None
-        self._menu_containers = []
-        self._menu_container_names = []
-        self._margin_control = FormattedTextControl('')
-        self._margin = Window(self._margin_control, width=4)
-
-        self._inflect = inflect.engine()
-        self._plural = self._inflect.plural
-        self._plural_verb = self._inflect.plural_verb
-
-        self._render_containers(differences)
-
-    @property
-    def current_focus(self):
-        if self._has_differences:
-            return self._menu_container_names[self._current_index]
-        else:
-            return None
+    def __init__(self, exchange):
+        self._exchange = exchange
+        self._current_index = 0
+        self._menu_container = VerticalMenu([
+            MenuEntry(SelectionName.UP, 'Up'),
+            MenuEntry(SelectionName.DOWN, 'Down'),
+            MenuEntry(SelectionName.WATCH, 'Watch'),
+        ], width=10)
+        self._menu_container.register_menu_change_callback(
+            lambda new_selection: self._on_new_selection(new_selection)
+        )
+        self.container = VSplit([
+            Window(width=1),
+            HSplit([
+                Window(height=1),
+                self._menu_container,
+                Window()
+            ])
+        ])
 
     @property
-    def containers(self):
-        return [VSplit([self._margin, HSplit(self._menu_containers)])]
+    def current_selection(self):
+        return self._menu_container.current_selection
 
-    def focus_next(self):
-        if self._has_differences:
-            return self._set_selection_index(self._current_index + 1)
+    @current_selection.setter
+    def current_selection(self, new_selection):
+        self._menu_container.current_selection = new_selection
 
-    def focus_previous(self):
-        if self._has_differences:
-            return self._set_selection_index(self._current_index - 1)
+    def gain_focus(self, app):
+        app.layout.focus(self._menu_container)
 
-    def _set_selection_index(self, new_index):
-        if self._has_differences:
-            # Wrap around when selecting
-            self._current_index = new_index % len(self._menu_containers)
-            margin_lines = []
-            for icontainer in range(len(self._menu_containers)):
-                margin_lines.append(
-                    '  > ' if icontainer == self._current_index
-                    else (' ' * 4)
-                )
-            margin_text = '\n'.join(margin_lines)
-            self._margin_control.text = margin_text
-            return self._menu_container_names[self._current_index]
-
-    def _render_containers(self, differences):
-        extra_local_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'LEFT_ONLY'
-        ]
-        extra_remote_paths = [
-            difference[1].path for difference in differences
-            if difference[0] == 'RIGHT_ONLY'
-        ]
-        other_differences = [
-            difference[1].path for difference in differences
-            if difference[0] in {'TYPE_DIFFERENT', 'ATTRS_DIFFERENT'}
-        ]
-        if not extra_local_paths and not extra_remote_paths and not other_differences:
-            self._has_differences = False
-            self._menu_containers = [
-                Window(
-                    FormattedTextControl(
-                        'Local directory and SherlockML are synchronized.'),
-                    height=1)
-            ]
-        else:
-            self._has_differences = True
-            if extra_local_paths:
-                text = 'There {} {} {} that {} locally but not on SherlockML'.format(
-                    self._plural_verb('is', len(extra_local_paths)),
-                    len(extra_local_paths),
-                    self._plural('file', len(extra_local_paths)),
-                    self._plural_verb('exists', len(extra_local_paths))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.LOCAL)
-            if extra_remote_paths:
-                text = 'There {} {} {} that {} only on SherlockML'.format(
-                    self._plural_verb('is', len(extra_remote_paths)),
-                    len(extra_remote_paths),
-                    self._plural('file', len(extra_remote_paths)),
-                    self._plural_verb('exists', len(extra_remote_paths))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.REMOTE)
-            if other_differences:
-                text = 'There {} {} {} that {} not synchronized'.format(
-                    self._plural_verb('is', len(other_differences)),
-                    len(other_differences),
-                    self._plural('file', len(other_differences)),
-                    self._plural_verb('is', len(other_differences))
-                )
-                container = Window(FormattedTextControl(text), height=1)
-                self._menu_containers.append(container)
-                self._menu_container_names.append(SummaryContainerName.BOTH)
-            self._set_selection_index(0)
+    def _on_new_selection(self, new_selection):
+        self._exchange.publish(
+            DiffScreenMessages.SELECTION_UPDATED, new_selection)
 
 
 class Details(object):
 
-    def __init__(self, differences, initial_focus):
-        self._focus = initial_focus
+    def __init__(self, exchange, differences, initial_selection):
+        self._selection = initial_selection
         self._differences = differences
-        self._control = FormattedTextControl('')
-        self.container = Window(self._control)
+        self._exchange = exchange
+        self._table = None
+        self.container = HSplit([])
+
         self._render()
 
-    def set_focus(self, new_focus):
-        self._focus = new_focus
+        self._subscription_id = self._exchange.subscribe(
+            DiffScreenMessages.SELECTION_UPDATED,
+            self._set_selection
+        )
+
+    def gain_focus_if_possible(self, app):
+        if self._table is not None and self._selection != SelectionName.WATCH:
+            app.layout.focus(self._table)
+
+    def stop(self):
+        try:
+            self._exchange.unsubscribe(self._subscription_id)
+        except AttributeError:
+            logging.warning(
+                'Tried to unsubscribe from exchange before '
+                'subscription was activated.'
+            )
+
+    def _set_selection(self, new_selection):
+        self._selection = new_selection
         self._render()
 
     def _render(self):
-        if self._focus is None:
-            self._container = Window()
-        elif self._focus == SummaryContainerName.LOCAL:
-            paths = [
-                difference[1].path
-                for difference in self._differences
-                if difference[0] == 'LEFT_ONLY'
-            ]
-            self._render_paths(paths)
-        elif self._focus == SummaryContainerName.REMOTE:
-            paths = [
-                difference[1].path
-                for difference in self._differences
-                if difference[0] == 'RIGHT_ONLY'
-            ]
-            self._render_paths(paths)
+        if self._selection in {SelectionName.UP, SelectionName.DOWN}:
+            self._render_differences(self._differences, self._selection)
         else:
-            paths = [
-                difference[1].path
-                for difference in self._differences
-                if difference[0] in {'TYPE_DIFFERENT', 'ATTRS_DIFFERENT'}
-            ]
-            self._render_paths(paths)
+            self._render_watch()
+        get_app().invalidate()
 
-    def _render_paths(self, paths):
-        path_texts = ['    {}'.format(path) for path in paths]
-        self._control.text = '\n'.join(path_texts)
+    def _render_local_mtime(self, difference):
+        if difference.left is not None and difference.left.is_file():
+            return naturaltime(difference.left.attrs.last_modified)
+        return '-'
+
+    def _render_remote_mtime(self, difference):
+        if difference.right is not None and difference.right.is_file():
+            return naturaltime(difference.right.attrs.last_modified)
+        return '-'
+
+    def _render_local_size(self, difference):
+        if difference.left is not None and difference.left.is_file():
+            return naturalsize(difference.left.attrs.size)
+        return '-'
+
+    def _render_remote_size(self, difference):
+        if difference.right is not None and difference.right.is_file():
+            return naturalsize(difference.right.attrs.size)
+        return '-'
+
+    def _render_help_box(self, text):
+        text_area = TextArea(
+            text, focusable=False, read_only=True, dont_extend_height=True)
+        return to_container(text_area)
+
+    def _render_watch(self):
+        help_box = self._render_help_box(WATCH_HELP_TEXT)
+        self.container.children = [Window(height=1), help_box, Window()]
+
+    def _size_transferred(self, difference, direction):
+        if (
+            difference.difference_type == DifferenceType.LEFT_ONLY
+            and difference.left.is_file()
+        ):
+            return difference.left.attrs.size
+        elif (
+            difference.difference_type == DifferenceType.RIGHT_ONLY
+            and difference.right.is_file()
+        ):
+            return difference.right.attrs.size
+        elif (
+                difference.difference_type in
+                {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
+        ):
+            if (
+                direction == SelectionName.UP
+                and difference.left.is_file()
+            ):
+                return difference.left.attrs.size
+            elif (
+                direction == SelectionName.DOWN
+                and difference.right.is_file()
+            ):
+                return difference.right.attrs.size
+            return 0
+        return 0
+
+    def _render_table(self, differences, direction):
+        def sort_key(difference):
+            """ Order first by action, then by size """
+            text = ACTION_TEXT[(difference.difference_type, direction)]
+            size = self._size_transferred(difference, direction)
+            if 'delete' in text:
+                return (0, -size)
+            elif 'replace' in text:
+                return (1, -size)
+            else:
+                return (2, -size)
+
+        sorted_differences = sorted(differences, key=sort_key)
+
+        paths = []
+        actions = []
+        local_mtimes = []
+        remote_mtimes = []
+        local_sizes = []
+        remote_sizes = []
+
+        for difference in sorted_differences:
+            if difference.difference_type == DifferenceType.LEFT_ONLY:
+                paths.append(difference.left.path)
+            elif difference.difference_type == DifferenceType.RIGHT_ONLY:
+                paths.append(difference.right.path)
+            else:
+                paths.append(difference.left.path)
+
+            local_mtimes.append(self._render_local_mtime(difference))
+            remote_mtimes.append(self._render_remote_mtime(difference))
+
+            local_sizes.append(self._render_local_size(difference))
+            remote_sizes.append(self._render_remote_size(difference))
+
+            action = ACTION_TEXT[(difference.difference_type, direction)]
+            actions.append(action)
+
+        columns = [
+            TableColumn(paths, 'PATH'),
+            TableColumn(actions, 'ACTION'),
+            TableColumn(
+                local_mtimes,
+                'LOCAL MTIME',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                remote_mtimes,
+                'REMOTE MTIME',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                local_sizes,
+                'LOCAL SIZE',
+                ColumnSettings(alignment=Alignment.RIGHT)),
+            TableColumn(
+                remote_sizes,
+                'REMOTE SIZE',
+                ColumnSettings(alignment=Alignment.RIGHT))
+        ]
+        table = Table(columns, sep='  ')
+        return table
+
+    def _render_differences(self, differences, direction):
+        if not differences:
+            help_box = self._render_help_box(FULLY_SYNCHRONIZED_HELP_TEXT)
+            self.container.children = [Window(height=1), help_box, Window()]
+        else:
+            self._table = self._render_table(differences, direction)
+            help_box = self._render_help_box(
+                UP_SYNC_HELP_TEXT
+                if direction == SelectionName.UP else
+                DOWN_SYNC_HELP_TEXT
+            )
+            self.container.children = [
+                Window(height=1),
+                help_box,
+                to_container(self._table),
+            ]
 
 
 class DifferencesScreen(BaseScreen):
@@ -198,62 +313,73 @@ class DifferencesScreen(BaseScreen):
         super().__init__()
         self._exchange = exchange
         self._bottom_toolbar = Window(FormattedTextControl(
-            '[d] Sync SherlockML files down  '
-            '[u] Sync local files up  '
+            '[arrows] Navigation '
             '[r] Refresh  '
-            '[w] Incremental sync from local changes\n'
             '[?] Help  '
             '[q] Quit'
-        ), height=2, style='reverse')
-        self._summary = Summary(differences)
-        self._details = Details(differences, self._summary.current_focus)
+        ), height=1, style='reverse')
+        self._summary = Summary(exchange)
+        self._details = Details(
+            exchange, differences, self._summary.current_selection)
         self.bindings = KeyBindings()
 
-        @self.bindings.add('d')
+        @self.bindings.add('d')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
+            if self._summary.current_selection == SelectionName.DOWN:
+                self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
+            else:
+                self._summary.current_selection = SelectionName.DOWN
 
-        @self.bindings.add('u')
+        @self.bindings.add('u')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
+            if self._summary.current_selection == SelectionName.UP:
+                self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
+            else:
+                self._summary.current_selection = SelectionName.UP
 
-        @self.bindings.add('r')
+        @self.bindings.add('r')  # noqa: F811
         def _(event):
             self._exchange.publish(Messages.REFRESH_DIFFERENCES)
 
-        @self.bindings.add('w')
+        @self.bindings.add('w')  # noqa: F811
         def _(event):
-            self._exchange.publish(Messages.START_WATCH_SYNC)
+            if self._summary.current_selection == SelectionName.WATCH:
+                self._exchange.publish(Messages.START_WATCH_SYNC)
+            else:
+                self._summary.current_selection = SelectionName.WATCH
 
-        @self.bindings.add('?')
+        @self.bindings.add('?')  # noqa: F811
         def _(event):
             self._toggle_help()
 
-        @self.bindings.add('tab')
-        @self.bindings.add('down')
-        @self.bindings.add('left')
+        @self.bindings.add('right')  # noqa: F811
         def _(event):
-            new_focus = self._summary.focus_next()
-            self._details.set_focus(new_focus)
+            self._details.gain_focus_if_possible(event.app)
 
-        @self.bindings.add('s-tab')
-        @self.bindings.add('up')
-        @self.bindings.add('right')
+        @self.bindings.add('left')  # noqa: F811
         def _(event):
-            new_focus = self._summary.focus_previous()
-            self._details.set_focus(new_focus)
+            self._summary.gain_focus(event.app)
 
-        self._screen_container = HSplit(
-            [Window(height=1)] +
-            self._summary.containers +
-            [Window(height=1), Window(char='-', height=1), Window(height=1)] +
-            [self._details.container] +
-            [self._bottom_toolbar]
-        )
+        self._screen_container = HSplit([
+            VSplit([
+                self._summary.container,
+                Window(width=1),
+                VerticalLine(),
+                Window(width=1),
+                self._details.container
+            ]),
+            self._bottom_toolbar
+        ])
         self.main_container = FloatContainer(
             self._screen_container,
             floats=[]
         )
+
+    def on_mount(self, app):
+        self._summary.gain_focus(app)
+
+    def stop(self):
+        self._details.stop()
 
     def _toggle_help(self):
         if self.main_container.floats:
