@@ -131,15 +131,15 @@ To run a pre-release:
 
  - Bump the version in `version.py` and in the install script.
  - Commit the changes.
- - Tag the release with an annotated tag: `git tag -a 0.2.1-rc1`.
+ - Tag the release with an annotated tag: `git tag -a 0.3.0-rc1`.
  - Push the tag to GitHub (`git push --tags`).
- - Test that the prerelease installs correctly by running `curl https://bitbucket.org/theasi/sml-sync/raw/<tag>/install.sh | bash` in a new virtual environment.
+ - Test that the prerelease installs correctly by running `pip install https://github.com/ASIDataScience/sml-sync/archive/0.3.0-rc1.zip` in a new virtual environment.
 
 To run a full release:
 
  - Bump the version in `version.py` and in the installation instructions in the README.
  - Commit the changes.
- - Tag the release with an annotated tag: `git tag -a 0.2.1`. Include some brief release notes.
+ - Tag the release with an annotated tag: `git tag -a 0.3.0`. Include some brief release notes.
  - Push the tag to GitHub.
  - Test that the release installs correctly by installing in a new virtual environment.
 
