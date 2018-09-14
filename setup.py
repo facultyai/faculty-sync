@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -7,19 +7,12 @@ version_ns = {}
 with open(os.path.join(here, 'sml_sync', 'version.py')) as f:
     exec(f.read(), {}, version_ns)
 
-packages = [
-    'sml_sync',
-    'sml_sync.screens',
-    'sml_sync.cli',
-    'sml_sync.screens.components'
-]
-
 setup(
     name='sml_sync',
     version=version_ns['version'],
     description='SherlockML file synchronizer',
     author='ASI Data Science',
-    packages=packages,
+    packages=find_packages(),
     entry_points={
         'console_scripts': ['sml-sync=sml_sync:run']
     },
@@ -35,5 +28,4 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
     ]
-
 )
