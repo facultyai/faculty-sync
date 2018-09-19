@@ -1,5 +1,5 @@
-
 import argparse
+from pathlib import Path
 
 from .models import Configuration
 from .projects import resolve_project
@@ -67,6 +67,13 @@ def parse_command_line(argv=None):
     arguments = parser.parse_args(argv)
 
     local_dir = arguments.local.rstrip('/') + '/'
+
+    local_path = Path(local_dir).resolve()
+    if local_path == Path.home():
+        raise ValueError('Synchronising your home directory is not supported.')
+    elif local_path == Path('/'):
+        raise ValueError('Synchronising your root directory is not supported.')
+
     config = get_config(local_dir)
 
     project = arguments.project
