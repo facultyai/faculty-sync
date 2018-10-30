@@ -1,4 +1,3 @@
-
 import uuid
 
 import sml.client
@@ -16,8 +15,7 @@ def resolve_project(project):
         project = projects_client.get_project_by_id(project_id)
     except ValueError:
         user_id = sml.auth.user_id()
-        project = projects_client.get_project_by_name(
-            user_id, project)
+        project = projects_client.get_project_by_name(user_id, project)
     return project
 
 
@@ -40,7 +38,7 @@ class Project(object):
         return cls(
             json_object['project_id'],
             json_object['name'],
-            json_object['owner_id']
+            json_object['owner_id'],
         )
 
 
@@ -55,8 +53,8 @@ class Projects(sml.client.SherlockMLService):
             resp = self._get('/project/{}'.format(project_id))
         except sml.client.SherlockMLServiceError:
             raise InvalidProject(
-                'Project with ID {} not found in SherlockML'.format(
-                    project_id))
+                'Project with ID {} not found in SherlockML'.format(project_id)
+            )
         return Project.from_json(resp.json())
 
     def get_projects(self, user_id):

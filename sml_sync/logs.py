@@ -17,11 +17,9 @@ def setup_logging(debug):
     if debug:
         ensure_parent_exists(LOG_LOCATION)
         daiquiri.setup(
-            level=logging.INFO,
-            outputs=[daiquiri.output.File(LOG_LOCATION)]
+            level=logging.INFO, outputs=[daiquiri.output.File(LOG_LOCATION)]
         )
     else:
         daiquiri.setup(
-            level=logging.FATAL,
-            outputs=[daiquiri.output.File('/dev/null')]
+            level=logging.FATAL, outputs=[daiquiri.output.File('/dev/null')]
         )

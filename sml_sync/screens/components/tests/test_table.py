@@ -17,9 +17,10 @@ def test_simple_table():
     assert header_window.content.text == 't1 t2'
     assert body_window.content.buffer.text == textwrap.dedent(
         """\
-        a  d 
-        b  e 
-        c  f """)  # noqa: W291 (ignore trailing whitespace)
+        a  d
+        b  e
+        c  f """
+    )  # noqa: W291 (ignore trailing whitespace)
     assert table.preferred_width(100).preferred == 5
     assert table.preferred_height(5, 100).preferred == 4
 
@@ -33,12 +34,15 @@ def test_table_varying_row_lengths():
     assert len(table.window.children) == 2
     [header_window, body_window] = table.window.children
 
-    assert header_window.content.text == textwrap.dedent("""\
-        t1              t2  """)
+    assert header_window.content.text == textwrap.dedent(
+        """\
+        t1              t2  """
+    )
     assert body_window.content.buffer.text == textwrap.dedent(
         """\
         a               long
-        some-long-value b   """)
+        some-long-value b   """
+    )
     assert table.preferred_width(100).preferred == 20
     assert table.preferred_height(5, 100).preferred == 3
 
@@ -86,9 +90,10 @@ def test_custom_separator():
     assert header_window.content.text == 't1 | t2'
     assert body_window.content.buffer.text == textwrap.dedent(
         """\
-        a  | d 
-        b  | e 
-        c  | f """)  # noqa: W291 (ignore trailing whitespace)
+        a  | d
+        b  | e
+        c  | f """
+    )  # noqa: W291 (ignore trailing whitespace)
     assert table.preferred_width(100).preferred == 7
     assert table.preferred_height(5, 100).preferred == 4
 
@@ -98,7 +103,7 @@ def test_right_align():
     col2 = TableColumn(
         rows=['d', 'e', 'f'],
         header='header2',
-        settings=ColumnSettings(alignment=Alignment.RIGHT)
+        settings=ColumnSettings(alignment=Alignment.RIGHT),
     )
 
     table = Table([col1, col2], sep='|')
@@ -107,12 +112,12 @@ def test_right_align():
     [header_window, body_window] = table.window.children
 
     retrieved_table = (
-        header_window.content.text + '\n' +
-        body_window.content.buffer.text
+        header_window.content.text + '\n' + body_window.content.buffer.text
     )
     assert retrieved_table == textwrap.dedent(
         """\
         header1|header2
         a      |      d
         b      |      e
-        c      |      f""")  # noqa: W291 (ignore trailing whitespace)
+        c      |      f"""
+    )  # noqa: W291 (ignore trailing whitespace)

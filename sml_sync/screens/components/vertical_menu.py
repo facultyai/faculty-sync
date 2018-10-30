@@ -9,13 +9,11 @@ MenuEntry = namedtuple('MenuEntry', ['id_', 'text'])
 
 
 class VerticalMenu(object):
-
-    def __init__(self, entries: List[MenuEntry], width: Optional[int]=None):
+    def __init__(self, entries: List[MenuEntry], width: Optional[int] = None):
         self._current_index = 0
         self._entries = entries
         self._entry_indices = {
-            entry.id_: ientry for (ientry, entry)
-            in enumerate(entries)
+            entry.id_: ientry for (ientry, entry) in enumerate(entries)
         }
         if width is None:
             self._formatted_entries = [entry.text for entry in self._entries]
@@ -24,8 +22,11 @@ class VerticalMenu(object):
                 _ensure_width(entry.text, width) for entry in self._entries
             ]
         self._control = FormattedTextControl(
-            '', focusable=True, show_cursor=False,
-            key_bindings=self._get_key_bindings())
+            '',
+            focusable=True,
+            show_cursor=False,
+            key_bindings=self._get_key_bindings(),
+        )
         self._set_control_text()
         self._window = Window(self._control, width=width)
         self._menu_change_callbacks = []

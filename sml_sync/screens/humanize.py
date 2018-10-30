@@ -1,4 +1,3 @@
-
 # Largely stolen from https://github.com/jmoiron/humanize (MIT)
 
 from datetime import datetime, timedelta
@@ -93,8 +92,10 @@ def naturaldelta(value, months=True):
             if months == 1:
                 return "1 year, 1 month"
             else:
-                return _ngettext("1 year, %d month",
-                                 "1 year, %d months", months) % months
+                return (
+                    _ngettext("1 year, %d month", "1 year, %d months", months)
+                    % months
+                )
         else:
             return _ngettext("1 year, %d day", "1 year, %d days", days) % days
     else:
@@ -140,7 +141,7 @@ def naturalsize(value, format='%.1f'):
         return '%d Bytes' % bytes
 
     for i, s in enumerate(suffixes):
-        unit = base ** (i+2)
+        unit = base ** (i + 2)
         if bytes < unit:
             return (format + ' %s') % ((base * bytes / unit), s)
     return (format + ' %s') % ((base * bytes / unit), s)

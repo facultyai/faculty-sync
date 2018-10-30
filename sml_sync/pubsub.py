@@ -1,4 +1,3 @@
-
 import logging
 import threading
 import uuid
@@ -38,7 +37,6 @@ class Messages(Enum):
 
 
 class PubSubExchange(object):
-
     def __init__(self):
         self.queue = Queue()
         self.subscribers = {}
@@ -71,7 +69,8 @@ class PubSubExchange(object):
                             logging.info(
                                 'Publishing {} to {} subscribers'.format(
                                     message_type, len(subscribers)
-                                ))
+                                )
+                            )
                         for (subscription_id, callback) in subscribers:
                             callback(message_data)
                     except KeyError:
@@ -93,6 +92,7 @@ class PubSubExchange(object):
         # TODO: Inefficient and probably full of race conditions
         for msg_type, subscribers in self.subscribers.items():
             self.subscribers[msg_type] = [
-                subscriber for subscriber in subscribers if
-                subscriber[0] != subscription_id
+                subscriber
+                for subscriber in subscribers
+                if subscriber[0] != subscription_id
             ]

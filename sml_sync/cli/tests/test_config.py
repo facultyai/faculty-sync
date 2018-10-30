@@ -45,7 +45,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             project = acme
             remote = /project/dir22
             """,
-            FileConfiguration('acme', '/project/dir22', None, [])
+            FileConfiguration('acme', '/project/dir22', None, []),
         ),
         (
             """
@@ -54,7 +54,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             remote = /project/dir22
             ignore = *.pyc
             """,
-            FileConfiguration('acme', '/project/dir22', None, ['*.pyc'])
+            FileConfiguration('acme', '/project/dir22', None, ['*.pyc']),
         ),
         (
             """
@@ -63,7 +63,9 @@ def _temporary_configurations(user_config=None, project_config=None):
             remote = /project/dir22
             server = some-server-name
             """,
-            FileConfiguration('acme', '/project/dir22', 'some-server-name', [])
+            FileConfiguration(
+                'acme', '/project/dir22', 'some-server-name', []
+            ),
         ),
         (
             """
@@ -73,7 +75,8 @@ def _temporary_configurations(user_config=None, project_config=None):
             ignore = *.pyc, pattern/
             """,
             FileConfiguration(
-                'acme', '/project/dir22', None, ['*.pyc', 'pattern/'])
+                'acme', '/project/dir22', None, ['*.pyc', 'pattern/']
+            ),
         ),
         (
             """
@@ -82,14 +85,15 @@ def _temporary_configurations(user_config=None, project_config=None):
             remote = /project/dir22
             ignore =
             """,
-            FileConfiguration(
-                'acme', '/project/dir22', None, [])
+            FileConfiguration('acme', '/project/dir22', None, []),
         ),
-    ]
+    ],
 )
 def test_project_config(config, expected):
     with _temporary_configurations(project_config=config) as (
-            project_path, user_path):
+        project_path,
+        user_path,
+    ):
         result = get_config('.', project_path, user_path)
         assert result == expected
 
@@ -103,7 +107,9 @@ def test_project_config_multiple_sections():
     project = something-else
     """
     with _temporary_configurations(project_config=config) as (
-             project_path, user_path):
+        project_path,
+        user_path,
+    ):
         with pytest.raises(ValueError):
             get_config('.', project_path, user_path)
 
@@ -117,8 +123,10 @@ def test_project_config_multiple_sections():
             [{}]
             project = acme
             remote = /project/dir22
-            """.format(LOCAL_DIRECTORY),
-            FileConfiguration('acme', '/project/dir22', None, [])
+            """.format(
+                LOCAL_DIRECTORY
+            ),
+            FileConfiguration('acme', '/project/dir22', None, []),
         ),
         (
             # Test tilde expansion
@@ -127,14 +135,18 @@ def test_project_config_multiple_sections():
             [{}]
             project = acme
             remote = /project/dir22
-            """.format(LOCAL_DIRECTORY_WITH_TILDE),
-            FileConfiguration('acme', '/project/dir22', None, [])
-        )
-    ]
+            """.format(
+                LOCAL_DIRECTORY_WITH_TILDE
+            ),
+            FileConfiguration('acme', '/project/dir22', None, []),
+        ),
+    ],
 )
 def test_user_config(local_directory, config, expected):
     with _temporary_configurations(user_config=config) as (
-            project_path, user_path):
+        project_path,
+        user_path,
+    ):
         result = get_config(local_directory, project_path, user_path)
         assert result == expected
 
@@ -148,9 +160,13 @@ def test_config_present_in_both_user_and_project():
     user_config = """
     [{}]
     project = other-project
-    """.format(LOCAL_DIRECTORY)
+    """.format(
+        LOCAL_DIRECTORY
+    )
     with _temporary_configurations(user_config, project_config) as (
-            project_path, user_path):
+        project_path,
+        user_path,
+    ):
         with pytest.raises(ValueError):
             get_config('.', project_path, user_path)
 

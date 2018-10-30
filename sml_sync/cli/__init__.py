@@ -16,53 +16,60 @@ DEFAULT_IGNORE_PATTERNS = [
     '.tox',
     '.git',
     '.mypy_cache',
-    '.cache'
+    '.cache',
 ]
 
 
 def parse_command_line(argv=None):
     parser = argparse.ArgumentParser(
         prog='sml-sync',
-        description='Autosync a local directory to a SherlockML project'
+        description='Autosync a local directory to a SherlockML project',
     )
     parser.add_argument(
-        '--project', default=None,
-        help=('Project name or ID. If omitted, it has to be present '
-              'in the configuration file.')
+        '--project',
+        default=None,
+        help=(
+            'Project name or ID. If omitted, it has to be present '
+            'in the configuration file.'
+        ),
     )
     parser.add_argument(
         '--remote',
         default=None,
-        help=('Remote directory, e.g. /project/src. If omitted, sml-sync '
-              'will look first in configuration and, failing that, will '
-              'prompt for a directory.')
+        help=(
+            'Remote directory, e.g. /project/src. If omitted, sml-sync '
+            'will look first in configuration and, failing that, will '
+            'prompt for a directory.'
+        ),
     )
     parser.add_argument(
         '--local',
         default='.',
-        help='Local directory to sync from. Defaults to the current directory.'
+        help='Local directory to sync from. Defaults to the current directory.',
     )
     parser.add_argument(
         '--ignore',
         nargs='+',
-        help='Path fragments to ignore (e.g. node_modules, __pycache__).'
+        help='Path fragments to ignore (e.g. node_modules, __pycache__).',
     )
     parser.add_argument(
         '--debug',
         default=False,
         action='store_true',
-        help='Run in debug mode (sets the log level to info).'
+        help='Run in debug mode (sets the log level to info).',
     )
     parser.add_argument(
         '--version',
         action='version',
-        version='sml-sync {version}'.format(version=version)
+        version='sml-sync {version}'.format(version=version),
     )
     parser.add_argument(
         '--server',
         default=None,
-        help=('The name or ID of the server in the project to use. If omitted,'
-              ' a random server is used.')
+        help=(
+            'The name or ID of the server in the project to use. If omitted,'
+            ' a random server is used.'
+        ),
     )
     arguments = parser.parse_args(argv)
 
@@ -80,8 +87,10 @@ def parse_command_line(argv=None):
     if project is None:
         project = config.project
     if project is None:
-        raise ValueError('You have to specify a project either '
-                         'as an argument, or in the config.')
+        raise ValueError(
+            'You have to specify a project either '
+            'as an argument, or in the config.'
+        )
     project = resolve_project(project)
 
     server = arguments.server
@@ -101,7 +110,6 @@ def parse_command_line(argv=None):
         ignore += arguments.ignore
 
     configuration = Configuration(
-        project, server_id, local_dir, remote_dir,
-        arguments.debug, ignore
+        project, server_id, local_dir, remote_dir, arguments.debug, ignore
     )
     return configuration

@@ -1,4 +1,3 @@
-
 import logging
 import os
 import queue
@@ -15,7 +14,6 @@ from .pubsub import Messages
 
 
 class TimestampDatabase(object):
-
     def __init__(self, initial_data=None):
         """
         Keep track of paths and timestamps associated with those paths.
@@ -59,7 +57,6 @@ class TimestampDatabase(object):
 
 
 class ListableQueue(queue.Queue):
-
     def items(self):
         return [item for item in self.queue]
 
@@ -70,7 +67,7 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         watchdog.events.EVENT_TYPE_CREATED: ChangeEventType.CREATED,
         watchdog.events.EVENT_TYPE_MOVED: ChangeEventType.MOVED,
         watchdog.events.EVENT_TYPE_MODIFIED: ChangeEventType.MODIFIED,
-        watchdog.events.EVENT_TYPE_DELETED: ChangeEventType.DELETED
+        watchdog.events.EVENT_TYPE_DELETED: ChangeEventType.DELETED,
     }
 
     def __init__(self, queue, local_dir, excluded_patterns):
@@ -86,7 +83,8 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         if path_match.matches_any_of(path, self._excluded_patterns):
             logging.info(
                 'Ignoring change event {} as it is in list of excluded patterns.'.format(
-                    watchdog_event)
+                    watchdog_event
+                )
             )
         elif event_type == ChangeEventType.MODIFIED and is_directory:
             # Ignore directory mtime changes
@@ -100,7 +98,7 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
                         event_type,
                         is_directory,
                         path,
-                        extra_args={'dest_path': self._relpath(dest_path)}
+                        extra_args={'dest_path': self._relpath(dest_path)},
                     )
                 else:
                     # File was moved outside of the area we're watching:
@@ -109,11 +107,12 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
                         ChangeEventType.DELETED,
                         is_directory,
                         path,
-                        extra_args=None
+                        extra_args=None,
                     )
             else:
                 event = FsChangeEvent(
-                    event_type, is_directory, path, extra_args=None)
+                    event_type, is_directory, path, extra_args=None
+                )
             self.queue.put(event)
 
     def _relpath(self, path):
@@ -121,7 +120,6 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
 
 
 class Uploader(object):
-
     def __init__(self, queue, synchronizer, monitor, exchange):
         self._queue = queue
         self._synchronizer = synchronizer
@@ -155,38 +153,34 @@ class Uploader(object):
 
     def _handle_sync(self, fs_event):
         logging.info('Processing file system event {}'.format(fs_event))
-        self._exchange.publish(
-            Messages.STARTING_HANDLING_FS_EVENT,
-            fs_event
-        )
+        self._exchange.publish(Messages.STARTING_HANDLING_FS_EVENT, fs_event)
         if fs_event.is_directory:
             # TODO implement directory handling
-            if fs_event.event_type in \
-             {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
+            if fs_event.event_type in {
+                ChangeEventType.CREATED,
+                ChangeEventType.MODIFIED,
+            }:
                 self._synchronizer.mkdir_remote(fs_event.path)
             elif fs_event.event_type == ChangeEventType.DELETED:
                 self._synchronizer.rmdir_remote(fs_event.path)
             elif fs_event.event_type == ChangeEventType.MOVED:
                 self._synchronizer.mvfile_remote(
-                    fs_event.path,
-                    fs_event.extra_args['dest_path']
+                    fs_event.path, fs_event.extra_args['dest_path']
                 )
         else:
             path = fs_event.path
-            if fs_event.event_type in \
-             {ChangeEventType.CREATED, ChangeEventType.MODIFIED}:
+            if fs_event.event_type in {
+                ChangeEventType.CREATED,
+                ChangeEventType.MODIFIED,
+            }:
                 self._synchronizer.up(path)
             elif fs_event.event_type == ChangeEventType.DELETED:
                 self._synchronizer.rmfile_remote(path)
             elif fs_event.event_type == ChangeEventType.MOVED:
                 self._synchronizer.mvfile_remote(
-                    path,
-                    fs_event.extra_args['dest_path']
+                    path, fs_event.extra_args['dest_path']
                 )
-        self._exchange.publish(
-            Messages.FINISHED_HANDLING_FS_EVENT,
-            fs_event
-        )
+        self._exchange.publish(Messages.FINISHED_HANDLING_FS_EVENT, fs_event)
 
     def join(self):
         if self._thread is not None:
@@ -194,7 +188,6 @@ class Uploader(object):
 
 
 class HeldFilesMonitor(object):
-
     def __init__(self, synchronizer, sftp, exchange):
         self._synchronizer = synchronizer
         self._local_dir = synchronizer.local_dir
@@ -203,15 +196,15 @@ class HeldFilesMonitor(object):
         self._exchange = exchange
         _local_tree = self._synchronizer.list_local()
         _remote_tree = self._synchronizer.list_remote()
-        self._local_timestamps = TimestampDatabase.from_fs_objects(
-            _local_tree)
+        self._local_timestamps = TimestampDatabase.from_fs_objects(_local_tree)
         self._remote_timestamps = TimestampDatabase.from_fs_objects(
-            _remote_tree)
+            _remote_tree
+        )
         self._held_paths = set(
-            self._get_initial_help_paths(_local_tree, _remote_tree))
+            self._get_initial_help_paths(_local_tree, _remote_tree)
+        )
         self._exchange.publish(
-            Messages.HELD_FILES_CHANGED,
-            frozenset(self._held_paths)
+            Messages.HELD_FILES_CHANGED, frozenset(self._held_paths)
         )
 
     def _get_initial_help_paths(self, local_tree, remote_tree):
@@ -254,7 +247,8 @@ class HeldFilesMonitor(object):
         last_known_timestamp = self._remote_timestamps.get(path)
         try:
             current_timestamp = get_remote_mtime(
-                os.path.join(self._remote_dir, path), self._sftp)
+                os.path.join(self._remote_dir, path), self._sftp
+            )
             has_changed = last_known_timestamp != current_timestamp
             return has_changed
         except FileNotFoundError:
@@ -263,8 +257,7 @@ class HeldFilesMonitor(object):
     def _add_to_held_paths(self, path):
         self._held_paths.add(path)
         self._exchange.publish(
-            Messages.HELD_FILES_CHANGED,
-            frozenset(self._held_paths)
+            Messages.HELD_FILES_CHANGED, frozenset(self._held_paths)
         )
 
     def has_synced(self, fs_event):
@@ -276,16 +269,17 @@ class HeldFilesMonitor(object):
             abs_dest_path = os.path.join(self._remote_dir, dest_path)
             current_timestamp = get_remote_mtime(abs_dest_path, self._sftp)
             self._remote_timestamps.update_if_newer(
-                dest_path, current_timestamp)
+                dest_path, current_timestamp
+            )
         else:
             path = fs_event.path
             current_timestamp = get_remote_mtime(
-                os.path.join(self._remote_dir, path), self._sftp)
+                os.path.join(self._remote_dir, path), self._sftp
+            )
             self._remote_timestamps.update_if_newer(path, current_timestamp)
 
 
 class WatcherSynchronizer(object):
-
     def __init__(self, sftp, synchronizer, exchange):
         local_dir = synchronizer.local_dir
         self.queue = ListableQueue()
@@ -294,12 +288,10 @@ class WatcherSynchronizer(object):
         monitor = HeldFilesMonitor(synchronizer, sftp, exchange)
         self.observer.schedule(
             FileSystemChangeHandler(
-                self.queue,
-                local_dir,
-                synchronizer.ignore_paths
+                self.queue, local_dir, synchronizer.ignore_paths
             ),
             local_dir,
-            recursive=True
+            recursive=True,
         )
         self.uploader = Uploader(self.queue, synchronizer, monitor, exchange)
 

@@ -2,6 +2,7 @@ import pytest
 
 from sml_sync.path_match import matches
 
+
 @pytest.mark.parametrize(
     'path,pattern',
     [
@@ -18,7 +19,7 @@ from sml_sync.path_match import matches
         ('/hello/world', '/*/world'),
         ('/hello/world/bye', '*'),
         ('/hello/', 'hel*o'),
-    ]
+    ],
 )
 def test_should_match(path, pattern):
     assert matches(path, pattern)
@@ -31,7 +32,7 @@ def test_should_match(path, pattern):
         ('/hello/wo', '/hello/world'),
         ('/hello/world/bye', '/world'),
         ('/hello/', 'hel*x'),
-    ]
+    ],
 )
 def test_should_not_match(path, pattern):
     assert not matches(path, pattern)

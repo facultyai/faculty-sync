@@ -4,20 +4,27 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
-from .file_trees import (compare_file_trees, get_remote_subdirectories,
-                         remote_is_dir)
+from .file_trees import (
+    compare_file_trees,
+    get_remote_subdirectories,
+    remote_is_dir,
+)
 from .pubsub import Messages
-from .screens import (DifferencesScreen, RemoteDirectoryPromptScreen,
-                      SynchronizationScreen, SynchronizationScreenDirection,
-                      WalkingFileTreesScreen, WalkingFileTreesStatus,
-                      WatchSyncScreen)
+from .screens import (
+    DifferencesScreen,
+    RemoteDirectoryPromptScreen,
+    SynchronizationScreen,
+    SynchronizationScreenDirection,
+    WalkingFileTreesScreen,
+    WalkingFileTreesStatus,
+    WatchSyncScreen,
+)
 from .ssh import sftp_from_ssh_details
 from .sync import Synchronizer
 from .watch_sync import WatcherSynchronizer
 
 
 class Controller(object):
-
     def __init__(self, configuration, ssh_details, view, exchange):
         self._configuration = configuration
         self._ssh_details = ssh_details
@@ -34,51 +41,51 @@ class Controller(object):
 
     def start(self):
         self._exchange.subscribe(
-            Messages.STOP_CALLED,
-            lambda _: self._stop_event.set()
+            Messages.STOP_CALLED, lambda _: self._stop_event.set()
         )
         self._exchange.subscribe(
             Messages.VERIFY_REMOTE_DIRECTORY,
-            lambda directory:
-                self._submit(
-                    lambda: self._resolve_remote_directory(directory))
+            lambda directory: self._submit(
+                lambda: self._resolve_remote_directory(directory)
+            ),
         )
         self._exchange.subscribe(
             Messages.PROMPT_FOR_REMOTE_DIRECTORY,
-            lambda _: self._submit(self._prompt_for_remote_directory)
+            lambda _: self._submit(self._prompt_for_remote_directory),
         )
         self._exchange.subscribe(
             Messages.START_INITIAL_FILE_TREE_WALK,
-            lambda _: self._submit(self._show_differences)
+            lambda _: self._submit(self._show_differences),
         )
         self._exchange.subscribe(
             Messages.DISPLAY_DIFFERENCES,
             lambda differences: self._submit(
-                self._display_differences, differences)
+                self._display_differences, differences
+            ),
         )
         self._exchange.subscribe(
             Messages.SYNC_SHERLOCKML_TO_LOCAL,
-            lambda _: self._submit(self._sync_sherlockml_to_local)
+            lambda _: self._submit(self._sync_sherlockml_to_local),
         )
         self._exchange.subscribe(
             Messages.SYNC_LOCAL_TO_SHERLOCKML,
-            lambda _: self._submit(self._sync_local_to_sherlockml)
+            lambda _: self._submit(self._sync_local_to_sherlockml),
         )
         self._exchange.subscribe(
             Messages.START_WATCH_SYNC,
-            lambda _: self._submit(self._start_watch_sync)
+            lambda _: self._submit(self._start_watch_sync),
         )
         self._exchange.subscribe(
             Messages.ERROR_HANDLING_FS_EVENT,
-            lambda _: self._submit(self._restart_watch_sync)
+            lambda _: self._submit(self._restart_watch_sync),
         )
         self._exchange.subscribe(
             Messages.STOP_WATCH_SYNC,
-            lambda _: self._submit(self._stop_watch_sync)
+            lambda _: self._submit(self._stop_watch_sync),
         )
         self._exchange.subscribe(
             Messages.DOWN_IN_WATCH_SYNC,
-            lambda _: self._submit(self._down_in_watch_sync)
+            lambda _: self._submit(self._down_in_watch_sync),
         )
 
         def run():
@@ -89,8 +96,7 @@ class Controller(object):
         self._thread.start()
 
         self._exchange.publish(
-            Messages.VERIFY_REMOTE_DIRECTORY,
-            self._configuration.remote_dir
+            Messages.VERIFY_REMOTE_DIRECTORY, self._configuration.remote_dir
         )
 
     def _submit(self, fn, *args, **kwargs):
@@ -103,18 +109,18 @@ class Controller(object):
     def _resolve_remote_directory(self, remote_dir):
         if remote_dir is not None:
             if remote_is_dir(remote_dir, self._sftp):
-                logging.info('Setting {} as remote directory'.format(
-                    remote_dir))
+                logging.info(
+                    'Setting {} as remote directory'.format(remote_dir)
+                )
                 self._remote_dir = remote_dir.rstrip('/') + '/'
                 self._synchronizer = Synchronizer(
                     self._configuration.local_dir,
                     self._remote_dir,
                     self._ssh_details,
-                    self._configuration.ignore
+                    self._configuration.ignore,
                 )
                 self._exchange.publish(
-                    Messages.REMOTE_DIRECTORY_SET,
-                    self._remote_dir
+                    Messages.REMOTE_DIRECTORY_SET, self._remote_dir
                 )
                 self._exchange.publish(Messages.START_INITIAL_FILE_TREE_WALK)
             else:
@@ -127,14 +133,16 @@ class Controller(object):
         self._current_screen = RemoteDirectoryPromptScreen(
             self._exchange,
             get_paths_in_directory=lambda directory: list(
-                get_remote_subdirectories(directory, self._sftp))
+                get_remote_subdirectories(directory, self._sftp)
+            ),
         )
         self._view.mount(self._current_screen)
 
     def _sync_sherlockml_to_local(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen(
-            direction=SynchronizationScreenDirection.DOWN)
+            direction=SynchronizationScreenDirection.DOWN
+        )
         self._view.mount(self._current_screen)
         self._synchronizer.down(rsync_opts=['--delete'])
         self._show_differences()
@@ -142,7 +150,8 @@ class Controller(object):
     def _sync_local_to_sherlockml(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen(
-            direction=SynchronizationScreenDirection.UP)
+            direction=SynchronizationScreenDirection.UP
+        )
         self._view.mount(self._current_screen)
         self._synchronizer.up(rsync_opts=['--delete'])
         self._show_differences()
@@ -152,7 +161,7 @@ class Controller(object):
         self._current_screen = DifferencesScreen(differences, self._exchange)
         subscription_id = self._exchange.subscribe(
             Messages.REFRESH_DIFFERENCES,
-            lambda _: self._submit(self._show_differences)
+            lambda _: self._submit(self._show_differences),
         )
         self._current_screen_subscriptions.append(subscription_id)
         self._view.mount(self._current_screen)
@@ -164,7 +173,8 @@ class Controller(object):
     def _show_differences(self):
         self._clear_current_subscriptions()
         self._current_screen = WalkingFileTreesScreen(
-            WalkingFileTreesStatus.CONNECTING, self._exchange)
+            WalkingFileTreesStatus.CONNECTING, self._exchange
+        )
         try:
             self._view.mount(self._current_screen)
             differences = self._calculate_differences(publish_progress=True)
@@ -175,25 +185,29 @@ class Controller(object):
     def _calculate_differences(self, publish_progress=True):
         if publish_progress:
             self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK)
+                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.LOCAL_WALK
+            )
         local_files = self._synchronizer.list_local()
         logging.info(
             'Found {} files locally at path {}.'.format(
-                len(local_files), self._configuration.local_dir)
+                len(local_files), self._configuration.local_dir
+            )
         )
         if publish_progress:
             self._exchange.publish(
-                Messages.WALK_STATUS_CHANGE,
-                WalkingFileTreesStatus.REMOTE_WALK)
+                Messages.WALK_STATUS_CHANGE, WalkingFileTreesStatus.REMOTE_WALK
+            )
         remote_files = self._synchronizer.list_remote()
         logging.info(
             'Found {} files on SherlockML at path {}.'.format(
-                len(remote_files), self._configuration.remote_dir)
+                len(remote_files), self._configuration.remote_dir
+            )
         )
         if publish_progress:
             self._exchange.publish(
                 Messages.WALK_STATUS_CHANGE,
-                WalkingFileTreesStatus.CALCULATING_DIFFERENCES)
+                WalkingFileTreesStatus.CALCULATING_DIFFERENCES,
+            )
         differences = list(compare_file_trees(local_files, remote_files))
         return differences
 
@@ -202,9 +216,7 @@ class Controller(object):
         self._current_screen = WatchSyncScreen(self._exchange)
         self._view.mount(self._current_screen)
         self._watcher_synchronizer = WatcherSynchronizer(
-            self._sftp,
-            self._synchronizer,
-            self._exchange
+            self._sftp, self._synchronizer, self._exchange
         )
         self._watcher_synchronizer.start()
 
@@ -226,7 +238,8 @@ class Controller(object):
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
         self._current_screen = SynchronizationScreen(
-            direction=SynchronizationScreenDirection.DOWN)
+            direction=SynchronizationScreenDirection.DOWN
+        )
         self._view.mount(self._current_screen)
         self._synchronizer.down(rsync_opts=['--update'])
         self._start_watch_sync()

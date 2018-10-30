@@ -1,4 +1,3 @@
-
 import collections
 import threading
 import time
@@ -40,23 +39,20 @@ Keys:
 
 
 class Loading(object):
-
     def __init__(self):
         self._loading_indicator = LoadingIndicator()
         self._control = FormattedTextControl('')
-        self.container = HSplit([
-            Window(height=1),
-            Window(self._control, height=1),
-            Window()
-        ])
+        self.container = HSplit(
+            [Window(height=1), Window(self._control, height=1), Window()]
+        )
         self._thread = None
         self._stop_event = threading.Event()
         self._start_updating_loading_indicator()
 
     def _render(self):
-        self._control.text = \
-            '  {} Loading directory structure on SherlockML'.format(
-                self._loading_indicator.current())
+        self._control.text = '  {} Loading directory structure on SherlockML'.format(
+            self._loading_indicator.current()
+        )
 
     def _start_updating_loading_indicator(self):
         def run():
@@ -66,6 +62,7 @@ class Loading(object):
                 self._render()
                 time.sleep(0.5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
@@ -74,7 +71,6 @@ class Loading(object):
 
 
 class CurrentlySyncing(object):
-
     def __init__(self):
         self._current_event = None
         self._loading_indicator = LoadingIndicator()
@@ -100,7 +96,8 @@ class CurrentlySyncing(object):
         else:
             path = self._current_event.path
             self._control.text = '  {} {}'.format(
-                self._loading_indicator.current(), path)
+                self._loading_indicator.current(), path
+            )
 
     def _start_updating_loading_indicator(self):
         def run():
@@ -110,12 +107,12 @@ class CurrentlySyncing(object):
                 self._render()
                 time.sleep(0.5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
 
 class RecentlySyncedItems(object):
-
     def __init__(self):
         self._items = collections.deque(maxlen=10)
         self._empty_window = Window(height=1)
@@ -140,7 +137,7 @@ class RecentlySyncedItems(object):
                 Window(width=4, height=len(items)),
                 self._render_events(events),
                 Window(width=2, height=len(items)),
-                self._render_times(times)
+                self._render_times(times),
             ]
         else:
             self.container.children = [self._empty_window]
@@ -151,7 +148,7 @@ class RecentlySyncedItems(object):
         return Window(
             FormattedTextControl('\n'.join(event_texts)),
             width=min(event_max_width, 50),
-            height=len(events)
+            height=len(events),
         )
 
     def _format_event(self, event):
@@ -176,8 +173,7 @@ class RecentlySyncedItems(object):
     def _render_times(self, times):
         times_text = [humanize.naturaltime(t) for t in times]
         return Window(
-            FormattedTextControl('\n'.join(times_text)),
-            height=len(times)
+            FormattedTextControl('\n'.join(times_text)), height=len(times)
         )
 
     def _start_updating(self):
@@ -187,12 +183,12 @@ class RecentlySyncedItems(object):
                 self._render()
                 time.sleep(5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
 
 class HeldFiles(object):
-
     def __init__(self):
         self._held_paths = list()
         self.container = HSplit([Window()])
@@ -208,13 +204,15 @@ class HeldFiles(object):
                 Window(height=1),
                 Window(char='-', height=1),
                 Window(height=1),
-                Window(FormattedTextControl(
-                    '  The following files will not be synced to '
-                    'avoid accidentally overwriting changes on SherlockML:'),
-                       dont_extend_height=True
+                Window(
+                    FormattedTextControl(
+                        '  The following files will not be synced to '
+                        'avoid accidentally overwriting changes on SherlockML:'
+                    ),
+                    dont_extend_height=True,
                 ),
                 Window(height=1),
-                self._format_held_paths(self._held_paths)
+                self._format_held_paths(self._held_paths),
             ]
         else:
             self.container.children = Window(dont_extend_height=True)
@@ -226,7 +224,6 @@ class HeldFiles(object):
 
 
 class WatchSyncScreen(BaseScreen):
-
     def __init__(self, exchange):
         super().__init__()
         self._exchange = exchange
@@ -236,40 +233,40 @@ class WatchSyncScreen(BaseScreen):
         self._recently_synced_component = None
         self._held_files_component = None
 
-        self.menu_bar = Window(FormattedTextControl(
+        self.menu_bar = Window(
+            FormattedTextControl(
                 '[s] Stop  '
                 '[d] Sync SherlockML files down  '
                 '[q] Quit  '
                 '[?] Help'
-            ), height=1, style='reverse')
-
-        self._screen_container = HSplit([
-            self._loading_component.container,
-            self.menu_bar
-        ])
-
-        self.main_container = FloatContainer(
-            self._screen_container,
-            floats=[]
+            ),
+            height=1,
+            style='reverse',
         )
+
+        self._screen_container = HSplit(
+            [self._loading_component.container, self.menu_bar]
+        )
+
+        self.main_container = FloatContainer(self._screen_container, floats=[])
 
         self._subscription_ids = [
             self._exchange.subscribe(
                 Messages.START_WATCH_SYNC_MAIN_LOOP,
-                lambda _: self._start_main_screen()
+                lambda _: self._start_main_screen(),
             ),
             self._exchange.subscribe(
                 Messages.HELD_FILES_CHANGED,
-                lambda held_files: self._update_held_files(held_files)
+                lambda held_files: self._update_held_files(held_files),
             ),
             self._exchange.subscribe(
                 Messages.STARTING_HANDLING_FS_EVENT,
-                lambda event: self._on_start_handling_fs_event(event)
+                lambda event: self._on_start_handling_fs_event(event),
             ),
             self._exchange.subscribe(
                 Messages.FINISHED_HANDLING_FS_EVENT,
-                lambda event: self._on_finish_handling_fs_event(event)
-            )
+                lambda event: self._on_finish_handling_fs_event(event),
+            ),
         ]
 
         self.bindings = KeyBindings()
@@ -309,7 +306,7 @@ class WatchSyncScreen(BaseScreen):
             self._currently_syncing_component.container,
             self._recently_synced_component.container,
             self._held_files_component.container,
-            self.menu_bar
+            self.menu_bar,
         ]
 
     def _update_held_files(self, held_files):

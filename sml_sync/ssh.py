@@ -1,4 +1,3 @@
-
 import contextlib
 import os
 import shutil
@@ -12,12 +11,12 @@ from .models import SshDetails
 
 
 def sftp_from_ssh_details(ssh_details):
-    transport = paramiko.Transport(
-        (ssh_details.hostname, ssh_details.port)
-    )
+    transport = paramiko.Transport((ssh_details.hostname, ssh_details.port))
     transport.connect(
         username=ssh_details.username,
-        pkey=paramiko.rsakey.RSAKey.from_private_key_file(ssh_details.key_file)
+        pkey=paramiko.rsakey.RSAKey.from_private_key_file(
+            ssh_details.key_file
+        ),
     )
     sftp = paramiko.sftp_client.SFTPClient.from_transport(transport)
     return sftp
@@ -27,8 +26,7 @@ def sftp_from_ssh_details(ssh_details):
 def get_ssh_details(configuration):
     client = sml.galleon.Galleon()
     details = client.ssh_details(
-        configuration.project.id_,
-        configuration.server_id
+        configuration.project.id_, configuration.server_id
     )
     hostname = details['hostname']
     port = details['port']

@@ -30,8 +30,10 @@ def _server_by_name(project_id, server_name, status=None):
         if not matching_servers:
             tpl = 'no {} server of name "{}" in this project'
         else:
-            tpl = ('more than one {} server of name "{}", please select by '
-                   'server ID instead')
+            tpl = (
+                'more than one {} server of name "{}", please select by '
+                'server ID instead'
+            )
         adjective = 'available' if status is None else status
         raise NoValidServer(tpl.format(adjective, server_name))
 

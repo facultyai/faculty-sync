@@ -1,4 +1,3 @@
-
 import logging
 from enum import Enum
 
@@ -14,7 +13,13 @@ from ..models import DifferenceType
 from .base import BaseScreen
 from .help import help_modal
 from .components import (
-    Table, TableColumn, VerticalMenu, MenuEntry, ColumnSettings, Alignment)
+    Table,
+    TableColumn,
+    VerticalMenu,
+    MenuEntry,
+    ColumnSettings,
+    Alignment,
+)
 from .humanize import naturaltime, naturalsize
 
 HELP_TITLE = 'Differences between local directory and SherlockML'
@@ -78,6 +83,7 @@ class DiffScreenMessages(Enum):
     """
     Messages used internally in the differences screen
     """
+
     SELECTION_UPDATED = 'SELECTION_UPDATED'
 
 
@@ -89,31 +95,31 @@ ACTION_TEXT = {
     (DifferenceType.TYPE_DIFFERENT, SelectionName.UP): 'replace remote',
     (DifferenceType.TYPE_DIFFERENT, SelectionName.DOWN): 'replace local',
     (DifferenceType.ATTRS_DIFFERENT, SelectionName.UP): 'replace remote',
-    (DifferenceType.ATTRS_DIFFERENT, SelectionName.DOWN): 'replace local'
+    (DifferenceType.ATTRS_DIFFERENT, SelectionName.DOWN): 'replace local',
 }
 
 
 class Summary(object):
-
     def __init__(self, exchange):
         self._exchange = exchange
         self._current_index = 0
-        self._menu_container = VerticalMenu([
-            MenuEntry(SelectionName.UP, 'Up'),
-            MenuEntry(SelectionName.DOWN, 'Down'),
-            MenuEntry(SelectionName.WATCH, 'Watch'),
-        ], width=10)
+        self._menu_container = VerticalMenu(
+            [
+                MenuEntry(SelectionName.UP, 'Up'),
+                MenuEntry(SelectionName.DOWN, 'Down'),
+                MenuEntry(SelectionName.WATCH, 'Watch'),
+            ],
+            width=10,
+        )
         self._menu_container.register_menu_change_callback(
             lambda new_selection: self._on_new_selection(new_selection)
         )
-        self.container = VSplit([
-            Window(width=1),
-            HSplit([
-                Window(height=1),
-                self._menu_container,
-                Window()
-            ])
-        ])
+        self.container = VSplit(
+            [
+                Window(width=1),
+                HSplit([Window(height=1), self._menu_container, Window()]),
+            ]
+        )
 
     @property
     def current_selection(self):
@@ -128,11 +134,11 @@ class Summary(object):
 
     def _on_new_selection(self, new_selection):
         self._exchange.publish(
-            DiffScreenMessages.SELECTION_UPDATED, new_selection)
+            DiffScreenMessages.SELECTION_UPDATED, new_selection
+        )
 
 
 class Details(object):
-
     def __init__(self, exchange, differences, initial_selection):
         self._selection = initial_selection
         self._differences = differences
@@ -143,8 +149,7 @@ class Details(object):
         self._render()
 
         self._subscription_id = self._exchange.subscribe(
-            DiffScreenMessages.SELECTION_UPDATED,
-            self._set_selection
+            DiffScreenMessages.SELECTION_UPDATED, self._set_selection
         )
 
     def gain_focus_if_possible(self, app):
@@ -193,7 +198,8 @@ class Details(object):
 
     def _render_help_box(self, text):
         text_area = TextArea(
-            text, focusable=False, read_only=True, dont_extend_height=True)
+            text, focusable=False, read_only=True, dont_extend_height=True
+        )
         return to_container(text_area)
 
     def _render_watch(self):
@@ -211,18 +217,14 @@ class Details(object):
             and difference.right.is_file()
         ):
             return difference.right.attrs.size
-        elif (
-                difference.difference_type in
-                {DifferenceType.TYPE_DIFFERENT, DifferenceType.ATTRS_DIFFERENT}
-        ):
-            if (
-                direction == SelectionName.UP
-                and difference.left.is_file()
-            ):
+        elif difference.difference_type in {
+            DifferenceType.TYPE_DIFFERENT,
+            DifferenceType.ATTRS_DIFFERENT,
+        }:
+            if direction == SelectionName.UP and difference.left.is_file():
                 return difference.left.attrs.size
             elif (
-                direction == SelectionName.DOWN
-                and difference.right.is_file()
+                direction == SelectionName.DOWN and difference.right.is_file()
             ):
                 return difference.right.attrs.size
             return 0
@@ -272,19 +274,23 @@ class Details(object):
             TableColumn(
                 local_mtimes,
                 'LOCAL MTIME',
-                ColumnSettings(alignment=Alignment.RIGHT)),
+                ColumnSettings(alignment=Alignment.RIGHT),
+            ),
             TableColumn(
                 remote_mtimes,
                 'REMOTE MTIME',
-                ColumnSettings(alignment=Alignment.RIGHT)),
+                ColumnSettings(alignment=Alignment.RIGHT),
+            ),
             TableColumn(
                 local_sizes,
                 'LOCAL SIZE',
-                ColumnSettings(alignment=Alignment.RIGHT)),
+                ColumnSettings(alignment=Alignment.RIGHT),
+            ),
             TableColumn(
                 remote_sizes,
                 'REMOTE SIZE',
-                ColumnSettings(alignment=Alignment.RIGHT))
+                ColumnSettings(alignment=Alignment.RIGHT),
+            ),
         ]
         table = Table(columns, sep='  ')
         return table
@@ -297,8 +303,8 @@ class Details(object):
             self._table = self._render_table(differences, direction)
             help_box = self._render_help_box(
                 UP_SYNC_HELP_TEXT
-                if direction == SelectionName.UP else
-                DOWN_SYNC_HELP_TEXT
+                if direction == SelectionName.UP
+                else DOWN_SYNC_HELP_TEXT
             )
             self.container.children = [
                 Window(height=1),
@@ -308,19 +314,20 @@ class Details(object):
 
 
 class DifferencesScreen(BaseScreen):
-
     def __init__(self, differences, exchange):
         super().__init__()
         self._exchange = exchange
-        self._bottom_toolbar = Window(FormattedTextControl(
-            '[arrows] Navigation '
-            '[r] Refresh  '
-            '[?] Help  '
-            '[q] Quit'
-        ), height=1, style='reverse')
+        self._bottom_toolbar = Window(
+            FormattedTextControl(
+                '[arrows] Navigation ' '[r] Refresh  ' '[?] Help  ' '[q] Quit'
+            ),
+            height=1,
+            style='reverse',
+        )
         self._summary = Summary(exchange)
         self._details = Details(
-            exchange, differences, self._summary.current_selection)
+            exchange, differences, self._summary.current_selection
+        )
         self.bindings = KeyBindings()
 
         @self.bindings.add('d')  # noqa: F811
@@ -360,20 +367,21 @@ class DifferencesScreen(BaseScreen):
         def _(event):
             self._summary.gain_focus(event.app)
 
-        self._screen_container = HSplit([
-            VSplit([
-                self._summary.container,
-                Window(width=1),
-                VerticalLine(),
-                Window(width=1),
-                self._details.container
-            ]),
-            self._bottom_toolbar
-        ])
-        self.main_container = FloatContainer(
-            self._screen_container,
-            floats=[]
+        self._screen_container = HSplit(
+            [
+                VSplit(
+                    [
+                        self._summary.container,
+                        Window(width=1),
+                        VerticalLine(),
+                        Window(width=1),
+                        self._details.container,
+                    ]
+                ),
+                self._bottom_toolbar,
+            ]
         )
+        self.main_container = FloatContainer(self._screen_container, floats=[])
 
     def on_mount(self, app):
         self._summary.gain_focus(app)

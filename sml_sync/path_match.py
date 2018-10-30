@@ -50,9 +50,10 @@ def _anchored_match_helper(path_components, pattern_components):
     elif len(pattern_components) == 1:
         return fnmatch(path_components[0], pattern_components[0])
     else:
-        return (
-            fnmatch(path_components[0], pattern_components[0]) and
-            _anchored_match_helper(path_components[1:], pattern_components[1:])
+        return fnmatch(
+            path_components[0], pattern_components[0]
+        ) and _anchored_match_helper(
+            path_components[1:], pattern_components[1:]
         )
 
 

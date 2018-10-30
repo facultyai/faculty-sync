@@ -13,19 +13,17 @@ setup(
     description='SherlockML file synchronizer',
     author='ASI Data Science',
     packages=find_packages(),
-    entry_points={
-        'console_scripts': ['sml-sync=sml_sync:run']
-    },
+    entry_points={'console_scripts': ['sml-sync=sml_sync:run']},
     install_requires=[
         'sml',
         'daiquiri',
         'paramiko',
         'watchdog',
         'semantic_version',
-        'prompt_toolkit>=2.0'
+        'prompt_toolkit>=2.0',
     ],
     classifiers=[
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
-    ]
+        'Programming Language :: Python :: 3.6',
+    ],
 )

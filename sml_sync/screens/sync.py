@@ -1,4 +1,3 @@
-
 import threading
 import time
 from enum import Enum
@@ -18,17 +17,15 @@ class SynchronizationScreenDirection(Enum):
 
 
 class SynchronizationScreen(BaseScreen):
-
     def __init__(self, direction):
         super().__init__()
         self._direction = direction
         self._loading_indicator = LoadingIndicator()
         self._stop_event = threading.Event()
         self._control = FormattedTextControl('')
-        self.main_container = HSplit([
-            Window(height=1),
-            Window(self._control, height=1)
-        ])
+        self.main_container = HSplit(
+            [Window(height=1), Window(self._control, height=1)]
+        )
         self._start_updating_loading_indicator()
 
     def _start_updating_loading_indicator(self):
@@ -39,6 +36,7 @@ class SynchronizationScreen(BaseScreen):
                 self._render()
                 time.sleep(0.5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
@@ -46,9 +44,11 @@ class SynchronizationScreen(BaseScreen):
         direction_text = (
             'from local filesystem to SherlockML'
             if self._direction == SynchronizationScreenDirection.UP
-            else 'from SherlockML to local filesystem')
+            else 'from SherlockML to local filesystem'
+        )
         self._control.text = '  {} Synchronizing {}'.format(
-            self._loading_indicator.current(), direction_text)
+            self._loading_indicator.current(), direction_text
+        )
 
     def stop(self):
         self._stop_event.set()

@@ -1,9 +1,7 @@
-
 SEQUENCE = ['|', '/', '-', '\\', '|', '/', '-', '\\']
 
 
 class LoadingIndicator(object):
-
     def __init__(self):
         self._index = 0
 

@@ -19,7 +19,8 @@ def run():
     setup_logging(configuration.debug)
 
     logging.info(
-        'sml-sync started with configuration {}'.format(configuration))
+        'sml-sync started with configuration {}'.format(configuration)
+    )
 
     exchange = PubSubExchange()
     exchange.start()
