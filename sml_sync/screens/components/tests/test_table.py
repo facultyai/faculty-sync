@@ -16,11 +16,10 @@ def test_simple_table():
 
     assert header_window.content.text == 't1 t2'
     assert body_window.content.buffer.text == textwrap.dedent(
-        """\
-        a  d
-        b  e
-        c  f """
-    )  # noqa: W291 (ignore trailing whitespace)
+        "a  d \n"
+        "b  e \n"
+        "c  f "
+    )
     assert table.preferred_width(100).preferred == 5
     assert table.preferred_height(5, 100).preferred == 4
 
@@ -89,11 +88,10 @@ def test_custom_separator():
 
     assert header_window.content.text == 't1 | t2'
     assert body_window.content.buffer.text == textwrap.dedent(
-        """\
-        a  | d
-        b  | e
-        c  | f """
-    )  # noqa: W291 (ignore trailing whitespace)
+        "a  | d \n"
+        "b  | e \n"
+        "c  | f "
+    )
     assert table.preferred_width(100).preferred == 7
     assert table.preferred_height(5, 100).preferred == 4
 
