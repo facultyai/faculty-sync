@@ -9,77 +9,77 @@ from .servers import resolve_server
 
 
 DEFAULT_IGNORE_PATTERNS = [
-    'node_modules',
-    '__pycache__',
-    '*.pyc',
-    '.ipynb_checkpoints',
-    '.tox',
-    '.git',
-    '.mypy_cache',
-    '.cache',
+    "node_modules",
+    "__pycache__",
+    "*.pyc",
+    ".ipynb_checkpoints",
+    ".tox",
+    ".git",
+    ".mypy_cache",
+    ".cache",
 ]
 
 
 def parse_command_line(argv=None):
     parser = argparse.ArgumentParser(
-        prog='sml-sync',
-        description='Autosync a local directory to a SherlockML project',
+        prog="sml-sync",
+        description="Autosync a local directory to a SherlockML project",
     )
     parser.add_argument(
-        '--project',
+        "--project",
         default=None,
         help=(
-            'Project name or ID. If omitted, it has to be present '
-            'in the configuration file.'
+            "Project name or ID. If omitted, it has to be present "
+            "in the configuration file."
         ),
     )
     parser.add_argument(
-        '--remote',
+        "--remote",
         default=None,
         help=(
-            'Remote directory, e.g. /project/src. If omitted, sml-sync '
-            'will look first in configuration and, failing that, will '
-            'prompt for a directory.'
+            "Remote directory, e.g. /project/src. If omitted, sml-sync "
+            "will look first in configuration and, failing that, will "
+            "prompt for a directory."
         ),
     )
     parser.add_argument(
-        '--local',
-        default='.',
-        help='Local directory to sync from. Defaults to the current directory.',
+        "--local",
+        default=".",
+        help="Local directory to sync from. Defaults to the current directory.",
     )
     parser.add_argument(
-        '--ignore',
-        nargs='+',
-        help='Path fragments to ignore (e.g. node_modules, __pycache__).',
+        "--ignore",
+        nargs="+",
+        help="Path fragments to ignore (e.g. node_modules, __pycache__).",
     )
     parser.add_argument(
-        '--debug',
+        "--debug",
         default=False,
-        action='store_true',
-        help='Run in debug mode (sets the log level to info).',
+        action="store_true",
+        help="Run in debug mode (sets the log level to info).",
     )
     parser.add_argument(
-        '--version',
-        action='version',
-        version='sml-sync {version}'.format(version=version),
+        "--version",
+        action="version",
+        version="sml-sync {version}".format(version=version),
     )
     parser.add_argument(
-        '--server',
+        "--server",
         default=None,
         help=(
-            'The name or ID of the server in the project to use. If omitted,'
-            ' a random server is used.'
+            "The name or ID of the server in the project to use. If omitted,"
+            " a random server is used."
         ),
     )
     arguments = parser.parse_args(argv)
 
-    local_dir = arguments.local.rstrip('/') + '/'
+    local_dir = arguments.local.rstrip("/") + "/"
 
     local_path = Path(local_dir).resolve()
     if local_path == Path.home():
-        raise ValueError('Synchronising your home directory is not supported.')
-    elif local_path == Path('/'):
-        raise ValueError('Synchronising your root directory is not supported.')
+        raise ValueError("Synchronising your home directory is not supported.")
+    elif local_path == Path("/"):
+        raise ValueError("Synchronising your root directory is not supported.")
 
     config = get_config(local_dir)
 
@@ -88,8 +88,8 @@ def parse_command_line(argv=None):
         project = config.project
     if project is None:
         raise ValueError(
-            'You have to specify a project either '
-            'as an argument, or in the config.'
+            "You have to specify a project either "
+            "as an argument, or in the config."
         )
     project = resolve_project(project)
 
@@ -103,7 +103,7 @@ def parse_command_line(argv=None):
         remote_dir = config.remote
 
     if remote_dir is not None:
-        remote_dir = remote_dir.rstrip('/') + '/'
+        remote_dir = remote_dir.rstrip("/") + "/"
 
     ignore = DEFAULT_IGNORE_PATTERNS + config.ignore
     if arguments.ignore is not None:

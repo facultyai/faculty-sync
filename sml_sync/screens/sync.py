@@ -12,8 +12,8 @@ from .loading import LoadingIndicator
 
 
 class SynchronizationScreenDirection(Enum):
-    UP = 'up'
-    DOWN = 'down'
+    UP = "up"
+    DOWN = "down"
 
 
 class SynchronizationScreen(BaseScreen):
@@ -22,7 +22,7 @@ class SynchronizationScreen(BaseScreen):
         self._direction = direction
         self._loading_indicator = LoadingIndicator()
         self._stop_event = threading.Event()
-        self._control = FormattedTextControl('')
+        self._control = FormattedTextControl("")
         self.main_container = HSplit(
             [Window(height=1), Window(self._control, height=1)]
         )
@@ -42,11 +42,11 @@ class SynchronizationScreen(BaseScreen):
 
     def _render(self):
         direction_text = (
-            'from local filesystem to SherlockML'
+            "from local filesystem to SherlockML"
             if self._direction == SynchronizationScreenDirection.UP
-            else 'from SherlockML to local filesystem'
+            else "from SherlockML to local filesystem"
         )
-        self._control.text = '  {} Synchronizing {}'.format(
+        self._control.text = "  {} Synchronizing {}".format(
             self._loading_indicator.current(), direction_text
         )
 

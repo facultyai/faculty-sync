@@ -23,17 +23,17 @@ class RemoteDirMessages(Enum):
     Messages that are only used internally
     """
 
-    NEW_SUBDIRECTORIES_WALKED = 'NEW_SUBDIRECTORIES_WALKED'
-    SUBDIRECTORY_WALKER_STATUS_CHANGE = 'SUBDIRECTORY_WALKER_STATUS_CHANGE'
+    NEW_SUBDIRECTORIES_WALKED = "NEW_SUBDIRECTORIES_WALKED"
+    SUBDIRECTORY_WALKER_STATUS_CHANGE = "SUBDIRECTORY_WALKER_STATUS_CHANGE"
 
 
 class Completions(object):
     def __init__(self):
         self._completions = None
-        self._control = FormattedTextControl('')
+        self._control = FormattedTextControl("")
 
         self._current_index = None
-        self._margin_control = FormattedTextControl('')
+        self._margin_control = FormattedTextControl("")
         self._margin = Window(self._margin_control, width=2)
         self.container = VSplit([self._margin, Window(self._control)])
 
@@ -62,22 +62,22 @@ class Completions(object):
 
     def _render(self):
         if self._completions is None:
-            self._control.text = ''
+            self._control.text = ""
         else:
-            self._control.text = '\n'.join(self._completions)
+            self._control.text = "\n".join(self._completions)
             margin_lines = []
             for icompletion in range(len(self._completions)):
                 margin_lines.append(
-                    '> ' if icompletion == self._current_index else (' ' * 2)
+                    "> " if icompletion == self._current_index else (" " * 2)
                 )
-            margin_text = '\n'.join(margin_lines)
+            margin_text = "\n".join(margin_lines)
             self._margin_control.text = margin_text
 
 
 class AsyncCompleterStatus(object):
     def __init__(self):
         self._loading_indicator = LoadingIndicator()
-        self._status = 'IDLE'
+        self._status = "IDLE"
         self._current_path = None
         self._control = FormattedTextControl()
         self.container = HSplit(
@@ -88,11 +88,11 @@ class AsyncCompleterStatus(object):
         self._start_updating_loading_indicator()
 
     def _render(self):
-        if self._status == 'IDLE':
-            self._control.text = ''
+        if self._status == "IDLE":
+            self._control.text = ""
         else:
             if self._current_path is not None:
-                self._control.text = '{} Fetching subdirectories of {}'.format(
+                self._control.text = "{} Fetching subdirectories of {}".format(
                     self._loading_indicator.current(), self._current_path
                 )
             else:
@@ -126,7 +126,7 @@ class AsyncCompleter(object):
         self._get_paths_in_directory = get_paths_in_directory
         self._completions_cache = {}
         self._stop_event = threading.Event()
-        self.current_status = 'IDLE'
+        self.current_status = "IDLE"
         self.start()
 
     def cache_completions(self, directory):
@@ -143,9 +143,9 @@ class AsyncCompleter(object):
                     if path not in self._completions_cache:
                         # path has not been fetched already
                         logging.info(
-                            'Retrieving completions for {}'.format(path)
+                            "Retrieving completions for {}".format(path)
                         )
-                        self.current_status = 'BUSY'
+                        self.current_status = "BUSY"
                         self._publish_busy(path)
                         try:
                             subdirectories = self._get_paths_in_directory(path)
@@ -155,13 +155,13 @@ class AsyncCompleter(object):
                             )
                         except Exception:
                             logging.exception(
-                                'Error fetching subdirectories of {}'.format(
+                                "Error fetching subdirectories of {}".format(
                                     path
                                 )
                             )
                 except Empty:
-                    if self.current_status != 'IDLE':
-                        self.current_status = 'IDLE'
+                    if self.current_status != "IDLE":
+                        self.current_status = "IDLE"
                         self._publish_idle()
 
         self._thread = threading.Thread(target=run, daemon=True)
@@ -184,7 +184,7 @@ class RemoteDirectoryPromptScreen(BaseScreen):
         self.use_default_bindings = False
         self._exchange = exchange
 
-        self._input = TextArea(text='/project/', multiline=False)
+        self._input = TextArea(text="/project/", multiline=False)
         self._buffer = self._input.buffer
         self._buffer.cursor_position = len(self._buffer.text)
         self._completions_component = Completions()
@@ -192,20 +192,20 @@ class RemoteDirectoryPromptScreen(BaseScreen):
         self._completer_status_component = AsyncCompleterStatus()
         self._bottom_toolbar = Window(
             FormattedTextControl(
-                '[tab] Enter selected directory  '
-                '[return] Choose selected directory  '
-                '[arrows] Navigation  '
-                '[C-c] Quit'
+                "[tab] Enter selected directory  "
+                "[return] Choose selected directory  "
+                "[arrows] Navigation  "
+                "[C-c] Quit"
             ),
             height=1,
-            style='reverse',
+            style="reverse",
         )
         self._container = HSplit(
             [
                 Window(height=1),
                 Window(
                     FormattedTextControl(
-                        'Choose directory to synchronize to on SherlockML: '
+                        "Choose directory to synchronize to on SherlockML: "
                     ),
                     height=1,
                 ),
@@ -222,30 +222,30 @@ class RemoteDirectoryPromptScreen(BaseScreen):
 
         self.bindings = KeyBindings()
 
-        @self.bindings.add('down')
+        @self.bindings.add("down")
         def _(event):
             self._completions_component.move_selection_down()
 
-        @self.bindings.add('up')
+        @self.bindings.add("up")
         def _(event):
             self._completions_component.move_selection_up()
 
-        @self.bindings.add('tab')
+        @self.bindings.add("tab")
         def _(event):
             current_selection = self._completions_component.current_selection()
             if current_selection is not None:
                 self._buffer.cursor_position = 0
-                self._buffer.text = current_selection + '/'
+                self._buffer.text = current_selection + "/"
                 self._buffer.cursor_position = len(self._buffer.text)
 
-        @self.bindings.add('enter')
+        @self.bindings.add("enter")
         def _(event):
             current_selection = self._completions_component.current_selection()
             self._exchange.publish(
                 Messages.VERIFY_REMOTE_DIRECTORY, current_selection
             )
 
-        @self.bindings.add('c-c')
+        @self.bindings.add("c-c")
         def _(event):
             self._exchange.publish(Messages.STOP_CALLED)
 

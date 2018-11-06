@@ -16,7 +16,7 @@ from .base import BaseScreen
 from .help import help_modal
 from .loading import LoadingIndicator
 
-HELP_TITLE = 'Incremental synchronization'
+HELP_TITLE = "Incremental synchronization"
 
 HELP_TEXT = """\
 A background process is currently watching the local directory. When
@@ -41,7 +41,7 @@ Keys:
 class Loading(object):
     def __init__(self):
         self._loading_indicator = LoadingIndicator()
-        self._control = FormattedTextControl('')
+        self._control = FormattedTextControl("")
         self.container = HSplit(
             [Window(height=1), Window(self._control, height=1), Window()]
         )
@@ -50,7 +50,7 @@ class Loading(object):
         self._start_updating_loading_indicator()
 
     def _render(self):
-        self._control.text = '  {} Loading directory structure on SherlockML'.format(
+        self._control.text = "  {} Loading directory structure on SherlockML".format(
             self._loading_indicator.current()
         )
 
@@ -75,7 +75,7 @@ class CurrentlySyncing(object):
         self._current_event = None
         self._loading_indicator = LoadingIndicator()
         self._has_synced_at_least_once = False
-        self._control = FormattedTextControl('')
+        self._control = FormattedTextControl("")
         self.container = Window(self._control, height=1)
         self._stop_event = threading.Event()
         self._thread = None
@@ -90,12 +90,12 @@ class CurrentlySyncing(object):
 
     def _render(self):
         if self._current_event is None and not self._has_synced_at_least_once:
-            self._control.text = '  Ready and waiting for local changes'
+            self._control.text = "  Ready and waiting for local changes"
         elif self._current_event is None:
-            self._control.text = ''
+            self._control.text = ""
         else:
             path = self._current_event.path
-            self._control.text = '  {} {}'.format(
+            self._control.text = "  {} {}".format(
                 self._loading_indicator.current(), path
             )
 
@@ -146,7 +146,7 @@ class RecentlySyncedItems(object):
         event_texts = [self._format_event(event) for event in events]
         event_max_width = max(len(event_text) for event_text in event_texts)
         return Window(
-            FormattedTextControl('\n'.join(event_texts)),
+            FormattedTextControl("\n".join(event_texts)),
             width=min(event_max_width, 50),
             height=len(events),
         )
@@ -155,25 +155,25 @@ class RecentlySyncedItems(object):
         src_path = event.path
         src_path_text = self._format_path(src_path, event.is_directory)
         if event.event_type == ChangeEventType.MOVED:
-            dest_path = event.extra_args['dest_path']
+            dest_path = event.extra_args["dest_path"]
             dest_path_text = self._format_path(dest_path, event.is_directory)
-            event_text = '{} -> {}'.format(src_path_text, dest_path_text)
+            event_text = "{} -> {}".format(src_path_text, dest_path_text)
         elif event.event_type == ChangeEventType.DELETED:
-            event_text = '{} (x)'.format(src_path_text)
+            event_text = "{} (x)".format(src_path_text)
         else:
-            event_text = '{}'.format(src_path_text)
+            event_text = "{}".format(src_path_text)
         return event_text
 
     def _format_path(self, path, is_directory):
         if is_directory:
-            return path.rstrip('/') + '/'
+            return path.rstrip("/") + "/"
         else:
             return path
 
     def _render_times(self, times):
         times_text = [humanize.naturaltime(t) for t in times]
         return Window(
-            FormattedTextControl('\n'.join(times_text)), height=len(times)
+            FormattedTextControl("\n".join(times_text)), height=len(times)
         )
 
     def _start_updating(self):
@@ -202,12 +202,12 @@ class HeldFiles(object):
         if self._held_paths:
             self.container.children = [
                 Window(height=1),
-                Window(char='-', height=1),
+                Window(char="-", height=1),
                 Window(height=1),
                 Window(
                     FormattedTextControl(
-                        '  The following files will not be synced to '
-                        'avoid accidentally overwriting changes on SherlockML:'
+                        "  The following files will not be synced to "
+                        "avoid accidentally overwriting changes on SherlockML:"
                     ),
                     dont_extend_height=True,
                 ),
@@ -218,7 +218,7 @@ class HeldFiles(object):
             self.container.children = Window(dont_extend_height=True)
 
     def _format_held_paths(self, paths):
-        paths_text = '\n'.join(['    {}'.format(path) for path in paths])
+        paths_text = "\n".join(["    {}".format(path) for path in paths])
         control = FormattedTextControl(paths_text)
         return Window(control)
 
@@ -235,13 +235,13 @@ class WatchSyncScreen(BaseScreen):
 
         self.menu_bar = Window(
             FormattedTextControl(
-                '[s] Stop  '
-                '[d] Sync SherlockML files down  '
-                '[q] Quit  '
-                '[?] Help'
+                "[s] Stop  "
+                "[d] Sync SherlockML files down  "
+                "[q] Quit  "
+                "[?] Help"
             ),
             height=1,
-            style='reverse',
+            style="reverse",
         )
 
         self._screen_container = HSplit(
@@ -271,15 +271,15 @@ class WatchSyncScreen(BaseScreen):
 
         self.bindings = KeyBindings()
 
-        @self.bindings.add('s')
+        @self.bindings.add("s")
         def _(event):
             self._exchange.publish(Messages.STOP_WATCH_SYNC)
 
-        @self.bindings.add('d')
+        @self.bindings.add("d")
         def _(event):
             self._exchange.publish(Messages.DOWN_IN_WATCH_SYNC)
 
-        @self.bindings.add('?')
+        @self.bindings.add("?")
         def _(event):
             self._toggle_help()
 

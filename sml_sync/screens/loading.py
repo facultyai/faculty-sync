@@ -1,4 +1,4 @@
-SEQUENCE = ['|', '/', '-', '\\', '|', '/', '-', '\\']
+SEQUENCE = ["|", "/", "-", "\\", "|", "/", "-", "\\"]
 
 
 class LoadingIndicator(object):

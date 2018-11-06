@@ -17,7 +17,7 @@ LOCAL_DIRECTORY = os.getcwd()
 # Another version of the local directory, but
 # with `/path/to/home` replaced by a tilde.
 LOCAL_DIRECTORY_WITH_TILDE = LOCAL_DIRECTORY.replace(
-    os.path.expanduser('~'), '~', 1
+    os.path.expanduser("~"), "~", 1
 )
 
 
@@ -25,19 +25,19 @@ LOCAL_DIRECTORY_WITH_TILDE = LOCAL_DIRECTORY.replace(
 def _temporary_configurations(user_config=None, project_config=None):
     with tempfile.TemporaryDirectory() as temporary_directory:
         path = Path(temporary_directory)
-        user_configuration_path = path / 'user.conf'
-        project_configuration_path = path / 'project.conf'
+        user_configuration_path = path / "user.conf"
+        project_configuration_path = path / "project.conf"
         if user_config is not None:
-            with user_configuration_path.open('w') as fp:
+            with user_configuration_path.open("w") as fp:
                 fp.write(user_config)
         if project_config is not None:
-            with project_configuration_path.open('w') as fp:
+            with project_configuration_path.open("w") as fp:
                 fp.write(project_config)
         yield (project_configuration_path, user_configuration_path)
 
 
 @pytest.mark.parametrize(
-    'config,expected',
+    "config,expected",
     [
         (
             """
@@ -45,7 +45,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             project = acme
             remote = /project/dir22
             """,
-            FileConfiguration('acme', '/project/dir22', None, []),
+            FileConfiguration("acme", "/project/dir22", None, []),
         ),
         (
             """
@@ -54,7 +54,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             remote = /project/dir22
             ignore = *.pyc
             """,
-            FileConfiguration('acme', '/project/dir22', None, ['*.pyc']),
+            FileConfiguration("acme", "/project/dir22", None, ["*.pyc"]),
         ),
         (
             """
@@ -64,7 +64,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             server = some-server-name
             """,
             FileConfiguration(
-                'acme', '/project/dir22', 'some-server-name', []
+                "acme", "/project/dir22", "some-server-name", []
             ),
         ),
         (
@@ -75,7 +75,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             ignore = *.pyc, pattern/
             """,
             FileConfiguration(
-                'acme', '/project/dir22', None, ['*.pyc', 'pattern/']
+                "acme", "/project/dir22", None, ["*.pyc", "pattern/"]
             ),
         ),
         (
@@ -85,7 +85,7 @@ def _temporary_configurations(user_config=None, project_config=None):
             remote = /project/dir22
             ignore =
             """,
-            FileConfiguration('acme', '/project/dir22', None, []),
+            FileConfiguration("acme", "/project/dir22", None, []),
         ),
     ],
 )
@@ -94,7 +94,7 @@ def test_project_config(config, expected):
         project_path,
         user_path,
     ):
-        result = get_config('.', project_path, user_path)
+        result = get_config(".", project_path, user_path)
         assert result == expected
 
 
@@ -111,11 +111,11 @@ def test_project_config_multiple_sections():
         user_path,
     ):
         with pytest.raises(ValueError):
-            get_config('.', project_path, user_path)
+            get_config(".", project_path, user_path)
 
 
 @pytest.mark.parametrize(
-    'local_directory,config,expected',
+    "local_directory,config,expected",
     [
         (
             LOCAL_DIRECTORY,
@@ -126,7 +126,7 @@ def test_project_config_multiple_sections():
             """.format(
                 LOCAL_DIRECTORY
             ),
-            FileConfiguration('acme', '/project/dir22', None, []),
+            FileConfiguration("acme", "/project/dir22", None, []),
         ),
         (
             # Test tilde expansion
@@ -138,7 +138,7 @@ def test_project_config_multiple_sections():
             """.format(
                 LOCAL_DIRECTORY_WITH_TILDE
             ),
-            FileConfiguration('acme', '/project/dir22', None, []),
+            FileConfiguration("acme", "/project/dir22", None, []),
         ),
     ],
 )
@@ -168,10 +168,10 @@ def test_config_present_in_both_user_and_project():
         user_path,
     ):
         with pytest.raises(ValueError):
-            get_config('.', project_path, user_path)
+            get_config(".", project_path, user_path)
 
 
 def test_no_config():
     with _temporary_configurations() as (project_path, user_path):
-        result = get_config('.', project_path, user_path)
+        result = get_config(".", project_path, user_path)
         assert result == FileConfiguration(None, None, None, [])

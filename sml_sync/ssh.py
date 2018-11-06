@@ -28,10 +28,10 @@ def get_ssh_details(configuration):
     details = client.ssh_details(
         configuration.project.id_, configuration.server_id
     )
-    hostname = details['hostname']
-    port = details['port']
-    username = details['username']
-    key = details['key']
+    hostname = details["hostname"]
+    port = details["port"]
+    username = details["username"]
+    key = details["key"]
     with _save_key_to_file(key) as key_file:
         ssh_details = SshDetails(hostname, port, username, key_file)
         yield ssh_details
@@ -40,8 +40,8 @@ def get_ssh_details(configuration):
 @contextlib.contextmanager
 def _save_key_to_file(key):
     tmpdir = tempfile.mkdtemp()
-    filename = os.path.join(tmpdir, 'key.pem')
-    with open(filename, 'w') as keyfile:
+    filename = os.path.join(tmpdir, "key.pem")
+    with open(filename, "w") as keyfile:
         keyfile.write(key)
     os.chmod(filename, stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH)
     yield filename

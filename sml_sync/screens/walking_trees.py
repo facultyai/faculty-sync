@@ -14,21 +14,21 @@ from .loading import LoadingIndicator
 
 class WalkingFileTreesStatus(Enum):
 
-    CONNECTING = 'CONNECTING'
-    LOCAL_WALK = 'LOCAL_WALK'
-    REMOTE_WALK = 'REMOTE_WALK'
-    CALCULATING_DIFFERENCES = 'CALCULATING_DIFFERENCES'
+    CONNECTING = "CONNECTING"
+    LOCAL_WALK = "LOCAL_WALK"
+    REMOTE_WALK = "REMOTE_WALK"
+    CALCULATING_DIFFERENCES = "CALCULATING_DIFFERENCES"
 
 
 class WalkingFileTreesScreen(BaseScreen):
     def __init__(self, initial_status, exchange):
         super().__init__()
-        self._status_control = FormattedTextControl('')
+        self._status_control = FormattedTextControl("")
         self._loading_indicator = LoadingIndicator()
         self._status = None
         self.set_status(initial_status)
         self._bottom_toolbar = Window(
-            FormattedTextControl('[q] Quit'), height=1, style='reverse'
+            FormattedTextControl("[q] Quit"), height=1, style="reverse"
         )
         self.main_container = HSplit(
             [
@@ -65,21 +65,21 @@ class WalkingFileTreesScreen(BaseScreen):
     def _render(self):
         loading_character = self._loading_indicator.current()
         if self._status == WalkingFileTreesStatus.CONNECTING:
-            self._status_control.text = '  {} Connecting to SherlockML server'.format(
+            self._status_control.text = "  {} Connecting to SherlockML server".format(
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.LOCAL_WALK:
-            self._status_control.text = '  {} Walking local file tree'.format(
+            self._status_control.text = "  {} Walking local file tree".format(
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.REMOTE_WALK:
-            self._status_control.text = '  {} Walking file tree on SherlockML'.format(
+            self._status_control.text = "  {} Walking file tree on SherlockML".format(
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.CALCULATING_DIFFERENCES:
             self._status_control.text = (
-                '  {} Calculating differences between '
-                'local and remote file trees'.format(loading_character)
+                "  {} Calculating differences between "
+                "local and remote file trees".format(loading_character)
             )
 
     def stop(self):

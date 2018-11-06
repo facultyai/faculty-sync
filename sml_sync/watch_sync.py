@@ -36,7 +36,7 @@ class TimestampDatabase(object):
             del self._data[path]
         except KeyError:
             logging.info(
-                'Path {} did not exist in timestamp database'.format(path)
+                "Path {} did not exist in timestamp database".format(path)
             )
 
     def _was_modified_since(self, path, timestamp):
@@ -76,13 +76,13 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
         self._excluded_patterns = excluded_patterns
 
     def on_any_event(self, watchdog_event):
-        logging.info('Registered filesystem event {}'.format(watchdog_event))
+        logging.info("Registered filesystem event {}".format(watchdog_event))
         event_type = self.watchdog_event_lookup[watchdog_event.event_type]
         is_directory = watchdog_event.is_directory
         path = self._relpath(watchdog_event.src_path)
         if path_match.matches_any_of(path, self._excluded_patterns):
             logging.info(
-                'Ignoring change event {} as it is in list of excluded patterns.'.format(
+                "Ignoring change event {} as it is in list of excluded patterns.".format(
                     watchdog_event
                 )
             )
@@ -98,7 +98,7 @@ class FileSystemChangeHandler(watchdog.events.FileSystemEventHandler):
                         event_type,
                         is_directory,
                         path,
-                        extra_args={'dest_path': self._relpath(dest_path)},
+                        extra_args={"dest_path": self._relpath(dest_path)},
                     )
                 else:
                     # File was moved outside of the area we're watching:
@@ -152,7 +152,7 @@ class Uploader(object):
         self._thread.start()
 
     def _handle_sync(self, fs_event):
-        logging.info('Processing file system event {}'.format(fs_event))
+        logging.info("Processing file system event {}".format(fs_event))
         self._exchange.publish(Messages.STARTING_HANDLING_FS_EVENT, fs_event)
         if fs_event.is_directory:
             # TODO implement directory handling
@@ -165,7 +165,7 @@ class Uploader(object):
                 self._synchronizer.rmdir_remote(fs_event.path)
             elif fs_event.event_type == ChangeEventType.MOVED:
                 self._synchronizer.mvfile_remote(
-                    fs_event.path, fs_event.extra_args['dest_path']
+                    fs_event.path, fs_event.extra_args["dest_path"]
                 )
         else:
             path = fs_event.path
@@ -178,7 +178,7 @@ class Uploader(object):
                 self._synchronizer.rmfile_remote(path)
             elif fs_event.event_type == ChangeEventType.MOVED:
                 self._synchronizer.mvfile_remote(
-                    path, fs_event.extra_args['dest_path']
+                    path, fs_event.extra_args["dest_path"]
                 )
         self._exchange.publish(Messages.FINISHED_HANDLING_FS_EVENT, fs_event)
 
@@ -209,9 +209,9 @@ class HeldFilesMonitor(object):
 
     def _get_initial_help_paths(self, local_tree, remote_tree):
         for difference in compare_file_trees(local_tree, remote_tree):
-            if difference[0] in {'RIGHT_ONLY', 'TYPE_DIFFERENT'}:
+            if difference[0] in {"RIGHT_ONLY", "TYPE_DIFFERENT"}:
                 yield difference[1].path
-            elif difference[0] == 'ATTRS_DIFFERENT':
+            elif difference[0] == "ATTRS_DIFFERENT":
                 local_mtime = difference[1].attrs.last_modified
                 remote_mtime = difference[2].attrs.last_modified
                 if remote_mtime > local_mtime:
@@ -224,7 +224,7 @@ class HeldFilesMonitor(object):
             return False
         else:
             if fs_event.event_type == ChangeEventType.MOVED:
-                dest_path = fs_event.extra_args['dest_path']
+                dest_path = fs_event.extra_args["dest_path"]
                 if self._has_path_changed(path):
                     self._add_to_held_paths(path)
                     src_path_unchanged = False
@@ -265,7 +265,7 @@ class HeldFilesMonitor(object):
             self._remote_timestamps.remove(fs_event.path)
         elif fs_event.event_type == ChangeEventType.MOVED:
             self._remote_timestamps.remove(fs_event.path)
-            dest_path = fs_event.extra_args['dest_path']
+            dest_path = fs_event.extra_args["dest_path"]
             abs_dest_path = os.path.join(self._remote_dir, dest_path)
             current_timestamp = get_remote_mtime(abs_dest_path, self._sftp)
             self._remote_timestamps.update_if_newer(

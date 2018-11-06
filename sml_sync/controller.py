@@ -110,9 +110,9 @@ class Controller(object):
         if remote_dir is not None:
             if remote_is_dir(remote_dir, self._sftp):
                 logging.info(
-                    'Setting {} as remote directory'.format(remote_dir)
+                    "Setting {} as remote directory".format(remote_dir)
                 )
-                self._remote_dir = remote_dir.rstrip('/') + '/'
+                self._remote_dir = remote_dir.rstrip("/") + "/"
                 self._synchronizer = Synchronizer(
                     self._configuration.local_dir,
                     self._remote_dir,
@@ -144,7 +144,7 @@ class Controller(object):
             direction=SynchronizationScreenDirection.DOWN
         )
         self._view.mount(self._current_screen)
-        self._synchronizer.down(rsync_opts=['--delete'])
+        self._synchronizer.down(rsync_opts=["--delete"])
         self._show_differences()
 
     def _sync_local_to_sherlockml(self):
@@ -153,7 +153,7 @@ class Controller(object):
             direction=SynchronizationScreenDirection.UP
         )
         self._view.mount(self._current_screen)
-        self._synchronizer.up(rsync_opts=['--delete'])
+        self._synchronizer.up(rsync_opts=["--delete"])
         self._show_differences()
 
     def _display_differences(self, differences):
@@ -189,7 +189,7 @@ class Controller(object):
             )
         local_files = self._synchronizer.list_local()
         logging.info(
-            'Found {} files locally at path {}.'.format(
+            "Found {} files locally at path {}.".format(
                 len(local_files), self._configuration.local_dir
             )
         )
@@ -199,7 +199,7 @@ class Controller(object):
             )
         remote_files = self._synchronizer.list_remote()
         logging.info(
-            'Found {} files on SherlockML at path {}.'.format(
+            "Found {} files on SherlockML at path {}.".format(
                 len(remote_files), self._configuration.remote_dir
             )
         )
@@ -224,24 +224,24 @@ class Controller(object):
         self._clear_current_subscriptions()
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
-        self._synchronizer.up(rsync_opts=['--delete'])
+        self._synchronizer.up(rsync_opts=["--delete"])
         self._start_watch_sync()
 
     def _stop_watch_sync(self):
-        logging.info('Stopping watch-synchronization loop.')
+        logging.info("Stopping watch-synchronization loop.")
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
         self._show_differences()
 
     def _down_in_watch_sync(self):
-        logging.info('Doing down synchronization as part of watch-sync.')
+        logging.info("Doing down synchronization as part of watch-sync.")
         if self._watcher_synchronizer is not None:
             self._watcher_synchronizer.stop()
         self._current_screen = SynchronizationScreen(
             direction=SynchronizationScreenDirection.DOWN
         )
         self._view.mount(self._current_screen)
-        self._synchronizer.down(rsync_opts=['--update'])
+        self._synchronizer.down(rsync_opts=["--update"])
         self._start_watch_sync()
 
     def join(self):

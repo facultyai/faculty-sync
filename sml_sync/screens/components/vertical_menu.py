@@ -5,7 +5,7 @@ from typing import List, Optional
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import Window, FormattedTextControl
 
-MenuEntry = namedtuple('MenuEntry', ['id_', 'text'])
+MenuEntry = namedtuple("MenuEntry", ["id_", "text"])
 
 
 class VerticalMenu(object):
@@ -22,7 +22,7 @@ class VerticalMenu(object):
                 _ensure_width(entry.text, width) for entry in self._entries
             ]
         self._control = FormattedTextControl(
-            '',
+            "",
             focusable=True,
             show_cursor=False,
             key_bindings=self._get_key_bindings(),
@@ -63,11 +63,11 @@ class VerticalMenu(object):
     def _get_key_bindings(self):
         bindings = KeyBindings()
 
-        @bindings.add('up')  # noqa: F811
+        @bindings.add("up")  # noqa: F811
         def _(event):
             self._select_previous()
 
-        @bindings.add('down')  # noqa: F811
+        @bindings.add("down")  # noqa: F811
         def _(event):
             self._select_next()
 
@@ -84,8 +84,8 @@ class VerticalMenu(object):
     def _set_control_text(self):
         control_lines = []
         for ientry, entry in enumerate(self._formatted_entries):
-            style = 'reverse' if ientry == self._current_index else ''
-            control_lines.append((style, entry + '\n'))
+            style = "reverse" if ientry == self._current_index else ""
+            control_lines.append((style, entry + "\n"))
         self._control.text = control_lines
 
     def __pt_container__(self):

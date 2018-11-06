@@ -15,8 +15,8 @@ from prompt_toolkit.layout import (
 
 
 class Alignment(Enum):
-    RIGHT = 'RIGHT'
-    LEFT = 'LEFT'
+    RIGHT = "RIGHT"
+    LEFT = "LEFT"
 
 
 class ColumnSettings(object):
@@ -24,7 +24,7 @@ class ColumnSettings(object):
         self.alignment = alignment
 
 
-class TableColumn(namedtuple('Column', ['rows', 'header', 'settings'])):
+class TableColumn(namedtuple("Column", ["rows", "header", "settings"])):
     def __new__(
         cls,
         rows: List[str],
@@ -37,9 +37,9 @@ class TableColumn(namedtuple('Column', ['rows', 'header', 'settings'])):
 
 
 class Table(object):
-    def __init__(self, columns: List[TableColumn], sep: str = ' '):
+    def __init__(self, columns: List[TableColumn], sep: str = " "):
         if len(set(len(column.rows) for column in columns)) not in {0, 1}:
-            raise ValueError('All columns must have the same number of rows.')
+            raise ValueError("All columns must have the same number of rows.")
 
         self._sep = sep
 
@@ -51,7 +51,7 @@ class Table(object):
                 self._format_cell(row, column.settings, width)
                 for row in column.rows
             ]
-            formatted_headers.append(column.header.ljust(width, ' '))
+            formatted_headers.append(column.header.ljust(width, " "))
             formatted_columns.append(formatted_rows)
 
         self.window = HSplit(
@@ -83,10 +83,10 @@ class Table(object):
         return header_windows
 
     def _body_windows(self, formatted_columns):
-        rows = list(itertools.zip_longest(*formatted_columns, fillvalue=''))
+        rows = list(itertools.zip_longest(*formatted_columns, fillvalue=""))
         if rows:
             rows_string = [self._sep.join(row) for row in rows]
-            table_body = '\n'.join(rows_string)
+            table_body = "\n".join(rows_string)
 
             document = Document(table_body, 0)
             _buffer = Buffer(document=document, read_only=True)

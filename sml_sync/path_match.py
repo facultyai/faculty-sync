@@ -9,12 +9,12 @@ def matches(path, pattern):
     Currently should obey the same rules as rsync, apart from ** patterns
     """
     path = os.path.normpath(path)
-    if pattern == '/':
+    if pattern == "/":
         return True
     else:
-        pattern = pattern.rstrip('/')
-        if pattern.startswith('/'):
-            return _anchored_match(path, pattern.lstrip('/'))
+        pattern = pattern.rstrip("/")
+        if pattern.startswith("/"):
+            return _anchored_match(path, pattern.lstrip("/"))
         else:
             return _floating_match(path, pattern)
 
@@ -59,7 +59,7 @@ def _anchored_match_helper(path_components, pattern_components):
 
 def _get_path_components(path):
     path_components = []
-    while path and path != '/':
+    while path and path != "/":
         path, tail = os.path.split(path)
         path_components.append(tail)
     path_components.reverse()

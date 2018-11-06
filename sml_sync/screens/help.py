@@ -10,14 +10,14 @@ def help_modal(title, text):
             HSplit(
                 [
                     Window(
-                        FormattedTextControl(title), height=1, style='reverse'
+                        FormattedTextControl(title), height=1, style="reverse"
                     ),
                     Window(height=1),
                     Window(FormattedTextControl(text)),
                     Window(
-                        FormattedTextControl('[?] Close this window'),
+                        FormattedTextControl("[?] Close this window"),
                         height=1,
-                        style='reverse',
+                        style="reverse",
                     ),
                 ]
             )

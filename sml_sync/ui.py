@@ -88,7 +88,7 @@ class View(object):
     def _register_resize_handler(self):
         # The application receives the signal SIGWINCH
         # when the terminal has been resized.
-        self._has_sigwinch = hasattr(signal, 'SIGWINCH')
+        self._has_sigwinch = hasattr(signal, "SIGWINCH")
         if self._has_sigwinch:
             self._previous_winch_handler = self._loop.add_signal_handler(
                 signal.SIGWINCH, self._on_resize
@@ -102,34 +102,34 @@ class View(object):
             )
 
     def _on_resize(self):
-        logging.info('Handling application resize event.')
+        logging.info("Handling application resize event.")
         self.application.invalidate()
 
     def _render_top_toolbar(self):
         remote_directory_text = (
-            ':{}'.format(self._remote_directory)
+            ":{}".format(self._remote_directory)
             if self._remote_directory is not None
-            else ''
+            else ""
         )
         top_text = (
-            '[SherlockML synchronizer]  '
-            '{local_dir} -> '
-            '{project_name}{remote_directory_text}'
+            "[SherlockML synchronizer]  "
+            "{local_dir} -> "
+            "{project_name}{remote_directory_text}"
         ).format(
             local_dir=self._local_dir,
             project_name=self._project_name,
             remote_directory_text=remote_directory_text,
         )
         top_toolbar = Window(
-            FormattedTextControl(top_text), height=1, style='reverse'
+            FormattedTextControl(top_text), height=1, style="reverse"
         )
         return top_toolbar
 
     def _create_bindings(self):
         bindings = KeyBindings()
 
-        @bindings.add('c-c')
-        @bindings.add('q')
+        @bindings.add("c-c")
+        @bindings.add("q")
         def _(event):
             self._exchange.publish(Messages.STOP_CALLED)
 
