@@ -1,10 +1,23 @@
 language: python
 cache: pip
-python:
-  - 3.5
-  - 3.6
 install:
   - pip install -U pip
   - pip install -r requirements.txt
   - pip install pytest
-script: pytest
+jobs:
+  include:
+    - name: Run unit tests
+      stage: test
+      script:
+        - pytest
+      python:
+        - "3.5"
+        - "3.6"
+    - name: Check formatting
+      stage: test
+      install:
+        - pip install black
+      script:
+        - black --check .
+      python:
+        - "3.6"
