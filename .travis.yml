@@ -13,6 +13,7 @@ jobs:
       python:
         - "3.5"
         - "3.6"
+        - "3.7"
     - name: Check formatting
       stage: test
       install:
@@ -20,4 +21,4 @@ jobs:
       script:
         - black --check .
       python:
-        - "3.6"
+        - "3.7"
