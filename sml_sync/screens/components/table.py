@@ -6,27 +6,30 @@ from typing import List, Optional
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
 from prompt_toolkit.layout import (
-    Window, HSplit, FormattedTextControl, BufferControl, ScrollbarMargin)
+    Window,
+    HSplit,
+    FormattedTextControl,
+    BufferControl,
+    ScrollbarMargin,
+)
 
 
 class Alignment(Enum):
-    RIGHT = 'RIGHT'
-    LEFT = 'LEFT'
+    RIGHT = "RIGHT"
+    LEFT = "LEFT"
 
 
 class ColumnSettings(object):
-
     def __init__(self, alignment=Alignment.LEFT):
         self.alignment = alignment
 
 
-class TableColumn(
-        namedtuple('Column', ['rows', 'header', 'settings'])):
-
+class TableColumn(namedtuple("Column", ["rows", "header", "settings"])):
     def __new__(
-            cls, rows: List[str],
-            header: str,
-            settings: Optional[ColumnSettings] = None
+        cls,
+        rows: List[str],
+        header: str,
+        settings: Optional[ColumnSettings] = None,
     ):
         if settings is None:
             settings = ColumnSettings()
@@ -34,10 +37,9 @@ class TableColumn(
 
 
 class Table(object):
-
-    def __init__(self, columns: List[TableColumn], sep: str = ' '):
+    def __init__(self, columns: List[TableColumn], sep: str = " "):
         if len(set(len(column.rows) for column in columns)) not in {0, 1}:
-            raise ValueError('All columns must have the same number of rows.')
+            raise ValueError("All columns must have the same number of rows.")
 
         self._sep = sep
 
@@ -49,18 +51,18 @@ class Table(object):
                 self._format_cell(row, column.settings, width)
                 for row in column.rows
             ]
-            formatted_headers.append(column.header.ljust(width, ' '))
+            formatted_headers.append(column.header.ljust(width, " "))
             formatted_columns.append(formatted_rows)
 
         self.window = HSplit(
-            self._header_windows(formatted_headers) +
-            self._body_windows(formatted_columns)
+            self._header_windows(formatted_headers)
+            + self._body_windows(formatted_columns)
         )
 
     def _get_column_width(self, column):
         width = max(
             len(column.header),
-            max((len(row) for row in column.rows), default=0)
+            max((len(row) for row in column.rows), default=0),
         )
         return width
 
@@ -73,17 +75,18 @@ class Table(object):
     def _header_windows(self, formatted_headers):
         if len(formatted_headers):
             header_control = FormattedTextControl(
-                self._sep.join(formatted_headers))
+                self._sep.join(formatted_headers)
+            )
             header_windows = [Window(header_control, height=1)]
         else:
             header_windows = [Window(height=1, width=0)]
         return header_windows
 
     def _body_windows(self, formatted_columns):
-        rows = list(itertools.zip_longest(*formatted_columns, fillvalue=''))
+        rows = list(itertools.zip_longest(*formatted_columns, fillvalue=""))
         if rows:
             rows_string = [self._sep.join(row) for row in rows]
-            table_body = '\n'.join(rows_string)
+            table_body = "\n".join(rows_string)
 
             document = Document(table_body, 0)
             _buffer = Buffer(document=document, read_only=True)
@@ -91,7 +94,7 @@ class Table(object):
             body_windows = [
                 Window(
                     self._body_control,
-                    right_margins=[ScrollbarMargin(display_arrows=True)]
+                    right_margins=[ScrollbarMargin(display_arrows=True)],
                 )
             ]
         else:

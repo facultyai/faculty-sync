@@ -1,4 +1,3 @@
-
 import uuid
 
 import sml.client
@@ -16,8 +15,7 @@ def resolve_project(project):
         project = projects_client.get_project_by_id(project_id)
     except ValueError:
         user_id = sml.auth.user_id()
-        project = projects_client.get_project_by_name(
-            user_id, project)
+        project = projects_client.get_project_by_name(user_id, project)
     return project
 
 
@@ -32,15 +30,15 @@ class Project(object):
         self.owner_id = owner_id
 
     def __repr__(self):
-        template = 'Project(id_={}, name={}, owner_id={})'
+        template = "Project(id_={}, name={}, owner_id={})"
         return template.format(self.id_, self.name, self.owner_id)
 
     @classmethod
     def from_json(cls, json_object):
         return cls(
-            json_object['project_id'],
-            json_object['name'],
-            json_object['owner_id']
+            json_object["project_id"],
+            json_object["name"],
+            json_object["owner_id"],
         )
 
 
@@ -52,22 +50,22 @@ class Projects(sml.client.SherlockMLService):
 
     def get_project_by_id(self, project_id):
         try:
-            resp = self._get('/project/{}'.format(project_id))
+            resp = self._get("/project/{}".format(project_id))
         except sml.client.SherlockMLServiceError:
             raise InvalidProject(
-                'Project with ID {} not found in SherlockML'.format(
-                    project_id))
+                "Project with ID {} not found in SherlockML".format(project_id)
+            )
         return Project.from_json(resp.json())
 
     def get_projects(self, user_id):
         """List projects accessible by the given user."""
-        resp = self._get('/user/{}'.format(user_id))
+        resp = self._get("/user/{}".format(user_id))
         return [Project.from_json(o) for o in resp.json()]
 
     def get_project_by_name(self, user_id, project_name):
         """List projects with a given name accessible by the given user."""
         try:
-            resp = self._get('/project/{}/{}'.format(user_id, project_name))
+            resp = self._get("/project/{}/{}".format(user_id, project_name))
         except sml.client.SherlockMLServiceError:
             projects = self.get_projects(user_id)
             matching_projects = [p for p in projects if p.name == project_name]

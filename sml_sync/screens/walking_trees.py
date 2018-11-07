@@ -1,4 +1,3 @@
-
 import threading
 import time
 from enum import Enum
@@ -15,32 +14,33 @@ from .loading import LoadingIndicator
 
 class WalkingFileTreesStatus(Enum):
 
-    CONNECTING = 'CONNECTING'
-    LOCAL_WALK = 'LOCAL_WALK'
-    REMOTE_WALK = 'REMOTE_WALK'
-    CALCULATING_DIFFERENCES = 'CALCULATING_DIFFERENCES'
+    CONNECTING = "CONNECTING"
+    LOCAL_WALK = "LOCAL_WALK"
+    REMOTE_WALK = "REMOTE_WALK"
+    CALCULATING_DIFFERENCES = "CALCULATING_DIFFERENCES"
 
 
 class WalkingFileTreesScreen(BaseScreen):
-
     def __init__(self, initial_status, exchange):
         super().__init__()
-        self._status_control = FormattedTextControl('')
+        self._status_control = FormattedTextControl("")
         self._loading_indicator = LoadingIndicator()
         self._status = None
         self.set_status(initial_status)
         self._bottom_toolbar = Window(
-            FormattedTextControl('[q] Quit'),
-            height=1, style='reverse')
-        self.main_container = HSplit([
-            Window(height=1),
-            Window(self._status_control),
-            self._bottom_toolbar
-        ])
+            FormattedTextControl("[q] Quit"), height=1, style="reverse"
+        )
+        self.main_container = HSplit(
+            [
+                Window(height=1),
+                Window(self._status_control),
+                self._bottom_toolbar,
+            ]
+        )
         self._exchange = exchange
         self._subscription_id = exchange.subscribe(
             Messages.WALK_STATUS_CHANGE,
-            lambda new_status: self.set_status(new_status)
+            lambda new_status: self.set_status(new_status),
         )
         self._stop_event = threading.Event()
         self._thread = None
@@ -58,26 +58,29 @@ class WalkingFileTreesScreen(BaseScreen):
                 self._render()
                 time.sleep(0.5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
     def _render(self):
         loading_character = self._loading_indicator.current()
         if self._status == WalkingFileTreesStatus.CONNECTING:
-            self._status_control.text = \
-                '  {} Connecting to SherlockML server'.format(
-                    loading_character)
+            self._status_control.text = "  {} Connecting to SherlockML server".format(
+                loading_character
+            )
         elif self._status == WalkingFileTreesStatus.LOCAL_WALK:
-            self._status_control.text = \
-                '  {} Walking local file tree'.format(loading_character)
+            self._status_control.text = "  {} Walking local file tree".format(
+                loading_character
+            )
         elif self._status == WalkingFileTreesStatus.REMOTE_WALK:
-            self._status_control.text = \
-                '  {} Walking file tree on SherlockML'.format(
-                    loading_character)
+            self._status_control.text = "  {} Walking file tree on SherlockML".format(
+                loading_character
+            )
         elif self._status == WalkingFileTreesStatus.CALCULATING_DIFFERENCES:
             self._status_control.text = (
-                '  {} Calculating differences between '
-                'local and remote file trees'.format(loading_character))
+                "  {} Calculating differences between "
+                "local and remote file trees".format(loading_character)
+            )
 
     def stop(self):
         self._stop_event.set()

@@ -1,9 +1,7 @@
-
 from prompt_toolkit.key_binding import KeyBindings
 
 
 class BaseScreen(object):
-
     def __init__(self):
         self.main_container = None
         self.bindings = KeyBindings()

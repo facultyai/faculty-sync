@@ -1,4 +1,3 @@
-
 import logging
 import threading
 import traceback
@@ -15,7 +14,6 @@ from .pubsub import Messages
 
 
 class View(object):
-
     def __init__(self, configuration, exchange):
         self._project_name = configuration.project.name
         self._local_dir = configuration.local_dir
@@ -31,14 +29,11 @@ class View(object):
         self.bindings = self._create_bindings()
 
         self.application = Application(
-            layout=self.layout,
-            key_bindings=self.bindings,
-            full_screen=True
+            layout=self.layout, key_bindings=self.bindings, full_screen=True
         )
 
         self._exchange.subscribe(
-            Messages.REMOTE_DIRECTORY_SET,
-            self._set_remote_dir
+            Messages.REMOTE_DIRECTORY_SET, self._set_remote_dir
         )
 
     def _render(self):
@@ -61,9 +56,9 @@ class View(object):
         self._current_screen = screen
         if screen.bindings is not None:
             if screen.use_default_bindings:
-                merged_key_bindings = merge_key_bindings([
-                    self.bindings, screen.bindings
-                ])
+                merged_key_bindings = merge_key_bindings(
+                    [self.bindings, screen.bindings]
+                )
                 self.application.key_bindings = merged_key_bindings
             else:
                 self.application.key_bindings = screen.bindings
@@ -80,6 +75,7 @@ class View(object):
             except Exception as e:
                 traceback.print_exc()
                 print(e)
+
         self._thread = threading.Thread(target=run)
         self._thread.start()
         self._register_resize_handler()
@@ -92,48 +88,48 @@ class View(object):
     def _register_resize_handler(self):
         # The application receives the signal SIGWINCH
         # when the terminal has been resized.
-        self._has_sigwinch = hasattr(signal, 'SIGWINCH')
+        self._has_sigwinch = hasattr(signal, "SIGWINCH")
         if self._has_sigwinch:
             self._previous_winch_handler = self._loop.add_signal_handler(
-                signal.SIGWINCH, self._on_resize)
+                signal.SIGWINCH, self._on_resize
+            )
 
     def _remove_resize_handler(self):
         # Remove WINCH handler.
         if self._has_sigwinch:
             self._loop.add_signal_handler(
-                signal.SIGWINCH, self._previous_winch_handler)
+                signal.SIGWINCH, self._previous_winch_handler
+            )
 
     def _on_resize(self):
-        logging.info('Handling application resize event.')
+        logging.info("Handling application resize event.")
         self.application.invalidate()
 
     def _render_top_toolbar(self):
         remote_directory_text = (
-            ':{}'.format(self._remote_directory)
+            ":{}".format(self._remote_directory)
             if self._remote_directory is not None
-            else ''
+            else ""
         )
         top_text = (
-            '[SherlockML synchronizer]  '
-            '{local_dir} -> '
-            '{project_name}{remote_directory_text}'
+            "[SherlockML synchronizer]  "
+            "{local_dir} -> "
+            "{project_name}{remote_directory_text}"
         ).format(
             local_dir=self._local_dir,
             project_name=self._project_name,
-            remote_directory_text=remote_directory_text
+            remote_directory_text=remote_directory_text,
         )
         top_toolbar = Window(
-            FormattedTextControl(top_text),
-            height=1,
-            style='reverse'
+            FormattedTextControl(top_text), height=1, style="reverse"
         )
         return top_toolbar
 
     def _create_bindings(self):
         bindings = KeyBindings()
 
-        @bindings.add('c-c')
-        @bindings.add('q')
+        @bindings.add("c-c")
+        @bindings.add("q")
         def _(event):
             self._exchange.publish(Messages.STOP_CALLED)
 

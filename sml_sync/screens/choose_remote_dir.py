@@ -1,4 +1,3 @@
-
 import difflib
 import logging
 import os
@@ -23,18 +22,18 @@ class RemoteDirMessages(Enum):
     """
     Messages that are only used internally
     """
-    NEW_SUBDIRECTORIES_WALKED = 'NEW_SUBDIRECTORIES_WALKED'
-    SUBDIRECTORY_WALKER_STATUS_CHANGE = 'SUBDIRECTORY_WALKER_STATUS_CHANGE'
+
+    NEW_SUBDIRECTORIES_WALKED = "NEW_SUBDIRECTORIES_WALKED"
+    SUBDIRECTORY_WALKER_STATUS_CHANGE = "SUBDIRECTORY_WALKER_STATUS_CHANGE"
 
 
 class Completions(object):
-
     def __init__(self):
         self._completions = None
-        self._control = FormattedTextControl('')
+        self._control = FormattedTextControl("")
 
         self._current_index = None
-        self._margin_control = FormattedTextControl('')
+        self._margin_control = FormattedTextControl("")
         self._margin = Window(self._margin_control, width=2)
         self.container = VSplit([self._margin, Window(self._control)])
 
@@ -45,12 +44,16 @@ class Completions(object):
 
     def move_selection_down(self):
         if self._current_index is not None and self._completions is not None:
-            self._current_index = (self._current_index + 1) % len(self._completions)
+            self._current_index = (self._current_index + 1) % len(
+                self._completions
+            )
             self._render()
 
     def move_selection_up(self):
         if self._current_index is not None and self._completions is not None:
-            self._current_index = (self._current_index - 1) % len(self._completions)
+            self._current_index = (self._current_index - 1) % len(
+                self._completions
+            )
             self._render()
 
     def current_selection(self):
@@ -59,43 +62,39 @@ class Completions(object):
 
     def _render(self):
         if self._completions is None:
-            self._control.text = ''
+            self._control.text = ""
         else:
-            self._control.text = '\n'.join(self._completions)
+            self._control.text = "\n".join(self._completions)
             margin_lines = []
             for icompletion in range(len(self._completions)):
                 margin_lines.append(
-                    '> ' if icompletion == self._current_index
-                    else (' ' * 2)
+                    "> " if icompletion == self._current_index else (" " * 2)
                 )
-            margin_text = '\n'.join(margin_lines)
+            margin_text = "\n".join(margin_lines)
             self._margin_control.text = margin_text
 
 
 class AsyncCompleterStatus(object):
-
     def __init__(self):
         self._loading_indicator = LoadingIndicator()
-        self._status = 'IDLE'
+        self._status = "IDLE"
         self._current_path = None
         self._control = FormattedTextControl()
-        self.container = HSplit([
-            Window(height=1),
-            Window(self._control, height=1)
-        ], height=2)
+        self.container = HSplit(
+            [Window(height=1), Window(self._control, height=1)], height=2
+        )
         self._thread = None
         self._stop_event = threading.Event()
         self._start_updating_loading_indicator()
 
     def _render(self):
-        if self._status == 'IDLE':
-            self._control.text = ''
+        if self._status == "IDLE":
+            self._control.text = ""
         else:
             if self._current_path is not None:
-                self._control.text = (
-                    '{} Fetching subdirectories of {}'.format(
-                        self._loading_indicator.current(), self._current_path)
-                    )
+                self._control.text = "{} Fetching subdirectories of {}".format(
+                    self._loading_indicator.current(), self._current_path
+                )
             else:
                 self._control.text = self._loading_indicator.current()
 
@@ -112,6 +111,7 @@ class AsyncCompleterStatus(object):
                 self._render()
                 time.sleep(0.5)
                 app.invalidate()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
@@ -120,14 +120,13 @@ class AsyncCompleterStatus(object):
 
 
 class AsyncCompleter(object):
-
     def __init__(self, exchange, get_paths_in_directory):
         self._exchange = exchange
         self._queue = Queue()
         self._get_paths_in_directory = get_paths_in_directory
         self._completions_cache = {}
         self._stop_event = threading.Event()
-        self.current_status = 'IDLE'
+        self.current_status = "IDLE"
         self.start()
 
     def cache_completions(self, directory):
@@ -144,110 +143,119 @@ class AsyncCompleter(object):
                     if path not in self._completions_cache:
                         # path has not been fetched already
                         logging.info(
-                            'Retrieving completions for {}'.format(path))
-                        self.current_status = 'BUSY'
+                            "Retrieving completions for {}".format(path)
+                        )
+                        self.current_status = "BUSY"
                         self._publish_busy(path)
                         try:
                             subdirectories = self._get_paths_in_directory(path)
                             self._completions_cache[path] = subdirectories
                             self._exchange.publish(
-                                RemoteDirMessages.NEW_SUBDIRECTORIES_WALKED)
+                                RemoteDirMessages.NEW_SUBDIRECTORIES_WALKED
+                            )
                         except Exception:
                             logging.exception(
-                                'Error fetching subdirectories of {}'.format(
-                                    path))
+                                "Error fetching subdirectories of {}".format(
+                                    path
+                                )
+                            )
                 except Empty:
-                    if self.current_status != 'IDLE':
-                        self.current_status = 'IDLE'
+                    if self.current_status != "IDLE":
+                        self.current_status = "IDLE"
                         self._publish_idle()
+
         self._thread = threading.Thread(target=run, daemon=True)
         self._thread.start()
 
     def _publish_busy(self, path):
         self._exchange.publish(
-            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE,
-            path)
+            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE, path
+        )
 
     def _publish_idle(self):
         self._exchange.publish(
-            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE)
+            RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE
+        )
 
 
 class RemoteDirectoryPromptScreen(BaseScreen):
-
     def __init__(self, exchange, get_paths_in_directory):
         super().__init__()
         self.use_default_bindings = False
         self._exchange = exchange
 
-        self._input = TextArea(text='/project/', multiline=False)
+        self._input = TextArea(text="/project/", multiline=False)
         self._buffer = self._input.buffer
         self._buffer.cursor_position = len(self._buffer.text)
         self._completions_component = Completions()
         self._completer = AsyncCompleter(exchange, get_paths_in_directory)
         self._completer_status_component = AsyncCompleterStatus()
-        self._bottom_toolbar = Window(FormattedTextControl(
-            '[tab] Enter selected directory  '
-            '[return] Choose selected directory  '
-            '[arrows] Navigation  '
-            '[C-c] Quit'
-        ), height=1, style='reverse')
-        self._container = HSplit([
-            Window(height=1),
-            Window(
-                FormattedTextControl(
-                    'Choose directory to synchronize to on SherlockML: '
-                ),
-                height=1
+        self._bottom_toolbar = Window(
+            FormattedTextControl(
+                "[tab] Enter selected directory  "
+                "[return] Choose selected directory  "
+                "[arrows] Navigation  "
+                "[C-c] Quit"
             ),
-            self._input,
-            Window(height=1),
-            self._completions_component.container,
-            self._completer_status_component.container,
-        ])
-        self.main_container = HSplit([
-            VSplit([Window(width=2), self._container]),
-            self._bottom_toolbar
-        ])
+            height=1,
+            style="reverse",
+        )
+        self._container = HSplit(
+            [
+                Window(height=1),
+                Window(
+                    FormattedTextControl(
+                        "Choose directory to synchronize to on SherlockML: "
+                    ),
+                    height=1,
+                ),
+                self._input,
+                Window(height=1),
+                self._completions_component.container,
+                self._completer_status_component.container,
+            ]
+        )
+        self.main_container = HSplit(
+            [VSplit([Window(width=2), self._container]), self._bottom_toolbar]
+        )
         self._buffer.on_text_changed += self._handle_text_changed
 
         self.bindings = KeyBindings()
 
-        @self.bindings.add('down')
+        @self.bindings.add("down")
         def _(event):
             self._completions_component.move_selection_down()
 
-        @self.bindings.add('up')
+        @self.bindings.add("up")
         def _(event):
             self._completions_component.move_selection_up()
 
-        @self.bindings.add('tab')
+        @self.bindings.add("tab")
         def _(event):
             current_selection = self._completions_component.current_selection()
             if current_selection is not None:
                 self._buffer.cursor_position = 0
-                self._buffer.text = current_selection + '/'
+                self._buffer.text = current_selection + "/"
                 self._buffer.cursor_position = len(self._buffer.text)
 
-        @self.bindings.add('enter')
+        @self.bindings.add("enter")
         def _(event):
             current_selection = self._completions_component.current_selection()
             self._exchange.publish(
-                Messages.VERIFY_REMOTE_DIRECTORY,
-                current_selection
+                Messages.VERIFY_REMOTE_DIRECTORY, current_selection
             )
 
-        @self.bindings.add('c-c')
+        @self.bindings.add("c-c")
         def _(event):
             self._exchange.publish(Messages.STOP_CALLED)
 
         self._exchange.subscribe(
             RemoteDirMessages.NEW_SUBDIRECTORIES_WALKED,
-            lambda _: self._handle_text_changed()
+            lambda _: self._handle_text_changed(),
         )
         self._exchange.subscribe(
             RemoteDirMessages.SUBDIRECTORY_WALKER_STATUS_CHANGE,
-            lambda path: self._handle_walker_status_change(path)
+            lambda path: self._handle_walker_status_change(path),
         )
 
     def on_mount(self, app):
@@ -267,18 +275,15 @@ class RemoteDirectoryPromptScreen(BaseScreen):
                 for subdirectory in subdirectories
             }
             matching_basenames = difflib.get_close_matches(
-                current_basename,
-                remote_basenames.keys(),
-                cutoff=0.0,
-                n=20
+                current_basename, remote_basenames.keys(), cutoff=0.0, n=20
             )
             matching_subdirectories = [
-                remote_basenames[basename]
-                for basename in matching_basenames
+                remote_basenames[basename] for basename in matching_basenames
             ]
             completions = [directory] + matching_subdirectories
             self._completions_component.set_completions(completions)
 
     def _handle_walker_status_change(self, path):
         self._completer_status_component.set_status(
-            self._completer.current_status, path)
+            self._completer.current_status, path
+        )
