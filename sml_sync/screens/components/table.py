@@ -38,7 +38,7 @@ class TableColumn(namedtuple("Column", ["rows", "header", "settings"])):
 
 class Table(object):
     def __init__(self, columns: List[TableColumn], sep: str = " "):
-        if len(set(len(column.rows) for column in columns)) not in {0, 1}:
+        if len({len(column.rows) for column in columns}) not in {0, 1}:
             raise ValueError("All columns must have the same number of rows.")
 
         self._sep = sep
