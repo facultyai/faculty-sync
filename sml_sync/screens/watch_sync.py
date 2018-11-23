@@ -190,7 +190,7 @@ class RecentlySyncedItems(object):
 
 class HeldFiles(object):
     def __init__(self):
-        self._held_paths = list()
+        self._held_paths = []
         self.container = HSplit([Window()])
 
     def set_paths(self, paths):
