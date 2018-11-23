@@ -17,6 +17,7 @@ DEFAULT_IGNORE_PATTERNS = [
     ".git",
     ".mypy_cache",
     ".cache",
+    ".nfs*",
 ]
 
 
