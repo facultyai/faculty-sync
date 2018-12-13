@@ -12,6 +12,7 @@ setup(
     version=version_ns["version"],
     description="SherlockML file synchronizer",
     author="ASI Data Science",
+    author_email="opensource@asidatascience.com",
     packages=find_packages(),
     entry_points={"console_scripts": ["sml-sync=sml_sync:run"]},
     install_requires=[
