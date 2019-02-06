@@ -4,8 +4,8 @@ import shutil
 import stat
 import tempfile
 
+import faculty
 import paramiko
-import sml.galleon
 
 from .models import SshDetails
 
@@ -24,14 +24,14 @@ def sftp_from_ssh_details(ssh_details):
 
 @contextlib.contextmanager
 def get_ssh_details(configuration):
-    client = sml.galleon.Galleon()
-    details = client.ssh_details(
-        configuration.project.id_, configuration.server_id
+    client = faculty.client("server")
+    details = client.get_ssh_details(
+        configuration.project.id, configuration.server_id
     )
-    hostname = details["hostname"]
-    port = details["port"]
-    username = details["username"]
-    key = details["key"]
+    hostname = details.hostname
+    port = details.port
+    username = details.username
+    key = details.key
     with _save_key_to_file(key) as key_file:
         ssh_details = SshDetails(hostname, port, username, key_file)
         yield ssh_details

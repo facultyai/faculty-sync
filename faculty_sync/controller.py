@@ -64,12 +64,12 @@ class Controller(object):
             ),
         )
         self._exchange.subscribe(
-            Messages.SYNC_SHERLOCKML_TO_LOCAL,
-            lambda _: self._submit(self._sync_sherlockml_to_local),
+            Messages.SYNC_PLATFORM_TO_LOCAL,
+            lambda _: self._submit(self._sync_platform_to_local),
         )
         self._exchange.subscribe(
-            Messages.SYNC_LOCAL_TO_SHERLOCKML,
-            lambda _: self._submit(self._sync_local_to_sherlockml),
+            Messages.SYNC_LOCAL_TO_PLATFORM,
+            lambda _: self._submit(self._sync_local_to_platform),
         )
         self._exchange.subscribe(
             Messages.START_WATCH_SYNC,
@@ -138,7 +138,7 @@ class Controller(object):
         )
         self._view.mount(self._current_screen)
 
-    def _sync_sherlockml_to_local(self):
+    def _sync_platform_to_local(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen(
             direction=SynchronizationScreenDirection.DOWN
@@ -147,7 +147,7 @@ class Controller(object):
         self._synchronizer.down(rsync_opts=["--delete"])
         self._show_differences()
 
-    def _sync_local_to_sherlockml(self):
+    def _sync_local_to_platform(self):
         self._clear_current_subscriptions()
         self._current_screen = SynchronizationScreen(
             direction=SynchronizationScreenDirection.UP
@@ -199,7 +199,7 @@ class Controller(object):
             )
         remote_files = self._synchronizer.list_remote()
         logging.info(
-            "Found {} files on SherlockML at path {}.".format(
+            "Found {} files on Faculty Platform at path {}.".format(
                 len(remote_files), self._configuration.remote_dir
             )
         )

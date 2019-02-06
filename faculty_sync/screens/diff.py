@@ -22,22 +22,22 @@ from .components import (
 )
 from .humanize import naturaltime, naturalsize
 
-HELP_TITLE = "Differences between local directory and SherlockML"
+HELP_TITLE = "Differences between local directory and Faculty Platform"
 
 HELP_TEXT = """\
-Synchronize your local filesystem and the SherlockML filesystem.
+Synchronize your local filesystem and the Faculty Platform filesystem.
 
 Three synchronization modes are supported:
 
-'Up' will push all local changes to SherlockML. This will
-erase any file that is on SherlockML, but not available locally.
+'Up' will push all local changes to Faculty Platform. This will
+erase any file that is on Faculty Platform, but not available locally.
 
-'Down' will bring all the changes down from SherlockML. This
-will erase any file that is present locally but not on SherlockML.
+'Down' will bring all the changes down from Faculty Platform. This
+will erase any file that is present locally but not on Faculty Platform.
 
 'Watch' enters `watch` mode. Any time you save, move or delete
 a file or a directory, the change is automatically replicated
-on SherlockML.
+on Faculty Platform.
 
 Keys:
 
@@ -46,30 +46,30 @@ Keys:
     [up/down] Navigate the left-hand menu or the table of
               files, depending on which one is focussed.
     [r] Refresh differences between the local file system
-        and SherlockML.
+        and Faculty Platform.
     [q] Quit the application.
     [?] Toggle this message.
 """
 
 
 UP_SYNC_HELP_TEXT = """\
-Press [u] to modify the SherlockML workspace so that it mirrors your local disk.
+Press [u] to modify the Faculty Platform workspace so that it mirrors your local disk.
 
-This will make the following changes to your SherlockML workspace:
+This will make the following changes to your Faculty Platform workspace:
 """
 
 DOWN_SYNC_HELP_TEXT = """\
-Press [d] to modify your local filesystem so that it mirrors the SherlockML workspace.
+Press [d] to modify your local filesystem so that it mirrors the Faculty Platform workspace.
 
 This will make the following changes to your local disk:
 """
 
 WATCH_HELP_TEXT = """\
-Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on SherlockML.
+Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on Faculty Platform.
 """
 
 FULLY_SYNCHRONIZED_HELP_TEXT = """\
-Your local disk and the SherlockML workspace are fully synchronized.
+Your local disk and the Faculty Platform workspace are fully synchronized.
 """
 
 
@@ -333,14 +333,14 @@ class DifferencesScreen(BaseScreen):
         @self.bindings.add("d")  # noqa: F811
         def _(event):
             if self._summary.current_selection == SelectionName.DOWN:
-                self._exchange.publish(Messages.SYNC_SHERLOCKML_TO_LOCAL)
+                self._exchange.publish(Messages.SYNC_PLATFORM_TO_LOCAL)
             else:
                 self._summary.current_selection = SelectionName.DOWN
 
         @self.bindings.add("u")  # noqa: F811
         def _(event):
             if self._summary.current_selection == SelectionName.UP:
-                self._exchange.publish(Messages.SYNC_LOCAL_TO_SHERLOCKML)
+                self._exchange.publish(Messages.SYNC_LOCAL_TO_PLATFORM)
             else:
                 self._summary.current_selection = SelectionName.UP
 

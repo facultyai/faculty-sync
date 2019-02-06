@@ -1,22 +1,24 @@
 import os
+
 from setuptools import find_packages, setup
 
 here = os.path.dirname(os.path.abspath(__file__))
 
 version_ns = {}
-with open(os.path.join(here, "sml_sync", "version.py")) as f:
+with open(os.path.join(here, "faculty_sync", "version.py")) as f:
     exec(f.read(), {}, version_ns)
 
 setup(
-    name="sml_sync",
+    name="faculty_sync",
     version=version_ns["version"],
-    description="SherlockML file synchronizer",
-    author="ASI Data Science",
-    author_email="opensource@asidatascience.com",
+    description="Faculty Platform file synchronizer",
+    author="Faculty",
+    author_email="opensource@faculty.ai",
     packages=find_packages(),
-    entry_points={"console_scripts": ["sml-sync=sml_sync:run"]},
+    entry_points={"console_scripts": ["faculty-sync=faculty_sync:run"]},
     install_requires=[
-        "sml",
+        "faculty",
+        "faculty_cli",
         "daiquiri",
         "paramiko",
         "watchdog",

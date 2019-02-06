@@ -1,11 +1,11 @@
+import errno
 import logging
 import os.path
 import subprocess
 import time
 from datetime import datetime
-import errno
 
-import sml.shell
+import faculty_cli.shell
 
 from .models import DirectoryAttrs, FileAttrs, FsObject, FsObjectType
 from .ssh import sftp_from_ssh_details
@@ -35,7 +35,7 @@ class Synchronizer(object):
         if os.path.isabs(path):
             raise ValueError("path must be a relative path")
         remote = os.path.join(self.remote_dir, path)
-        escaped_remote = sml.shell.quote(remote)
+        escaped_remote = faculty_cli.shell.quote(remote)
         local = os.path.join(self.local_dir, path)
         path_from = local
         path_to = u"{}@{}:{}".format(
@@ -47,7 +47,7 @@ class Synchronizer(object):
         if os.path.isabs(path):
             raise ValueError("path must be a relative path")
         remote = os.path.join(self.remote_dir, path)
-        escaped_remote = sml.shell.quote(remote)
+        escaped_remote = faculty_cli.shell.quote(remote)
         local = os.path.join(self.local_dir, path)
         path_from = u"{}@{}:{}".format(
             self.username, self.hostname, escaped_remote
@@ -57,7 +57,7 @@ class Synchronizer(object):
 
     def list_remote(self, path="", rsync_opts=None):
         remote = os.path.join(self.remote_dir, path)
-        escaped_remote = sml.shell.quote(remote)
+        escaped_remote = faculty_cli.shell.quote(remote)
         path = u"{}@{}:{}".format(self.username, self.hostname, escaped_remote)
         return self._rsync_list(path, rsync_opts)
 

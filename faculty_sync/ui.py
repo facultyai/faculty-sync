@@ -112,7 +112,7 @@ class View(object):
             else ""
         )
         top_text = (
-            "[SherlockML synchronizer]  "
+            "[Faculty Platform synchronizer]  "
             "{local_dir} -> "
             "{project_name}{remote_directory_text}"
         ).format(

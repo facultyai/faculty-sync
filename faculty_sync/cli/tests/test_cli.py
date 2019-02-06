@@ -3,11 +3,11 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import pytest
+from faculty.clients.project import Project
 
 from ... import cli
 from .. import models
 from ..config import FileConfiguration
-from ..projects import Project
 
 
 @contextmanager
@@ -49,7 +49,7 @@ def test_no_args():
                 )
 
                 resolve_project_mock.assert_called_once_with("project-name")
-                resolve_server_mock.assert_called_once_with(project.id_, None)
+                resolve_server_mock.assert_called_once_with(project.id, None)
 
 
 def test_override_project():
@@ -78,7 +78,7 @@ def test_specify_server_configuration():
             with _patched_project(project):
                 cli.parse_command_line(argv=argv)
                 resolve_server_mock.assert_called_once_with(
-                    project.id_, "server-name"
+                    project.id, "server-name"
                 )
 
 
@@ -94,7 +94,7 @@ def test_specify_server_command_line():
             with _patched_project(project):
                 cli.parse_command_line(argv=argv)
                 resolve_server_mock.assert_called_once_with(
-                    project.id_, "server-name"
+                    project.id, "server-name"
                 )
 
 
