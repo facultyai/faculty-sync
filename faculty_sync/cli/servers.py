@@ -53,9 +53,7 @@ def _any_server(project_id, status=None):
     servers_ = [server for server in client.list(project_id)]
     if status is not None:
         servers_ = [
-            server
-            for server in servers_
-            if server.status.value == status
+            server for server in servers_ if server.status.value == status
         ]
     if not servers_:
         adjective = "available" if status is None else status
