@@ -26,6 +26,26 @@ def _create_parser():
     return configparser.ConfigParser(converters=converters)
 
 
+def _resolve_user_conf_path(user_conf_path=None):
+    if user_conf_path is None:
+        user_conf_path = (
+            Path.home() / ".config/faculty-sync/faculty-sync.conf"
+        )
+        if not user_conf_path.exists():
+            user_conf_path = (
+                Path.home() / ".config/sml-sync/sml-sync.conf"
+            )
+    return user_conf_path
+
+
+def _resolve_project_conf_path(directory, project_conf_path=None):
+    if project_conf_path is None:
+        project_conf_path = directory / ".faculty-sync.conf"
+        if not project_conf_path.exists():
+            project_conf_path = directory / ".sml-sync.conf"
+    return project_conf_path
+
+
 def get_config(
     local_directory: str, project_conf_path=None, user_conf_path=None
 ) -> FileConfiguration:
@@ -37,11 +57,9 @@ def get_config(
     """
     directory = Path(local_directory).expanduser().resolve()
 
-    if project_conf_path is None:
-        project_conf_path = directory / ".faculty-sync.conf"
-    if user_conf_path is None:
-        user_conf_path = Path("~/.config/faculty-sync/faculty-sync.conf")
-    user_conf_path = user_conf_path.expanduser()
+    user_conf_path = _resolve_user_conf_path(user_conf_path)
+    project_conf_path = _resolve_project_conf_path(
+        directory, project_conf_path)
 
     config = _create_parser()
 
