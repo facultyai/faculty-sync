@@ -1,7 +1,6 @@
 import uuid
 
 import faculty
-import faculty_cli.auth
 
 
 def resolve_project(project):
@@ -11,7 +10,8 @@ def resolve_project(project):
         project_id = uuid.UUID(project)
         project = projects_client.get(project_id)
     except ValueError:
-        user_id = faculty_cli.auth.user_id()
+        account_client = faculty.client("account")
+        user_id = account_client.authenticated_user_id()
         projects = [
             p
             for p in projects_client.list_accessible_by_user(user_id)

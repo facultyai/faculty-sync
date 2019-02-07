@@ -18,7 +18,6 @@ setup(
     entry_points={"console_scripts": ["faculty-sync=faculty_sync:run"]},
     install_requires=[
         "faculty",
-        "faculty_cli",
         "daiquiri",
         "paramiko",
         "watchdog",
