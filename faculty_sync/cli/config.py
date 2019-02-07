@@ -28,13 +28,9 @@ def _create_parser():
 
 def _resolve_user_conf_path(user_conf_path=None):
     if user_conf_path is None:
-        user_conf_path = (
-            Path.home() / ".config/faculty-sync/faculty-sync.conf"
-        )
+        user_conf_path = Path.home() / ".config/faculty-sync/faculty-sync.conf"
         if not user_conf_path.exists():
-            user_conf_path = (
-                Path.home() / ".config/sml-sync/sml-sync.conf"
-            )
+            user_conf_path = Path.home() / ".config/sml-sync/sml-sync.conf"
     return user_conf_path
 
 
@@ -59,7 +55,8 @@ def get_config(
 
     user_conf_path = _resolve_user_conf_path(user_conf_path)
     project_conf_path = _resolve_project_conf_path(
-        directory, project_conf_path)
+        directory, project_conf_path
+    )
 
     config = _create_parser()
 
