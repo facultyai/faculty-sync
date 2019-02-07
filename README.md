@@ -1,5 +1,5 @@
 Faculty Platform incremental synchronization
-======================================
+============================================
 
 [![Build Status](https://travis-ci.org/facultyai/faculty-sync.svg?branch=master)](https://travis-ci.org/facultyai/faculty-sync)
 
