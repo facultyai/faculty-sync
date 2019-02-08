@@ -151,6 +151,6 @@ Many people in the Faculty Platform team and in Faculty have contributed to
 the vision for *faculty-sync*, both technical and at the product level. Without
 their help and encouragement, *faculty-sync* would not exist.
 
-*faculty-sync* is maintained by Pascal and Jan. Until such day as we see fit to bring
+*faculty-sync* is maintained by Pascal. Until such day as we see fit to bring
 it under the remit of the Faculty Platform team proper, support questions, bug reports
-etc. should be directed to them personally, rather than to the team.
+etc. should be directed to him personally, rather than to the team.
