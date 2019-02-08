@@ -205,7 +205,7 @@ class RemoteDirectoryPromptScreen(BaseScreen):
                 Window(height=1),
                 Window(
                     FormattedTextControl(
-                        "Choose directory to synchronize to on SherlockML: "
+                        "Choose directory to synchronize to on Faculty Platform: "
                     ),
                     height=1,
                 ),

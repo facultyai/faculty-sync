@@ -1,6 +1,6 @@
 import pytest
 
-from sml_sync.path_match import matches
+from faculty_sync.path_match import matches
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,4 @@
-sml
+faculty
 daiquiri
 paramiko
 watchdog

@@ -21,18 +21,18 @@ HELP_TITLE = "Incremental synchronization"
 HELP_TEXT = """\
 A background process is currently watching the local directory. When
 it detects a change, that change is replicated in the directory in
-SherlockML.
+Faculty Platform.
 
-To avoid overwriting changes that you may have made on SherlockML
+To avoid overwriting changes that you may have made on Faculty Platform
 directly, we avoid pushing changes if the file is modified on
-SherlockML while this process is running.
+Faculty Platform while this process is running.
 
 Keys:
 
     [s] Stop incremental synchronization and go back to main screen
-    [d] Bring all the changes down from SherlockML. This only updates
-        files that are newer on SherlockML than locally. It will not
-        delete local files that do not exist on SherlockML.
+    [d] Bring all the changes down from Faculty Platform. This only updates
+        files that are newer on Faculty Platform than locally. It will not
+        delete local files that do not exist on Faculty Platform.
     [q] Quit the application
     [?] Toggle this message
 """
@@ -50,7 +50,7 @@ class Loading(object):
         self._start_updating_loading_indicator()
 
     def _render(self):
-        self._control.text = "  {} Loading directory structure on SherlockML".format(
+        self._control.text = "  {} Loading directory structure on Faculty Platform".format(
             self._loading_indicator.current()
         )
 
@@ -207,7 +207,7 @@ class HeldFiles(object):
                 Window(
                     FormattedTextControl(
                         "  The following files will not be synced to "
-                        "avoid accidentally overwriting changes on SherlockML:"
+                        "avoid accidentally overwriting changes on Faculty Platform:"
                     ),
                     dont_extend_height=True,
                 ),
@@ -236,7 +236,7 @@ class WatchSyncScreen(BaseScreen):
         self.menu_bar = Window(
             FormattedTextControl(
                 "[s] Stop  "
-                "[d] Sync SherlockML files down  "
+                "[d] Sync Faculty Platform files down  "
                 "[q] Quit  "
                 "[?] Help"
             ),

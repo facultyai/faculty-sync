@@ -65,7 +65,7 @@ class WalkingFileTreesScreen(BaseScreen):
     def _render(self):
         loading_character = self._loading_indicator.current()
         if self._status == WalkingFileTreesStatus.CONNECTING:
-            self._status_control.text = "  {} Connecting to SherlockML server".format(
+            self._status_control.text = "  {} Connecting to Faculty Platform server".format(
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.LOCAL_WALK:
@@ -73,7 +73,7 @@ class WalkingFileTreesScreen(BaseScreen):
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.REMOTE_WALK:
-            self._status_control.text = "  {} Walking file tree on SherlockML".format(
+            self._status_control.text = "  {} Walking file tree on Faculty Platform".format(
                 loading_character
             )
         elif self._status == WalkingFileTreesStatus.CALCULATING_DIFFERENCES:

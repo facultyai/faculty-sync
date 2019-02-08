@@ -1,4 +1,4 @@
-"""Prompt the user to update sml-sync"""
+"""Prompt the user to update faculty-sync"""
 
 import json
 import os
@@ -11,7 +11,7 @@ import semantic_version
 from .dirs import ensure_parent_exists
 from .version import version
 
-PYPI_JSON_URL = "https://pypi.org/pypi/sml_sync/json"
+PYPI_JSON_URL = "https://pypi.org/pypi/faculty_sync/json"
 
 LOGGER = daiquiri.getLogger("version-check")
 
@@ -30,7 +30,7 @@ def _last_update_path():
     if not xdg_cache_dir:
         xdg_cache_dir = os.path.expanduser("~/.cache")
 
-    return os.path.join(xdg_cache_dir, "sml-sync", "last_update_check")
+    return os.path.join(xdg_cache_dir, "faculty-sync", "last_update_check")
 
 
 def _is_full_release(version):
@@ -67,10 +67,10 @@ def _check_for_new_release():
     )
     if current < latest:
         template = (
-            "You are using sml-sync version {current}, however "
+            "You are using faculty-sync version {current}, however "
             "version {latest} is available.\n"
             "You should upgrade with:\n\n"
-            "pip install -U sml-sync"
+            "pip install -U faculty-sync"
         )
         print(template.format(current=current, latest=latest))
     _set_mtime(_last_update_path())

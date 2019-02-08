@@ -42,9 +42,9 @@ class SynchronizationScreen(BaseScreen):
 
     def _render(self):
         direction_text = (
-            "from local filesystem to SherlockML"
+            "from local filesystem to Faculty Platform"
             if self._direction == SynchronizationScreenDirection.UP
-            else "from SherlockML to local filesystem"
+            else "from Faculty Platform to local filesystem"
         )
         self._control.text = "  {} Synchronizing {}".format(
             self._loading_indicator.current(), direction_text

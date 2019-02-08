@@ -23,8 +23,8 @@ DEFAULT_IGNORE_PATTERNS = [
 
 def parse_command_line(argv=None):
     parser = argparse.ArgumentParser(
-        prog="sml-sync",
-        description="Autosync a local directory to a SherlockML project",
+        prog="faculty-sync",
+        description="Autosync a local directory to a Faculty Platform project",
     )
     parser.add_argument(
         "--project",
@@ -38,7 +38,7 @@ def parse_command_line(argv=None):
         "--remote",
         default=None,
         help=(
-            "Remote directory, e.g. /project/src. If omitted, sml-sync "
+            "Remote directory, e.g. /project/src. If omitted, faculty-sync "
             "will look first in configuration and, failing that, will "
             "prompt for a directory."
         ),
@@ -62,7 +62,7 @@ def parse_command_line(argv=None):
     parser.add_argument(
         "--version",
         action="version",
-        version="sml-sync {version}".format(version=version),
+        version="faculty-sync {version}".format(version=version),
     )
     parser.add_argument(
         "--server",
@@ -97,7 +97,7 @@ def parse_command_line(argv=None):
     server = arguments.server
     if server is None:
         server = config.server
-    server_id = resolve_server(project.id_, server)
+    server_id = resolve_server(project.id, server)
 
     remote_dir = arguments.remote
     if remote_dir is None:
