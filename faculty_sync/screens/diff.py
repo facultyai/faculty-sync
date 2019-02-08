@@ -53,23 +53,23 @@ Keys:
 
 
 UP_SYNC_HELP_TEXT = """\
-Press [u] to modify the Faculty Platform workspace so that it mirrors your local disk.
+Press [u] to modify the Faculty workspace so that it mirrors your local disk.
 
 This will make the following changes to your Faculty Platform workspace:
 """
 
 DOWN_SYNC_HELP_TEXT = """\
-Press [d] to modify your local filesystem so that it mirrors the Faculty Platform workspace.
+Press [d] to modify your local filesystem so that it mirrors the Faculty workspace.
 
 This will make the following changes to your local disk:
 """
 
 WATCH_HELP_TEXT = """\
-Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on Faculty Platform.
+Press [w] to enter `watch` mode. Any time you save, move or delete a file, the change is automatically replicated on Faculty.
 """
 
 FULLY_SYNCHRONIZED_HELP_TEXT = """\
-Your local disk and the Faculty Platform workspace are fully synchronized.
+Your local disk and the Faculty workspace are fully synchronized.
 """
 
 

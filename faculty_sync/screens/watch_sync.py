@@ -50,7 +50,7 @@ class Loading(object):
         self._start_updating_loading_indicator()
 
     def _render(self):
-        self._control.text = "  {} Loading directory structure on Faculty Platform".format(
+        self._control.text = "  {} Loading directory structure on Faculty".format(
             self._loading_indicator.current()
         )
 
@@ -207,7 +207,7 @@ class HeldFiles(object):
                 Window(
                     FormattedTextControl(
                         "  The following files will not be synced to "
-                        "avoid accidentally overwriting changes on Faculty Platform:"
+                        "avoid accidentally overwriting changes on Faculty:"
                     ),
                     dont_extend_height=True,
                 ),
@@ -236,7 +236,7 @@ class WatchSyncScreen(BaseScreen):
         self.menu_bar = Window(
             FormattedTextControl(
                 "[s] Stop  "
-                "[d] Sync Faculty Platform files down  "
+                "[d] Sync files down  "
                 "[q] Quit  "
                 "[?] Help"
             ),
