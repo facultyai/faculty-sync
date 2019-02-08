@@ -235,10 +235,7 @@ class WatchSyncScreen(BaseScreen):
 
         self.menu_bar = Window(
             FormattedTextControl(
-                "[s] Stop  "
-                "[d] Sync files down  "
-                "[q] Quit  "
-                "[?] Help"
+                "[s] Stop  [d] Sync files down  [q] Quit  [?] Help"
             ),
             height=1,
             style="reverse",
