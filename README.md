@@ -4,7 +4,7 @@ Faculty Platform incremental synchronization
 [![Build Status](https://travis-ci.org/facultyai/faculty-sync.svg?branch=master)](https://travis-ci.org/facultyai/faculty-sync)
 
 You like writing code on your computer, but want to run the code on
-[Faculty Platform](https://faculty.ai). This makes that easier.
+[Faculty Platform](https://faculty.ai/products-services/platform/). This makes that easier.
 
 *faculty-sync* is a terminal application that helps automate synchronizing a local
 directory with a directory on Faculty Platform. It will automatically monitor a local
