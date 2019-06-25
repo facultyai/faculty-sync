@@ -31,12 +31,13 @@ def _resolve_user_conf_path(user_conf_path=None):
     if user_conf_path is None:
         user_conf_path = Path.home() / ".config/faculty-sync/faculty-sync.conf"
         if not user_conf_path.exists():
-            warnings.warn(
-                "Reading configuration from ~/.config/sml-sync/sml-sync.conf. "
-                "This path is deprecated. "
-                "Use ~/.config/faculty-sync/faculty-sync.conf."
-            )
             user_conf_path = Path.home() / ".config/sml-sync/sml-sync.conf"
+            if user_conf_path.exists():
+                warnings.warn(
+                    "Reading configuration from ~/.config/sml-sync/sml-sync.conf. "
+                    "This path is deprecated. "
+                    "Use ~/.config/faculty-sync/faculty-sync.conf."
+                )
     return user_conf_path
 
 
@@ -44,11 +45,12 @@ def _resolve_project_conf_path(directory, project_conf_path=None):
     if project_conf_path is None:
         project_conf_path = directory / ".faculty-sync.conf"
         if not project_conf_path.exists():
-            warnings.warn(
-                "Reading configuration from .sml-sync.conf. "
-                "This file is deprecated. Use .faculty-sync.conf."
-            )
             project_conf_path = directory / ".sml-sync.conf"
+            if project_conf_path.exists():
+                warnings.warn(
+                    "Reading configuration from .sml-sync.conf. "
+                    "This file is deprecated. Use .faculty-sync.conf."
+                )
     return project_conf_path
 
 
