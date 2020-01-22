@@ -22,7 +22,7 @@ setup(
         "paramiko",
         "watchdog",
         "semantic_version",
-        "prompt_toolkit>=2.0",
+        "prompt_toolkit>=2.0,<3.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.5",
